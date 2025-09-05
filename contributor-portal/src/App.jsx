@@ -1,14 +1,22 @@
-import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import ProjectForm from "./pages/ProjectForm";
+import UploadAfter from "./pages/UploadAfter";
+import ProjectStatus from "./pages/ProjectStatus";
 
-
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
-    <>
-      <div className='text-5xl'>Contributor</div>
-    </>
-  )
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/project/new" element={<ProjectForm />} />
+        <Route path="/project/:id/upload-after" element={<UploadAfter />} />
+        <Route path="/project/:id/status" element={<ProjectStatus />} />
+      </Routes>
+    </Router>
+  );
 }
-
-export default App
