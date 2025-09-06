@@ -1,0 +1,154 @@
+import { useState, useEffect } from "react";
+
+export default function MyProjects() {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [previewImg, setPreviewImg] = useState(null); // for modal
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) return;
+
+    const fetchProjects = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:5000/projects/${user.wallet_address}`
+        );
+
+        const data = await res.json();
+        setProjects(data.projects || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "approved":
+        return "bg-green-100 text-green-700 border-green-400";
+      case "rejected":
+        return "bg-red-100 text-red-700 border-red-400";
+      default:
+        return "bg-yellow-100 text-yellow-700 border-yellow-400";
+    }
+  };
+
+  if (loading) return <p className="p-4">Loading...</p>;
+
+  return (
+    <div className="min-h-screen bg-green-50 p-6 relative">
+      <h1 className="text-2xl font-bold mb-4">My Plantation Projects</h1>
+
+      {projects.length === 0 ? (
+        <p className="text-gray-600">No projects submitted yet.</p>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {projects.map((proj) => {
+            // ✅ Handle both old and new schema
+            const beforeImgs = proj.before_images || (proj.before_image ? [proj.before_image] : []);
+            const afterImgs = proj.after_images || (proj.after_image ? [proj.after_image] : []);
+
+            return (
+              <div
+                key={proj._id}
+                className="bg-white shadow-md p-4 rounded-lg border"
+              >
+                {/* Header with Status */}
+                <div className="flex justify-between items-center mb-2">
+                  <h2 className="font-bold text-lg">Project</h2>
+                  <span
+                    className={`px-3 py-1 text-sm font-medium rounded-full border ${getStatusColor(
+                      proj.status
+                    )}`}
+                  >
+                    {proj.status?.toUpperCase()}
+                  </span>
+                </div>
+
+                {/* Project ID */}
+                <p className="text-xs text-gray-500 mb-2">
+                  Project ID: <span className="font-mono">{proj.project_id}</span>
+                </p>
+
+                {/* Location */}
+                <p className="text-sm text-gray-500 mb-2">
+                  Location: {proj.location?.lat}, {proj.location?.lng}
+                </p>
+
+                {/* Trees + Area */}
+                <p className="text-sm text-gray-600 mb-2">
+                  Trees: {proj.tree_type || "-"} | Area: {proj.area || "-"} acres
+                </p>
+
+                {/* Before Images */}
+                {beforeImgs.length > 0 && (
+                  <div className="mb-3">
+                    <h3 className="text-sm font-semibold text-gray-700">
+                      Before Plantation
+                    </h3>
+                    <div className="flex gap-2 mt-1 flex-wrap">
+                      {beforeImgs.map((img, idx) => (
+                        <img
+                          key={idx}
+                          src={img}
+                          alt={`Before ${idx + 1}`}
+                          className="w-20 h-20 object-cover rounded border cursor-pointer"
+                          onClick={() => setPreviewImg(img)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* After Images */}
+                {afterImgs.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700">
+                      After Plantation
+                    </h3>
+                    <div className="flex gap-2 mt-1 flex-wrap">
+                      {afterImgs.map((img, idx) => (
+                        <img
+                          key={idx}
+                          src={img}
+                          alt={`After ${idx + 1}`}
+                          className="w-20 h-20 object-cover rounded border cursor-pointer"
+                          onClick={() => setPreviewImg(img)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* 🔥 Modal for image preview */}
+      {previewImg && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
+          onClick={() => setPreviewImg(null)}
+        >
+          <img
+            src={previewImg}
+            alt="Preview"
+            className="max-w-full max-h-full rounded shadow-lg"
+          />
+          <button
+            className="absolute top-4 right-4 text-white text-3xl font-bold"
+            onClick={() => setPreviewImg(null)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

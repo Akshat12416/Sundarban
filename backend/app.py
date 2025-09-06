@@ -1,62 +1,121 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
+from datetime import datetime
+import uuid
+from werkzeug.utils import secure_filename
 
-# Load environment variables
+# ---------- Setup ----------
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-# MongoDB connection
-client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017/"))
-db = client["bluecarbon"]
-users_collection = db["users"]
+# Uploads folder
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+# MongoDB connection
+mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+db_name = os.getenv("DB_NAME", "bluecarbon")
+
+client = MongoClient(mongo_uri)
+db = client[db_name]
+projects = db["projects"]
+users = db["users"]
+
+# Ensure unique wallet address
+users.create_index("wallet_address", unique=True)
+
+
+# ---------- Helpers ----------
+def serialize_user(user):
+    user["_id"] = str(user["_id"])
+    return user
+
+
+# ---------- Routes ----------
 @app.route("/")
 def home():
-    return {"message": "Blue Carbon MRV Backend Running"}
-
-# Register new user
-@app.route("/register", methods=["POST"])
-def register():
-    data = request.json
-    wallet_address = data.get("wallet_address")
-
-    # check if user exists
-    existing = users_collection.find_one({"wallet_address": wallet_address})
-    if existing:
-        return jsonify({"error": "User already exists"}), 400
-
-    new_user = {
-        "wallet_address": wallet_address,
-        "name": data.get("name"),
-        "phone": data.get("phone"),
-        "role": data.get("role"),  # individual / ngo / community
-        "age": data.get("age"),
-        "land_proof": data.get("land_proof", None),  # optional for NGOs
-        "projects": [],
-    }
-    users_collection.insert_one(new_user)
-
-    return jsonify({"message": "User registered successfully"}), 201
-
-# Login existing user (by wallet address)
-@app.route("/login", methods=["POST"])
-def login():
-    data = request.json
-    wallet_address = data.get("wallet_address")
-
-    user = users_collection.find_one({"wallet_address": wallet_address})
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-
-    # convert MongoDB ObjectId to string
-    user["_id"] = str(user["_id"])
-    return jsonify({"message": "Login successful", "user": user}), 200
+    return {"message": "Blue Carbon MRV Backend Running ✅"}
 
 
+# -------- File Upload --------
+@app.route("/upload", methods=["POST"])
+def upload_file():
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file = request.files["file"]
+    filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    file.save(filepath)
+
+    return jsonify({"url": f"http://localhost:5000/uploads/{filename}"}), 201
+
+
+@app.route("/uploads/<filename>")
+def serve_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
+
+# -------- Project Routes --------
+@app.route("/projects/new", methods=["POST"])
+def create_project():
+    try:
+        data = request.json
+
+        project = {
+            "project_id": f"PRJ-{datetime.now().year}-{str(uuid.uuid4())[:8]}",
+            "wallet_address": data.get("wallet_address"),
+            "role": data.get("role"),
+            "tree_type": data.get("tree_type"),
+            "area": data.get("area"),
+            "location": data.get("location"),
+            "before_images": data.get("before_images", []),
+            "after_images": data.get("after_images", []),
+            "status": "pending",
+            "credits": 0,
+            "created_at": datetime.utcnow(),
+        }
+
+        # Role-specific fields
+        if project["role"] == "individual":
+            project["land_record"] = data.get("land_record")
+
+        elif project["role"] == "ngo":
+            project["org_name"] = data.get("org_name")
+            project["reg_no"] = data.get("reg_no")
+            project["mou"] = data.get("mou")
+
+        elif project["role"] == "corporate":
+            project["csr_budget"] = data.get("csr_budget")
+            project["mou"] = data.get("mou")
+
+        elif project["role"] == "community":
+            project["community_name"] = data.get("community_name")
+            project["land_proof"] = data.get("land_proof")
+
+        projects.insert_one(project)
+
+        project["_id"] = str(project["_id"])
+        return jsonify({"message": "Project registered successfully!", "project": project}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/projects/<wallet_address>", methods=["GET"])
+def get_projects(wallet_address):
+    user_projects = list(projects.find({"wallet_address": wallet_address}))
+    for proj in user_projects:
+        proj["_id"] = str(proj["_id"])
+    return jsonify({"projects": user_projects}), 200
+
+
+# ---------- Main ----------
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
