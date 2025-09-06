@@ -11,7 +11,13 @@ from werkzeug.utils import secure_filename
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+
+# Allow both localhost and LAN IP frontend
+CORS(app, resources={r"/*": {"origins": [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://192.168.0.196:5173"  
+]}}, supports_credentials=True)
 
 # Uploads folder
 UPLOAD_FOLDER = "uploads"
@@ -41,6 +47,27 @@ def serialize_user(user):
 @app.route("/")
 def home():
     return {"message": "Blue Carbon MRV Backend Running ✅"}
+
+
+# -------- Login Route --------
+@app.route("/login", methods=["POST"])
+def login():
+    try:
+        data = request.json
+        wallet_address = data.get("wallet_address")
+
+        if not wallet_address:
+            return jsonify({"error": "Wallet address required"}), 400
+
+        user = users.find_one({"wallet_address": wallet_address})
+
+        if user:
+            return jsonify({"user": serialize_user(user)}), 200
+        else:
+            return jsonify({"error": "User not found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # -------- File Upload --------
