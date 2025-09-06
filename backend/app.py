@@ -103,8 +103,8 @@ def create_project():
             "area": data.get("area"),
             "location": data.get("location"),
             "before_images": data.get("before_images", []),
-            "after_images": data.get("after_images", []),
-            "status": "pending",
+            "after_images": [],
+            "status": "awaiting_after_images",  # 👈 new default
             "credits": 0,
             "created_at": datetime.utcnow(),
         }
@@ -135,12 +135,36 @@ def create_project():
         return jsonify({"error": str(e)}), 500
 
 
+
 @app.route("/projects/<wallet_address>", methods=["GET"])
 def get_projects(wallet_address):
     user_projects = list(projects.find({"wallet_address": wallet_address}))
     for proj in user_projects:
         proj["_id"] = str(proj["_id"])
     return jsonify({"projects": user_projects}), 200
+
+# -------- Upload After Images --------
+@app.route("/projects/<project_id>/after-images", methods=["POST"])
+def upload_after_images(project_id):
+    try:
+        data = request.json
+        after_images = data.get("after_images", [])
+
+        if not after_images:
+            return jsonify({"error": "No images provided"}), 400
+
+        result = projects.update_one(
+            {"project_id": project_id},
+            {"$set": {"after_images": after_images, "status": "pending"}}
+        )
+
+        if result.matched_count == 0:
+            return jsonify({"error": "Project not found"}), 404
+
+        return jsonify({"message": "After images uploaded successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # ---------- Main ----------

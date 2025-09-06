@@ -49,9 +49,17 @@ export default function NewProject() {
     return data.url;
   };
 
-  // Handle multiple file uploads
+  // Handle multiple file uploads (with validation for before_images)
   const handleFiles = async (e, field) => {
     const files = Array.from(e.target.files);
+
+    // Special check only for before_images
+    if (field === "before_images" && files.length < 3) {
+      setError("Please select at least 3 before plantation images.");
+      return;
+    }
+
+    setError(""); // clear old errors
     const urls = await Promise.all(files.map(uploadFile));
 
     setForm((prev) => ({
@@ -75,6 +83,12 @@ export default function NewProject() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // ✅ Double-check (failsafe)
+    if (!form.before_images || form.before_images.length < 3) {
+      setError("Please upload at least 3 before plantation images.");
+      return;
+    }
+
     const projectData = {
       wallet_address: user.wallet_address,
       role,
@@ -82,7 +96,6 @@ export default function NewProject() {
       area: form.area,
       location: form.location,
       before_images: form.before_images,
-      after_images: form.after_images,
       land_record: form.land_record,
       mou: form.mou,
       org_name: form.org_name,
@@ -109,7 +122,9 @@ export default function NewProject() {
 
   return (
     <div className="min-h-screen bg-green-50 p-6">
-      <h1 className="text-2xl font-bold mb-4">Submit Plantation Project ({role})</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        Submit Plantation Project ({role})
+      </h1>
       <form
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded-lg shadow-md max-w-lg space-y-4"
@@ -130,27 +145,6 @@ export default function NewProject() {
               key={idx}
               src={img}
               alt={`Before ${idx + 1}`}
-              className="w-20 h-20 object-cover rounded border"
-            />
-          ))}
-        </div>
-
-        {/* After Images */}
-        <label className="block font-semibold">
-          After Plantation Images (min 3):
-        </label>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(e) => handleFiles(e, "after_images")}
-        />
-        <div className="flex flex-wrap gap-2 mt-2">
-          {form.after_images.map((img, idx) => (
-            <img
-              key={idx}
-              src={img}
-              alt={`After ${idx + 1}`}
               className="w-20 h-20 object-cover rounded border"
             />
           ))}

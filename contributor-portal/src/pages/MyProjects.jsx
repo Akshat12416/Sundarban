@@ -3,29 +3,28 @@ import { useState, useEffect } from "react";
 export default function MyProjects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [previewImg, setPreviewImg] = useState(null); // for modal
+  const [previewImg, setPreviewImg] = useState(null);
 
   useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) return;
 
-    const fetchProjects = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:5000/projects/${user.wallet_address}`
-        );
-
-        const data = await res.json();
-        setProjects(data.projects || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProjects();
-  }, []);
+    try {
+      const res = await fetch(
+        `http://localhost:5000/projects/${user.wallet_address}`
+      );
+      const data = await res.json();
+      setProjects(data.projects || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -33,10 +32,46 @@ export default function MyProjects() {
         return "bg-green-100 text-green-700 border-green-400";
       case "rejected":
         return "bg-red-100 text-red-700 border-red-400";
+      case "awaiting_after_images":
+        return "bg-orange-100 text-orange-700 border-orange-400";
       default:
         return "bg-yellow-100 text-yellow-700 border-yellow-400";
     }
   };
+
+const uploadAfterImages = async (proj, files) => {
+  const fileArray = Array.from(files);
+
+  if (fileArray.length < 3) {
+    alert("Please upload at least 3 after plantation images.");
+    return;
+  }
+
+  const urls = await Promise.all(
+    fileArray.map(async (file) => {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("http://localhost:5000/upload", {
+        method: "POST",
+        body: fd,
+      });
+      const data = await res.json();
+      return data.url;
+    })
+  );
+
+  await fetch(
+    `http://localhost:5000/projects/${proj.project_id}/after-images`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ after_images: urls }),
+    }
+  );
+
+  fetchProjects(); // refresh
+};
+
 
   if (loading) return <p className="p-4">Loading...</p>;
 
@@ -49,16 +84,12 @@ export default function MyProjects() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {projects.map((proj) => {
-            // ✅ Handle both old and new schema
-            const beforeImgs = proj.before_images || (proj.before_image ? [proj.before_image] : []);
-            const afterImgs = proj.after_images || (proj.after_image ? [proj.after_image] : []);
+            const beforeImgs = proj.before_images || [];
+            const afterImgs = proj.after_images || [];
 
             return (
-              <div
-                key={proj._id}
-                className="bg-white shadow-md p-4 rounded-lg border"
-              >
-                {/* Header with Status */}
+              <div key={proj._id} className="bg-white shadow-md p-4 rounded-lg border">
+                {/* Header */}
                 <div className="flex justify-between items-center mb-2">
                   <h2 className="font-bold text-lg">Project</h2>
                   <span
@@ -70,17 +101,14 @@ export default function MyProjects() {
                   </span>
                 </div>
 
-                {/* Project ID */}
                 <p className="text-xs text-gray-500 mb-2">
                   Project ID: <span className="font-mono">{proj.project_id}</span>
                 </p>
 
-                {/* Location */}
                 <p className="text-sm text-gray-500 mb-2">
                   Location: {proj.location?.lat}, {proj.location?.lng}
                 </p>
 
-                {/* Trees + Area */}
                 <p className="text-sm text-gray-600 mb-2">
                   Trees: {proj.tree_type || "-"} | Area: {proj.area || "-"} acres
                 </p>
@@ -107,7 +135,7 @@ export default function MyProjects() {
 
                 {/* After Images */}
                 {afterImgs.length > 0 && (
-                  <div>
+                  <div className="mb-3">
                     <h3 className="text-sm font-semibold text-gray-700">
                       After Plantation
                     </h3>
@@ -124,13 +152,30 @@ export default function MyProjects() {
                     </div>
                   </div>
                 )}
+
+                {/* Upload After Images if awaiting */}
+                {proj.status === "awaiting_after_images" && (
+                  <div className="mt-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Upload After Plantation Images:
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      multiple
+                      onChange={(e) => uploadAfterImages(proj, e.target.files)}
+                      className="block w-full text-sm text-gray-600"
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
       )}
 
-      {/* 🔥 Modal for image preview */}
+      {/* Modal */}
       {previewImg && (
         <div
           className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
