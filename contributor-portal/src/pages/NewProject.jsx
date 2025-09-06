@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { ethers } from "ethers";
 
 export default function NewProject() {
   const [form, setForm] = useState({
@@ -36,39 +37,60 @@ export default function NewProject() {
     }
   }, []);
 
-  // File uploader -> uploads to backend immediately
-  const uploadFile = async (file) => {
-    const fd = new FormData();
-    fd.append("file", file);
+  
+// File uploader -> uploads to backend immediately with signature
+const uploadFile = async (file) => {
+  if (!window.ethereum) throw new Error("MetaMask not installed");
 
-    const res = await fetch("http://localhost:5000/upload", {
-      method: "POST",
-      body: fd,
-    });
-    const data = await res.json();
-    return data.url;
-  };
+  // Convert file to ArrayBuffer for hashing
+  const buffer = await file.arrayBuffer();
+  const hashHex = ethers.sha256(new Uint8Array(buffer)); // keccak256 in ethers v6
 
-  // Handle multiple file uploads (with validation for before_images)
+  // Ask wallet to sign this hash
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  const signature = await signer.signMessage(ethers.getBytes(hashHex));
+
+  // Attach everything to FormData
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("hash", hashHex);
+  fd.append("signature", signature);
+  fd.append("wallet_address", user.wallet_address);
+
+  const res = await fetch("http://localhost:5000/upload", {
+    method: "POST",
+    body: fd,
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error("Upload failed: " + err);
+  }
+
+  const data = await res.json();
+  return data.url; // backend should return full http://localhost:5000/uploads/xxx.png
+};
+
+
+  // Handle multiple file uploads
   const handleFiles = async (e, field) => {
     const files = Array.from(e.target.files);
 
-    // Special check only for before_images
     if (field === "before_images" && files.length < 3) {
       setError("Please select at least 3 before plantation images.");
       return;
     }
 
-    setError(""); // clear old errors
+    setError("");
     const urls = await Promise.all(files.map(uploadFile));
-
     setForm((prev) => ({
       ...prev,
       [field]: urls,
     }));
   };
 
-  // Single file upload (land record, MoU, etc.)
+  // Single file upload
   const handleSingleFile = async (e, field) => {
     const file = e.target.files[0];
     if (file) {
@@ -80,10 +102,24 @@ export default function NewProject() {
     }
   };
 
+  // ✅ Generate digital signature using wallet
+  const generateSignature = async (projectData) => {
+    if (!window.ethereum) {
+      throw new Error("MetaMask not installed");
+    }
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+
+    // Create a deterministic message
+    const message = JSON.stringify(projectData);
+    const signature = await signer.signMessage(message);
+
+    return { signature, message };
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ Double-check (failsafe)
     if (!form.before_images || form.before_images.length < 3) {
       setError("Please upload at least 3 before plantation images.");
       return;
@@ -105,18 +141,25 @@ export default function NewProject() {
       land_proof: form.land_proof,
     };
 
-    const res = await fetch("http://localhost:5000/projects/new", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(projectData),
-    });
+    try {
+      // ✅ Sign the project data
+      const { signature, message } = await generateSignature(projectData);
 
-    const data = await res.json();
-    if (res.ok) {
-      console.log("✅ Project created:", data);
-      navigate("/projects");
-    } else {
-      setError(data.error || "Failed to submit project");
+      const res = await fetch("http://localhost:5000/projects/new", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...projectData, signature, message }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        console.log("✅ Project created:", data);
+        navigate("/projects");
+      } else {
+        setError(data.error || "Failed to submit project");
+      }
+    } catch (err) {
+      setError(err.message || "Signature error");
     }
   };
 

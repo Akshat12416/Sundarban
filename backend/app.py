@@ -6,6 +6,9 @@ from dotenv import load_dotenv
 from datetime import datetime
 import uuid
 from werkzeug.utils import secure_filename
+from eth_account.messages import encode_defunct
+from eth_account import Account
+import hashlib
 
 # ---------- Setup ----------
 load_dotenv()
@@ -73,15 +76,43 @@ def login():
 # -------- File Upload --------
 @app.route("/upload", methods=["POST"])
 def upload_file():
-    if "file" not in request.files:
-        return jsonify({"error": "No file uploaded"}), 400
+    try:
+        if "file" not in request.files:
+            return jsonify({"error": "No file uploaded"}), 400
 
-    file = request.files["file"]
-    filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
-    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-    file.save(filepath)
+        file = request.files["file"]
+        hash_hex = request.form.get("hash")
+        signature = request.form.get("signature")
+        wallet_address = request.form.get("wallet_address")
 
-    return jsonify({"url": f"http://localhost:5000/uploads/{filename}"}), 201
+        # Save file
+        filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(filepath)
+
+        # Verify hash matches uploaded file
+        with open(filepath, "rb") as f:
+            file_bytes = f.read()
+            server_hash = "0x" + hashlib.sha256(file_bytes).hexdigest()
+            if server_hash != hash_hex:
+                return jsonify({"error": "Hash mismatch"}), 400
+
+        # Verify signature
+        msg = encode_defunct(hexstr=hash_hex)
+        recovered = Account.recover_message(msg, signature=signature)
+
+        if recovered.lower() != wallet_address.lower():
+            return jsonify({"error": "Signature verification failed"}), 400
+
+        return jsonify({
+            "url": f"http://localhost:5000/uploads/{filename}",
+            "hash": hash_hex,
+            "signature": signature,
+            "wallet_address": wallet_address
+        }), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/uploads/<filename>")

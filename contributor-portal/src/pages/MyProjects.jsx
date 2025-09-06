@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { ethers } from "ethers";
 
 export default function MyProjects() {
   const [projects, setProjects] = useState([]);
@@ -40,6 +41,9 @@ export default function MyProjects() {
   };
 
 const uploadAfterImages = async (proj, files) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user) return;
+
   const fileArray = Array.from(files);
 
   if (fileArray.length < 3) {
@@ -47,19 +51,43 @@ const uploadAfterImages = async (proj, files) => {
     return;
   }
 
+  // ⬇️ Signature-based uploads (same as NewProject.jsx)
   const urls = await Promise.all(
     fileArray.map(async (file) => {
+      if (!window.ethereum) throw new Error("MetaMask not installed");
+
+      // 1. Hash the file
+      const buffer = await file.arrayBuffer();
+      const hashHex = ethers.sha256(new Uint8Array(buffer));
+
+      // 2. Sign the hash
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const signature = await signer.signMessage(ethers.getBytes(hashHex));
+
+      // 3. Upload with hash + signature
       const fd = new FormData();
       fd.append("file", file);
+      fd.append("hash", hashHex);
+      fd.append("signature", signature);
+      fd.append("wallet_address", user.wallet_address);
+
       const res = await fetch("http://localhost:5000/upload", {
         method: "POST",
         body: fd,
       });
+
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error("Upload failed: " + err);
+      }
+
       const data = await res.json();
       return data.url;
     })
   );
 
+  // ✅ Save after_images in backend
   await fetch(
     `http://localhost:5000/projects/${proj.project_id}/after-images`,
     {
@@ -69,7 +97,7 @@ const uploadAfterImages = async (proj, files) => {
     }
   );
 
-  fetchProjects(); // refresh
+  fetchProjects(); // refresh UI
 };
 
 
