@@ -1,16 +1,23 @@
+import React from "react";
+import Navbar from "./Components/Navbar";
+import Hero from "./Components/Hero";
+
+
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-100 to-blue-300 text-gray-900">
+    // main section
+    <div className="min-h-screen max-w-7xl flex flex-col items-start justify-center bg-gradient-to-b from-blue-100 to-blue-300 text-gray-900">
       {/* Hero Section */}
-      <header className="text-center p-6">
+      {/* <header className="text-center p-6">
         <h1 className="text-4xl font-bold mb-2">🌊 Blue Carbon MRV</h1>
         <p className="text-lg">Blockchain-based Registry for Transparent Carbon Credits</p>
-      </header>
+      </header> */}
+      <Hero />
 
       {/* Role Selection */}
-      <main className="grid md:grid-cols-3 gap-6 mt-10 w-11/12 max-w-5xl">
+      {/* <main className="grid md:grid-cols-3 gap-6 mt-10 w-11/12 max-w-5xl"> */}
         {/* Contributor */}
-        <div className="bg-white shadow-lg rounded-2xl p-6 text-center hover:shadow-xl transition">
+        {/* <div className="bg-white shadow-lg rounded-2xl p-6 text-center hover:shadow-xl transition">
           <h2 className="text-xl font-semibold mb-3">🌱 Contributor</h2>
           <p className="text-sm mb-4">Register land or projects, upload before/after plantation images, and earn credits.</p>
           <a
@@ -19,10 +26,10 @@ export default function App() {
           >
             Go to Portal
           </a>
-        </div>
+        </div> */}
 
         {/* Company */}
-        <div className="bg-white shadow-lg rounded-2xl p-6 text-center hover:shadow-xl transition">
+        {/* <div className="bg-white shadow-lg rounded-2xl p-6 text-center hover:shadow-xl transition">
           <h2 className="text-xl font-semibold mb-3">🏭 Company</h2>
           <p className="text-sm mb-4">Buy carbon credits to offset emissions and meet compliance.</p>
           <a
@@ -31,10 +38,10 @@ export default function App() {
           >
             Go to Portal
           </a>
-        </div>
+        </div> */}
 
         {/* Admin */}
-        <div className="bg-white shadow-lg rounded-2xl p-6 text-center hover:shadow-xl transition">
+        {/* <div className="bg-white shadow-lg rounded-2xl p-6 text-center hover:shadow-xl transition">
           <h2 className="text-xl font-semibold mb-3">🛠️ NCCR Admin</h2>
           <p className="text-sm mb-4">Verify projects, approve credits, and manage registry.</p>
           <a
@@ -43,8 +50,8 @@ export default function App() {
           >
             Go to Portal
           </a>
-        </div>
-      </main>
+        </div> */}
+      {/* </main> */}
     </div>
   );
 }

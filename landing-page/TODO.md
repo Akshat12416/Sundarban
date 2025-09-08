@@ -1,0 +1,4 @@
+- [ ] Modify Navbar.jsx to remove fixed positioning for embedding in hero
+- [ ] Import Navbar in Hero.jsx
+- [ ] Add Navbar component at the top of the hero section
+- [ ] Adjust hero text container positioning to be below the navbar
