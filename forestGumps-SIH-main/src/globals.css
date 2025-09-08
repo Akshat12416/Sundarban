@@ -1,0 +1,349 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --forest-green: #228B22;
+  --emerald-700: #047857;
+  --forest-green-50: rgba(34, 139, 34, 0.05);
+  --forest-green-10: rgba(34, 139, 34, 0.1);
+  --forest-green-20: rgba(34, 139, 34, 0.2);
+  --forest-green-30: rgba(34, 139, 34, 0.3);
+  --forest-green-25: rgba(34, 139, 34, 0.25);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.6;
+  color: #333;
+  overflow-x: hidden;
+}
+
+/* Custom Forest Theme Utilities */
+.forest-green {
+  color: var(--forest-green);
+}
+
+.bg-forest-green {
+  background-color: var(--forest-green);
+}
+
+.bg-forest-green\/50 {
+  background-color: rgba(34, 139, 34, 0.5);
+}
+
+.bg-forest-green\/70 {
+  background-color: rgba(34, 139, 34, 0.7);
+}
+
+.border-forest-green {
+  border-color: var(--forest-green);
+}
+
+.border-forest-green\/10 {
+  border-color: var(--forest-green-10);
+}
+
+.border-forest-green\/20 {
+  border-color: var(--forest-green-20);
+}
+
+.shadow-forest-green\/25 {
+  box-shadow: 0 10px 15px -3px var(--forest-green-25), 0 4px 6px -2px var(--forest-green-25);
+}
+
+.shadow-forest-green\/30 {
+  box-shadow: 0 25px 50px -12px rgba(34, 139, 34, 0.3);
+}
+
+.hover\:text-forest-green:hover {
+  color: var(--forest-green);
+}
+
+.hover\:bg-forest-green:hover {
+  background-color: var(--forest-green);
+}
+
+.hover\:shadow-forest-green\/25:hover {
+  box-shadow: 0 10px 15px -3px var(--forest-green-25), 0 4px 6px -2px var(--forest-green-25);
+}
+
+/* Enhanced Button Animations */
+.animated-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.animated-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s;
+  z-index: 1;
+}
+
+.animated-button:hover::before {
+  left: 100%;
+}
+
+.animated-button:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Floating Background Animation */
+@keyframes float-slow {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px); 
+  }
+  25% { 
+    transform: translateY(-20px) translateX(10px); 
+  }
+  50% { 
+    transform: translateY(-10px) translateX(20px); 
+  }
+  75% { 
+    transform: translateY(-30px) translateX(5px); 
+  }
+}
+
+@keyframes float-reverse {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px); 
+  }
+  25% { 
+    transform: translateY(15px) translateX(-10px); 
+  }
+  50% { 
+    transform: translateY(25px) translateX(-20px); 
+  }
+  75% { 
+    transform: translateY(10px) translateX(-15px); 
+  }
+}
+
+@keyframes float-fast {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px); 
+  }
+  50% { 
+    transform: translateY(-15px) translateX(15px); 
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 12s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: float-fast 6s ease-in-out infinite;
+}
+
+/* Ripple Animation */
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.animate-ripple {
+  animation: ripple 0.6s linear;
+}
+
+/* Smooth Hover Transitions */
+.hover-scale:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px var(--forest-green-25);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Text Reveal Animations */
+.text-reveal {
+  overflow: hidden;
+}
+
+.text-reveal span {
+  display: inline-block;
+  transform: translateY(100%);
+  animation: reveal 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes reveal {
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Gradient Backgrounds */
+.bg-forest-gradient {
+  background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+}
+
+.bg-forest-gradient-radial {
+  background: radial-gradient(circle at center, #228B22 0%, #2F4F2F 100%);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--forest-green);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--emerald-700);
+}
+
+/* Loading Animation */
+.loading-dots {
+  display: inline-block;
+}
+
+.loading-dots::after {
+  content: '';
+  animation: loading-dots 1.5s infinite;
+}
+
+@keyframes loading-dots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+  100% { content: ''; }
+}
+
+/* Focus States */
+.focus-forest:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--forest-green-30);
+  border-color: var(--forest-green);
+}
+
+/* Image Hover Effects */
+.image-hover {
+  position: relative;
+  overflow: hidden;
+}
+
+.image-hover::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.image-hover:hover::after {
+  transform: translateX(100%);
+}
+
+/* Card Stack Animation */
+.card-stack {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-stack:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Parallax Elements */
+.parallax-element {
+  will-change: transform;
+}
+
+/* Carousel Enhancements */
+.carousel-container {
+  position: relative;
+}
+
+.carousel-container .embla__slide {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.carousel-container .embla__slide:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+/* Text Selection */
+::selection {
+  background: var(--forest-green-30);
+  color: white;
+}
+
+::-moz-selection {
+  background: var(--forest-green-30);
+  color: white;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .animate-float-slow,
+  .animate-float-reverse,
+  .animate-float-fast {
+    animation-play-state: paused;
+  }
+  
+  .hover-scale:hover {
+    transform: none;
+  }
+  
+  .animated-button:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-float-slow,
+  .animate-float-reverse,
+  .animate-float-fast {
+    animation: none;
+  }
+}

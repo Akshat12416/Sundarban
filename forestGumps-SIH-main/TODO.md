@@ -1,0 +1,6 @@
+- [ ] Add useState import and state for dropdown visibility in HeroSection.tsx
+- [ ] Add onClick handler to the "Login as" button to toggle dropdown
+- [ ] Add dropdown menu div below the button with 3 options: Contributors, Company, NCCR Admin
+- [ ] Style the dropdown with Tailwind: absolute position, white background, shadow, etc.
+- [ ] Style each option as link with hover effects (e.g., background color change)
+- [ ] Test the dropdown functionality
