@@ -177,9 +177,9 @@ export const SiteFooterSection = (): JSX.Element => {
         </div>
 
         {/* Social Links */}
-        <div 
+        <div
           ref={socialRef}
-          className="flex justify-center space-x-6 mb-8 pb-8 border-b border-forest-green/10"
+          className="flex justify-center space-x-6 mb-8 sm:mb-12 md:mb-12 pb-8 border-b border-forest-green/10"
         >
           {socialLinks.map((social, index) => {
             const IconComponent = social.icon;

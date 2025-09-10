@@ -2,87 +2,50 @@ import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import SplitText from "../../../../components/animations/SplitText";
+import { StaggeredMenu } from "../../../../components/animations/StaggeredMenu";
+import { AnimatedButton } from "../../../../components/animations/AnimatedButton";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const f14 = "/src/photos/f14.jpg";
-const heroBack = "/src/photos/Hero back.png";
-const heroMid = "/src/photos/Heromid.png";
-const heroFront = "/src/photos/Herofront.png";
+const Herobg = "https://images.pexels.com/photos/8514903/pexels-photo-8514903.jpeg";
 const logo = "/src/photos/logo.jpg";
 
 export const HeroSection = (): JSX.Element => {
   const heroRef = useRef<HTMLDivElement>(null);
-  const layer1Ref = useRef<HTMLImageElement>(null);
-  const layer2Ref = useRef<HTMLImageElement>(null);
-  const layer3Ref = useRef<HTMLImageElement>(null);
-  const layer4Ref = useRef<HTMLImageElement>(null);
+  const parallaxRef = useRef<HTMLImageElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
 
+  // Menu items for StaggeredMenu
+  const menuItems = [
+    { label: 'Home', ariaLabel: 'Go to home page', link: '/' },
+    { label: 'About', ariaLabel: 'Learn about us', link: '/about' },
+    { label: 'Services', ariaLabel: 'View our services', link: '/services' },
+    { label: 'Contact', ariaLabel: 'Get in touch', link: '/contact' }
+  ];
+
+  const socialItems = [
+    { label: 'Twitter', link: 'https://twitter.com' },
+    { label: 'GitHub', link: 'https://github.com' },
+    { label: 'LinkedIn', link: 'https://linkedin.com' }
+  ];
+
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Parallax effect for layered images with specific speeds
-      // f14 (layer1) - 50% speed (slowest background)
-     gsap.to(layer1Ref.current, {
-        y: () => window.innerHeight * 0.5,
-        ease: "none",
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true
-        }
-      });
-
-
-      // f14 (layer1) - 50% speed upwards
-      gsap.to(layer1Ref.current, {
-        y: () => -window.innerHeight * 0.5,
-        ease: "none",
-        scrollTrigger: {
-          trigger: layer1Ref.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true
-        }
-      });
-
-      // heroBack (layer2) - 50% speed upwards
-      gsap.to(layer2Ref.current, {
-        y: () => -window.innerHeight * 0.5,
-        ease: "none",
-        scrollTrigger: {
-          trigger: layer2Ref.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true
-        }
-      });
-
-      // heroMid (layer3) - 80% speed upwards
-      gsap.to(layer3Ref.current, {
-        y: () => -window.innerHeight * 0.8,
-        ease: "none",
-        scrollTrigger: {
-          trigger: layer3Ref.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true
-        }
-      });
-
-      // heroFront (layer4) - 100% speed (normal scroll, no y change)
-      gsap.to(layer4Ref.current, {
-        y: 0,
-        ease: "none",
-        scrollTrigger: {
-          trigger: layer4Ref.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true
-        }
-      });
+      // Parallax effect for background
+      if (parallaxRef.current) {
+        gsap.to(parallaxRef.current, {
+          yPercent: -30,
+          ease: "none",
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: "top top",
+            end: "bottom top",
+            scrub: true
+          }
+        });
+      }
 
       // Text animations
       gsap.from(titleRef.current, {
@@ -107,90 +70,109 @@ export const HeroSection = (): JSX.Element => {
 
   return (
     <>
-      {/* Floating Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-green-500/10 rounded-full blur-3xl animate-float-slow"></div>
-        <div className="absolute top-3/4 right-1/4 w-48 h-48 bg-emerald-400/5 rounded-full blur-3xl animate-float-reverse"></div>
-        <div className="absolute top-1/2 left-3/4 w-24 h-24 bg-forest-green/10 rounded-full blur-2xl animate-float-fast"></div>
-      </div>
-
-      <section ref={heroRef} className="relative w-full h-screen overflow-hidden">
+      <section ref={heroRef} className="relative w-full lg:h-screen md:h-[90vh] sm:h-[90vh] overflow-hidden">
         <div className="relative h-full">
-          {/* Layered Background Images */}
+          {/* Parallax Background with Gradient Overlay */}
           <div className="absolute inset-0 overflow-hidden">
-            <img src={f14} className="absolute inset-0 w-full h-screen object-cover z-[0]" />
-            {/* <img ref={layer1Ref} src={f14} className="absolute inset-0 w-full h-screen object-cover z-[0]" /> */}
-            {/* <img ref={layer2Ref} src={heroBack} className="absolute inset-0 w-full h-screen object-cover z-[1]" /> */}
-            {/* <img ref={layer3Ref} src={heroMid} className="absolute inset-0 w-full h-screen object-cover z-[2]" /> */}
-            {/* <img ref={layer4Ref} src={heroFront} className="absolute inset-0 w-full h-screen object-cover z-[3]" /> */}
+            <img 
+              ref={parallaxRef}
+              src={Herobg} 
+              className="absolute inset-0 w-full h-[140%] object-cover" 
+              alt="Hero background"
+            />
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50"></div>
           </div>
 
-          <div className="relative z-10 h-full flex items-center flex-col">
-            <header className="flex min-w-[1203px] items-center justify-between px-10 py-7 overflow-visible">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center transition-transform duration-300 hover:scale-110">
+          {/* Main content */}
+          <div className="relative z-10 h-full flex items-center flex-col max-w-full">
+            {/* Header with logo and menu/login wrapper */}
+            <header className="flex w-full max-w-[1203px] items-center justify-between px-4 md:px-10 py-7 overflow-visible">
+              {/* Logo */}
+              <div className="flex items-center">
                 <img
-                  className="w-full h-full rounded-lg object-cover"
-                  alt="Logo"
                   src={logo}
+                  alt="Logo"
+                  className="h-8 w-auto object-contain"
+                  draggable={false}
                 />
               </div>
 
-              <div className="flex items-center gap-8">
-                <div className="[font-family:'Inter',Helvetica] font-normal text-white text-[22.7px] tracking-[0] leading-[28.8px] cursor-pointer relative group">
+              {/* Menu and Login wrapper */}
+              <div className="flex items-center gap-4 md:gap-8">
+                <Link to="/login-type-selector" className="[font-family:'Inter',Helvetica] font-normal text-white text-lg md:text-[22.7px] tracking-[0] leading-[28.8px] cursor-pointer relative group hidden md:block">
                   LOGIN
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-forest-green transition-all duration-300 group-hover:w-full"></span>
-                </div>
-
-                <Link to="/login-type-selector" className="animated-button h-12 bg-forest-green/50 backdrop-blur-sm rounded-[50px] p-2 flex items-center gap-3 inline-flex transition-all duration-300 hover:bg-forest-green/70 hover:scale-105 hover:shadow-lg hover:shadow-forest-green/25">
-                  <span className="pl-2 [font-family:'Inter',Helvetica] font-normal text-white text-[15px] text-center tracking-[0] leading-[19.2px]">
-                    Login as
-                  </span>
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center transition-transform duration-300 group-hover:rotate-180">
-                    <svg className="w-5 h-5 text-forest-green" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
                 </Link>
+
+                {/* StaggeredMenu Component - embedded in header */}
+                <div className="relative z-50">
+                  <StaggeredMenu
+                    position="right"
+                    items={menuItems}
+                    socialItems={socialItems}
+                    displaySocials={true}
+                    displayItemNumbering={true}
+                    menuButtonColor="#fff"
+                    openMenuButtonColor="#fff"
+                    changeMenuColorOnOpen={true}
+                    colors={['#228B22', '#32CD32', '#006400']} // Green theme colors
+                    logoUrl={logo}
+                    accentColor="#228B22" // Forest green accent
+                    onMenuOpen={() => console.log('Menu opened')}
+                    onMenuClose={() => console.log('Menu closed')}
+                    embedded={true} // Add embedded prop to indicate it's inside header
+                  />
+                </div>
               </div>
             </header>
 
-            <main className="flex-1 flex flex-col min-w-[1203px] justify-between px-10 pb-14">
-              <div className="max-w-[718px]">
-                <h1 ref={titleRef} className="[font-family:'Inter',Helvetica] mb-5 font-bold text-black text-[74px] tracking-[-3.20px] leading-[70px]">
-                  Empowering Climate
-                  <br />
-                  Action Through
-                  <br />
-                  <span className="text-forest-green">Blockchain</span>
-                  <br />
-                  Innovation
-                </h1>
+            <main className="flex-1 flex flex-col w-full max-w-[1203px] justify-between px-4 sm:px-6 md:px-10 pb-6 sm:pb-8 md:pb-14 mt-4 sm:mt-6 md:mt-8">
+              <div className="max-w-full md:max-w-[718px]">
+                <div className="mb-4 sm:mb-5">
+                  <SplitText
+                    text="Empowering Climate Action Through Blockchain Innovation"
+                    tag="h1"
+                    className="[font-family:'Inter',Helvetica] font-bold text-black text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-[74px] tracking-[-0.5px] sm:tracking-[-1px] md:tracking-[-2px] lg:tracking-[-3.20px] leading-tight sm:leading-tight md:leading-[1.1] lg:leading-[70px]"
+                    delay={50}
+                    duration={0.8}
+                    ease="power3.out"
+                    splitType="chars"
+                    from={{ opacity: 0, y: 50, scale: 0.8 }}
+                    to={{ opacity: 1, y: 0, scale: 1 }}
+                    threshold={0.8}
+                    rootMargin="0px"
+                    textAlign="left"
+                    onLetterAnimationComplete={() => console.log('Hero title animation complete!')}
+                  />
+                </div>
               </div>
 
-              <div className="flex justify-end pl-56 max-w-[718px]">
-                <div className="max-w-[499px]">
-                  <div className="mb-4">
-                    <p ref={subtitleRef} className="[font-family:'Inter',Helvetica] font-bold text-[#252a18] text-[16px] text-right tracking-[-0.80px] leading-5">
-                      Our blockchain-enabled carbon credit platform ensures <br />
+              <div className="flex flex-col md:flex-row justify-center md:justify-end md:pl-16 lg:pl-32 xl:pl-56 max-w-full md:max-w-[718px] mt-6 sm:mt-8 md:mt-0">
+                <div className="max-w-full md:max-w-[499px]">
+                  <div className="mb-4 sm:mb-6">
+                    <p ref={subtitleRef} className="[font-family:'Inter',Helvetica] font-bold text-[#252a18] text-xs sm:text-sm md:text-[16px] text-center md:text-right tracking-[-0.20px] sm:tracking-[-0.40px] md:tracking-[-0.80px] leading-4 sm:leading-5 px-4 sm:px-2 md:px-0">
+                      Our blockchain-enabled carbon credit platform ensures 
                       transparency and integrity in the voluntary carbon market.{" "}
-                      <br />
                       Join us in making a measurable impact through verified
-                      <br />
                       afforestation projects.
                     </p>
                   </div>
 
-                  <div className="flex justify-end">
-                    <Link to="/login-type-selector" className="animated-button h-12 bg-forest-green rounded-[50px] p-1 flex items-center gap-2 inline-flex transition-all duration-300 hover:bg-emerald-700 hover:scale-105 hover:shadow-xl hover:shadow-forest-green/30 group">
-                      <span className="pl-2 [font-family:'Inter',Helvetica] font-normal text-white text-[15px] text-center tracking-[0] leading-[19.2px]">
+                  <div className="flex justify-center md:justify-end">
+                    <AnimatedButton
+                      variant="primary"
+                      size="lg"
+                      onClick={() => window.location.href = '/login-type-selector'}
+                      className="bg-forest-green hover:bg-emerald-700 shadow-xl hover:shadow-forest-green/30 text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3"
+                    >
+                      <span className="flex items-center gap-2">
                         Get Started
-                      </span>
-                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-9 h-9 text-forest-green transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M7 17l10-10m0 0v7m0-7h-7" />
                         </svg>
-                      </div>
-                    </Link>
+                      </span>
+                    </AnimatedButton>
                   </div>
                 </div>
               </div>
@@ -199,7 +181,7 @@ export const HeroSection = (): JSX.Element => {
         </div>
       </section>
 
-      <style jsx>{`
+      <style>{`
         .forest-green {
           color: #228B22;
         }

@@ -2,18 +2,16 @@ import React from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { ContactFormSection } from "./sections/ContactFormSection/ContactFormSection";
 import { ContentBlockSection } from "./sections/ContentBlockSection/ContentBlockSection";
-import { InfoCard3 } from "./sections/InfoCard3/InfoCard3";
 import { HeroSection } from "./sections/HeroSection/HeroSection";
 import { ImageCarouselSection } from "./sections/ImageCarouselSection/ImageCarouselSection";
-import { InfoCard2 } from "./sections/InfoCard2/InfoCard2";
 import { MainContentSection } from "./sections/MainContentSection/MainContentSection";
 import { OverviewSection } from "./sections/OverviewSection/OverviewSection";
-import { InfoCard1 } from "./sections/InfoCard1/InfoCard1";
 import { SiteFooterSection } from "./sections/SiteFooterSection/SiteFooterSection";
 import LoginTypeSelector from "./sections/LognCards/LoginTyleSelector";
 import ContributorLogin from "./sections/LognCards/ContributorLogin";
 import CompanyLogin from "./sections/LognCards/CompanyLogin";
 import AdminLogin from "./sections/LognCards/AdminLogin";
+import { InfoCardsStack } from "./sections/InfoCardStacks/InfoCardStack";
 
 export const ElementLight = (): JSX.Element => {
   const navigate = useNavigate();
@@ -38,9 +36,7 @@ export const ElementLight = (): JSX.Element => {
                 <HeroSection />
                 <OverviewSection />
                 <MainContentSection />
-                <InfoCard1 />
-                <InfoCard2 />
-                <InfoCard3 />
+                <InfoCardsStack/>
                 <ContentBlockSection />
                 <ImageCarouselSection />
                 <ContactFormSection />
