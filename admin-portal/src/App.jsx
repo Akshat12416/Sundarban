@@ -2,15 +2,28 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AdminDashboard from "./pages/AdminDashboard";
 import ApprovedProjects from "./pages/ApprovedProjects";
 import RejectedProjects from "./pages/RejectedProjects";
+import NavBar from "./components/NavBar";
+import Footer from "./components/Footer.jsx";
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<AdminDashboard />} />
-        <Route path="/approved" element={<ApprovedProjects />} />
-        <Route path="/rejected" element={<RejectedProjects />} />
-      </Routes>
+      <div className="flex flex-col min-h-screen bg-black text-white">
+        {/* Nav */}
+        <NavBar />
+
+        {/* Routes */}
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<AdminDashboard />} />
+            <Route path="/approved" element={<ApprovedProjects />} />
+            <Route path="/rejected" element={<RejectedProjects />} />
+          </Routes>
+        </main>
+
+        {/* Footer */}
+        <Footer />
+      </div>
     </BrowserRouter>
   );
 }
