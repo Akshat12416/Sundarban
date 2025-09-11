@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { ref, onValue, update, push } from "firebase/database";
+import { ref, onValue, update, set, push } from "firebase/database"; // use set instead of push
 import { collectImgs, getImageSrc, parseLocationField } from "../utils/projectUtils";
 import { ethers } from "ethers";
 import CONTRACT_ABI from "../abi/CarbonCreditToken.json"; 
+import { keccak256, toUtf8Bytes } from "ethers"; 
 
-
-const CONTRACT_ADDRESS = "0x9D52f83a9D1DF87D2117b98B48A815d03cCD8b9b";
+const CONTRACT_ADDRESS = "0x5714709ae8821F23a9B250559dec6d47ff3785B8";
 
 export default function AdminDashboard() {
   const [projects, setProjects] = useState([]);
@@ -56,7 +56,6 @@ export default function AdminDashboard() {
     return () => unsubscribe();
   }, []);
 
-  // Connect wallet for blockchain interactions
   const connectWallet = async () => {
     if (!window.ethereum) {
       alert("MetaMask required!");
@@ -66,7 +65,6 @@ export default function AdminDashboard() {
     setWalletConnected(true);
   };
 
-  // Hash generator (simple JSON stringify hash for now)
   const hashProjectData = (proj) => {
     const str = JSON.stringify({
       id: proj.id,
@@ -75,57 +73,86 @@ export default function AdminDashboard() {
       count: proj.noTree,
       category: proj.treeCategory,
     });
-    return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(str));
+    return keccak256(toUtf8Bytes(str));
   };
 
 const approveProject = async (proj) => {
   try {
-    if (!window.ethereum) {
-      alert("MetaMask not detected");
-      return;
-    }
-
-    // Request wallet connection
-    await window.ethereum.request({ method: "eth_requestAccounts" });
-
-    // Setup ethers provider + signer
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-
-    // Contract instance
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-    // Get details from project
-    const userWallet = proj.walletAddress;
-    const credits = parseInt(proj.noTree) || 0; // for demo: 1 tree = 1 credit
-    const dataHash = proj.id; // for demo: use project ID, later replace with IPFS/sha256
-
-    if (!userWallet) {
-      alert("No wallet address found for this project");
-      return;
-    }
-
-    // Call contract
-    const tx = await contract.registerProject(userWallet, dataHash, credits);
-    console.log("Transaction sent:", tx.hash);
-
-    await tx.wait();
-    console.log("Transaction mined");
-
-    // Save tx hash in Firebase
     const path = `Projects/${proj.ownerKey}/${proj.id}`;
-    await update(ref(db, path), {
-      status: "Approved",
-      blockchainTx: tx.hash,
-    });
+    const credits = parseInt(proj.noTree) || 0;
+    const upiMetamask = proj.upiMetamask; 
 
-    alert("Project approved and credits issued!");
+    if (!upiMetamask) {
+      alert("No payout details provided by user");
+      return;
+    }
+
+    // generate unique transaction id using push()
+    const transfersRef = ref(db, `Transfers/${proj.ownerKey}`);
+    const newTransferRef = push(transfersRef);
+    const transactionId = newTransferRef.key;
+
+    // Case 1: Bank / UPI payout
+    if (upiMetamask.includes("@")) {
+      await set(newTransferRef, {
+        transactionId,
+        projectId: proj.id,
+        ownerKey: proj.ownerKey,
+        upiId: upiMetamask,
+        credits,
+        payoutMode: "bank",
+        timestamp: Date.now(),
+      });
+
+      await update(ref(db, path), { status: "Approved" });
+      alert("Project approved and bank payout recorded!");
+      return;
+    }
+
+    // Case 2: Blockchain payout
+    if (upiMetamask.startsWith("0x")) {
+      if (!window.ethereum) {
+        alert("MetaMask not detected");
+        return;
+      }
+
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+      const userWallet = upiMetamask;
+      const dataHash = hashProjectData(proj);
+
+      const tx = await contract.registerProject(userWallet, dataHash, credits);
+      await tx.wait();
+
+      await update(ref(db, path), {
+        status: "Approved",
+        blockchainTx: tx.hash,
+      });
+
+      await set(newTransferRef, {
+        transactionId,
+        projectId: proj.id,
+        ownerKey: proj.ownerKey,
+        userWallet,
+        credits,
+        blockchainTx: tx.hash,
+        payoutMode: "crypto",
+        timestamp: Date.now(),
+      });
+
+      alert("Project approved and credits issued!");
+      return;
+    }
+
+    alert("Invalid payout details. Please check user input.");
   } catch (err) {
     console.error("Approval failed:", err);
     alert("Approval failed: " + err.message);
   }
 };
-
 
   const rejectProject = async (proj) => {
     const path = `Projects/${proj.ownerKey}/${proj.id}`;
