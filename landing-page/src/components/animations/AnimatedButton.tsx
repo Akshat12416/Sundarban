@@ -1,136 +1,175 @@
-import React, { useRef } from 'react';
-import { gsap } from 'gsap';
+import React, { useState, forwardRef } from 'react';
 
 interface AnimatedButtonProps {
-  children: React.ReactNode;
+  text?: string;
+  bgColor?: string;
+  textColor?: string;
   onClick?: () => void;
-  className?: string;
-  variant?: 'primary' | 'secondary' | 'outline';
-  size?: 'sm' | 'md' | 'lg';
 }
 
-export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
-  children,
-  onClick,
-  className = "",
-  variant = 'primary',
-  size = 'md'
-}) => {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const textRef = useRef<HTMLSpanElement>(null);
-  const textCloneRef = useRef<HTMLSpanElement>(null);
+const AnimatedButton = forwardRef<HTMLDivElement, AnimatedButtonProps>((props, ref) => {
+  const { text = "Continue", bgColor = "white/80", textColor = "black", onClick } = props;
+  const [isHovered, setIsHovered] = useState<boolean>(false);
 
-  const handleMouseEnter = () => {
-    const text = textRef.current;
-    const textClone = textCloneRef.current;
-    
-    if (!text || !textClone) return;
+  const finalBgColor = bgColor;
+  const finalTextColor = textColor;
 
-    gsap.to(text, {
-      y: -30,
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.out"
-    });
 
-    gsap.fromTo(textClone, 
-      { y: 30, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.3, ease: "power2.out" }
-    );
-  };
 
-  const handleMouseLeave = () => {
-    const text = textRef.current;
-    const textClone = textCloneRef.current;
-    
-    if (!text || !textClone) return;
+  // Parse bgColor to handle both solid colors and opacity values like "white/70" or "black/70"
+  const getBackgroundStyle = () => {
+    if (finalBgColor.includes('/')) {
+      const [color, opacity] = finalBgColor.split('/');
+      const opacityValue = parseInt(opacity) / 100;
 
-    gsap.to(text, {
-      y: 0,
-      opacity: 1,
-      duration: 0.3,
-      ease: "power2.out"
-    });
-
-    gsap.to(textClone, {
-      y: -30,
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.out"
-    });
-  };
-
-  const getVariantClasses = () => {
-    switch (variant) {
-      case 'primary':
-        return 'bg-forest-green hover:bg-emerald-700 text-white';
-      case 'secondary':
-        return 'bg-black hover:bg-gray-800 text-white';
-      case 'outline':
-        return 'border border-forest-green text-forest-green hover:bg-forest-green hover:text-white';
-      default:
-        return 'bg-forest-green hover:bg-emerald-700 text-white';
+      // Handle different color names
+      switch (color.toLowerCase()) {
+        case 'white':
+          return { backgroundColor: `rgba(255, 255, 255, ${opacityValue})` };
+        case 'black':
+          return { backgroundColor: `rgba(0, 0, 0, ${opacityValue})` };
+        case 'gray':
+          return { backgroundColor: `rgba(128, 128, 128, ${opacityValue})` };
+        case 'red':
+          return { backgroundColor: `rgba(255, 0, 0, ${opacityValue})` };
+        case 'green':
+          return { backgroundColor: `rgba(0, 255, 0, ${opacityValue})` };
+        case 'blue':
+          return { backgroundColor: `rgba(0, 0, 255, ${opacityValue})` };
+        default:
+          // For unknown colors, try to use Tailwind's color system
+          return {};
+      }
+    } else {
+      // Handle solid colors
+      switch (finalBgColor.toLowerCase()) {
+        case 'white':
+          return { backgroundColor: '#ffffff' };
+        case 'black':
+          return { backgroundColor: '#000000' };
+        case 'gray':
+          return { backgroundColor: '#808080' };
+        case 'red':
+          return { backgroundColor: '#ff0000' };
+        case 'green':
+          return { backgroundColor: '#00ff00' };
+        case 'blue':
+          return { backgroundColor: '#0000ff' };
+        default:
+          return {};
+      }
     }
   };
 
-  const getSizeClasses = () => {
-    switch (size) {
-      case 'sm':
-        return 'px-4 py-2 text-sm h-8';
-      case 'md':
-        return 'px-6 py-3 text-base h-12';
-      case 'lg':
-        return 'px-8 py-4 text-lg h-14';
+  // Get Tailwind class for solid colors
+  const getBgClass = () => {
+    if (bgColor.includes('/')) {
+      return 'bg-white'; // Fallback for opacity values
+    }
+    return ''; // Don't use Tailwind classes for solid colors, use inline styles instead
+  };
+
+  // Get text color style
+  const getTextStyle = () => {
+    switch (textColor.toLowerCase()) {
+      case 'white':
+        return { color: '#ffffff' };
+      case 'black':
+        return { color: '#000000' };
+      case 'gray':
+        return { color: '#808080' };
+      case 'red':
+        return { color: '#ff0000' };
+      case 'green':
+        return { color: '#00ff00' };
+      case 'blue':
+        return { color: '#0000ff' };
       default:
-        return 'px-6 py-3 text-base h-12';
+        return { color: '#000000' }; // Default to black
     }
   };
 
   return (
-    <button
-      ref={buttonRef}
-      onClick={onClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className={`
-        relative overflow-hidden rounded-full font-medium transition-all duration-300 
-        hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-forest-green/50
-        ${getVariantClasses()} ${getSizeClasses()} ${className}
-      `}
+    <div
+      ref={ref}
+      className="relative overflow-hidden rounded-full bg-transparent"
+      style={{ width: '220px', height: '56px' }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <span
-        ref={textRef}
-        className="relative z-10 inline-block whitespace-nowrap"
+      <div
+        className={`flex items-center absolute top-0 transition-all duration-700 ease-in-out ${
+          isHovered ? 'translate-x-16' : 'translate-x-0'
+        }`}
+        style={{ width: '300px', left: '-65px' }}
       >
-        {children}
-      </span>
-      <span
-        ref={textCloneRef}
-        className="absolute inset-0 flex items-center justify-center opacity-0 whitespace-nowrap"
-      >
-        {children}
-      </span>
+        {/* Left Arrow - starts outside container, scales up when entering */}
+        <div
+          className={`w-14 h-14 bg-green-600 rounded-full flex items-center justify-center cursor-pointer flex-shrink-0 transition-transform duration-700 ease-in-out ${
+            isHovered ? 'scale-100' : 'scale-0'
+          }`}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            className="text-white"
+          >
+            <path
+              d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"
+              fill="currentColor"
+            />
+          </svg>
+        </div>
 
-      <style jsx>{`
-        .bg-forest-green {
-          background-color: #228B22;
-        }
-        .hover\\:bg-emerald-700:hover {
-          background-color: #047857;
-        }
-        .hover\\:bg-forest-green:hover {
-          background-color: #228B22;
-        }
-        .text-forest-green {
-          color: #228B22;
-        }
-        .border-forest-green {
-          border-color: #228B22;
-        }
-        .focus\\:ring-forest-green\\/50:focus {
-          --tw-ring-color: rgba(34, 139, 34, 0.5);
-        }
-      `}</style>
-    </button>
+        {/* Gap */}
+        <div className="w-1"></div>
+
+        {/* Main Button */}
+        <div
+          className={`font-medium text-lg px-8 py-4 rounded-full cursor-pointer flex-shrink-0`}
+          style={{
+            minWidth: '160px',
+            height: '56px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: bgColor === 'black' ? '#000000' : bgColor === 'white' ? '#ffffff' : (getBackgroundStyle().backgroundColor || undefined),
+            color: textColor === 'white' ? '#ffffff' : textColor === 'black' ? '#000000' : (getTextStyle().color || undefined)
+          }}
+          onClick={onClick}
+        >
+          {text}
+        </div>
+
+        {/* Gap */}
+        <div className="w-1"></div>
+
+        {/* Right Arrow - scales down when leaving */}
+        <div
+          className={`w-14 h-14 bg-green-600 rounded-full flex items-center justify-center cursor-pointer flex-shrink-0 transition-transform duration-700 ease-in-out ${
+            isHovered ? 'scale-0' : 'scale-100'
+          }`}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            className="text-white"
+          >
+            <path
+              d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"
+              fill="currentColor"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
   );
-};
+});
+
+AnimatedButton.displayName = 'AnimatedButton';
+
+export default AnimatedButton;

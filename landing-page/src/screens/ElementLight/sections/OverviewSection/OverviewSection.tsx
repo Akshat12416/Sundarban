@@ -127,7 +127,7 @@ export const OverviewSection = (): JSX.Element => {
 
           <div 
             ref={el => addToOverviewRefs(el, 2)}
-            className="h-full w-fit [font-family:'Inter',Helvetica] font-bold text-[#0f0f0f] text-4xl md:text-6xl lg:text-[80px] text-center lg:text-right tracking-[-1.60px] leading-tight lg:leading-[128px]"
+            className="h-full w-fit [font-family:'Inter',Helvetica] font-bold text-[#0f0f0f] text-5xl md:text-6xl lg:text-[80px] text-center lg:text-right tracking-[-1.60px] leading-tight lg:leading-[128px]"
           >
             <span ref={measureRef} className="block hover:text-forest-green transition-colors duration-300">Measure.</span>
             <span ref={tradeRef} className="block hover:text-forest-green transition-colors duration-300">Trade.</span>

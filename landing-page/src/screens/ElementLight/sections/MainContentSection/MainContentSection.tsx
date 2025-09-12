@@ -60,17 +60,17 @@ export const MainContentSection = (): JSX.Element => {
   return (
     <section className="w-full bg-gradient-to-b from-white to-green-50/20 py-10 md:py-20 px-4 md:px-5">
       <div className="max-w-[1163px] mx-auto flex flex-col lg:flex-row items-center lg:items-start justify-between gap-8 lg:gap-0">
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 text-center">
           <h2 
             ref={titleRef}
-            className="[font-family:'Inter',Helvetica] font-bold text-black text-2xl md:text-4xl lg:text-[60.2px] tracking-[-1px] lg:tracking-[-1.86px] leading-tight lg:leading-[62px] text-center lg:text-left"
+            className="[font-family:'Inter',Helvetica] font-bold text-black text-5xl md:text-6xl lg:text-6xl tracking-[-1px] lg:tracking-[-1.86px] leading-tight lg:leading-[62px] text-center lg:text-left"
           >
             Our Commitment <br />
             to a <RotatingText 
               words={rotatingWords}
               className="text-forest-green inline-block min-w-[200px] lg:min-w-[300px]"
             /> <br />
-            Future
+            Future.
           </h2>
         </div>
 

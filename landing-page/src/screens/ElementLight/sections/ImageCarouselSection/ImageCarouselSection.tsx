@@ -80,7 +80,7 @@ export const ImageCarouselSection = (): JSX.Element => {
       <header className="pt-[47px] pl-5">
         <h1 
           ref={titleRef}
-          className="w-[896px] h-24 [font-family:'Inter',Helvetica] font-normal text-[#575757] text-[73.9px] tracking-[0] leading-[96px] whitespace-nowrap"
+          className="w-[896px] h-24 [font-family:'Inter',Helvetica] font-normal text-[#575757] text-5xl md:text-6xl lg:text-[80px] tracking-[0] leading-[96px] whitespace-nowrap"
         >
           Building a <span className="text-forest-green font-semibold">Cleaner</span> Future.
         </h1>
