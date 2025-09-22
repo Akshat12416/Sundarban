@@ -57,12 +57,7 @@ export const ContentBlockSection = (): JSX.Element => {
           <div className="flex justify-end items-end pt-[89px]">
             <div className="text-left space-y-[1px]">
               <p className="w-[300px] font-normal text-[#575757] text-[15px] tracking-[0] leading-[19.2px]">
-                We prioritize transparency in every
-                transaction, ensuring that all carbon
-                credits are backed by verified projects.
-                Our platform allows users to trace the
-                journey of each credit, fostering trust and
-                accountability.
+                Every action on our platform is tracked, validated, and recorded transparently using blockchain technology. From project submission to credit issuance, every step is carefully monitored to ensure genuine sustainability.
               </p>
             </div>
           </div>
@@ -71,9 +66,7 @@ export const ContentBlockSection = (): JSX.Element => {
 
           <div className="flex-shrink-0">
             <h2 className="text-right font-bold text-black text-[60.2px] tracking-[-1.86px] leading-[62px]">
-              Our Commitment <br />
-              to a Sustainable <br />
-              Future
+               Verified <br/>Sustainability, <br/> Every Step.
             </h2>
           </div>
         </div>
@@ -81,7 +74,7 @@ export const ContentBlockSection = (): JSX.Element => {
         {/* Mobile and Tablet Layout */}
         <div className="lg:hidden text-center space-y-8">
           <h2 className="font-bold text-black text-5xl md:text-5xl xl:text-5xl tracking-tight leading-tight">
-            Our Commitment <br/> to a Sustainable <br/> Future
+            Verified <br/>Sustainability, <br/> Every Step.
           </h2>
           
           <Separator className="w-20 h-px bg-gray-300 mx-auto" />
@@ -102,7 +95,7 @@ export const ContentBlockSection = (): JSX.Element => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {steps.map((step, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow duration-300">
+            <Card key={index} className="hover:shadow-md rounded transition-shadow duration-300">
               <CardContent className="p-6 md:p-8">
                 <div className="space-y-4">
                   {/* Step Number Badge */}

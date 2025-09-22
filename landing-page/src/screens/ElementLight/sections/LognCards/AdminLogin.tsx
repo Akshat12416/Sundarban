@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 const cn = (...classes: (string | undefined | null | false)[]): string => 
   classes.filter(Boolean).join(' ');
 
+
+
 // Types
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {}
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -186,7 +188,7 @@ function AdminLogin({ onBack }: AdminLoginProps) {
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     console.log('Admin login:', formData);
-    alert('Admin login submitted!');
+    window.location.href = "http://localhost:5173/";
   };
 
   const handleInputChange = (field: keyof Omit<AdminFormData, 'trustDevice'>) => 
@@ -264,7 +266,7 @@ function AdminLogin({ onBack }: AdminLoginProps) {
               />
             </div>
 
-            <div>
+            {/* <div>
               <Label htmlFor="two-factor">Two-Factor Authentication</Label>
               <Input
                 id="two-factor"
@@ -276,9 +278,9 @@ function AdminLogin({ onBack }: AdminLoginProps) {
                 className="text-center font-mono text-base"
                 required
               />
-            </div>
+            </div> */}
 
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <input 
                 type="checkbox" 
                 id="trust-device" 
@@ -287,7 +289,7 @@ function AdminLogin({ onBack }: AdminLoginProps) {
                 onChange={handleCheckboxChange}
               />
               <Label htmlFor="trust-device" className="text-sm mb-0">Trust this device for 30 days</Label>
-            </div>
+            </div> */}
           </div>
         </CardContent>
 
@@ -297,7 +299,7 @@ function AdminLogin({ onBack }: AdminLoginProps) {
               Access Admin Portal
             </Button>
             
-            <Button 
+            {/* <Button 
               variant="outline" 
               className="w-full"
               onClick={() => alert('SSO login clicked!')}
@@ -306,7 +308,7 @@ function AdminLogin({ onBack }: AdminLoginProps) {
                 <path d="M12 0L1.608 6v12L12 24l10.392-6V6L12 0zm-1.5 6h3v12h-3V6z"/>
               </svg>
               Continue with SSO
-            </Button>
+            </Button> */}
 
             <p className="text-center text-sm text-gray-500">
               Having access issues?{' '}

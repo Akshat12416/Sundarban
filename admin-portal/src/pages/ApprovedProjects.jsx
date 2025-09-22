@@ -33,7 +33,7 @@ export default function ApprovedProjects() {
   return (
     <div className="p-6 min-h-screen bg-black text-white">
       <h1 className="text-3xl font-bold mb-6 text-green-400">
-        ✅ Approved Projects
+        Approved Projects
       </h1>
       <div className="grid gap-6">
         {projects.map((p) => (

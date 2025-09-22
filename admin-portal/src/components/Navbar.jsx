@@ -15,9 +15,9 @@ export default function NavBar() {
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <img src="" alt="Logo" className="h-8 w-auto rounded-md" />
+          {/* <img src="" alt="Logo" className="h-8 w-auto rounded-md" /> */}
           <span className="font-bold text-xl text-green-300">
-            CarbonChain
+            Blue Carbon
           </span>
         </div>
 

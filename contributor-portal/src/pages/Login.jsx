@@ -1,54 +1,50 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// src/pages/Login.jsx
+import React from "react";
+import { auth, provider, db } from "../firebase";
+import { signInWithPopup } from "firebase/auth";
+import { ref, set, get, child } from "firebase/database";
 
 export default function Login() {
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
-
-  const connectWallet = async () => {
-    if (!window.ethereum) {
-      setError("MetaMask not found");
-      return;
-    }
-
+  const signIn = async () => {
     try {
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      const wallet = accounts[0];
+      const res = await signInWithPopup(auth, provider);
+      const user = res.user;
 
-      // Call backend login
-      const res = await fetch("http://localhost:5000/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wallet_address: wallet }),
-      });
+      const userRef = ref(db, `Users/${user.uid}`);
+      const snapshot = await get(child(ref(db), `Users/${user.uid}`));
 
-      const data = await res.json();
-
-      if (res.status === 200) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/dashboard");
-      } else if (res.status === 404) {
-        navigate("/register", { state: { wallet } });
-      } else {
-        setError(data.error);
+      if (!snapshot.exists()) {
+        await set(userRef, {
+          userId: user.uid,
+          fullName: user.displayName,
+          email: user.email,
+          picUrl: user.photoURL,
+        });
       }
+
+      // 🚀 no redirect needed here, App.jsx will auto-redirect
     } catch (err) {
-      setError("Wallet connection failed");
+      console.error(err);
+      alert("Login failed: " + err.message);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-blue-100">
-      <h1 className="text-3xl font-bold mb-6">Contributor Portal Login</h1>
-      <button
-        onClick={connectWallet}
-        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-      >
-        Connect MetaMask
-      </button>
-      {error && <p className="text-red-600 mt-4">{error}</p>}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-50 to-white">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-4 text-green-700">
+          Contributor Portal
+        </h2>
+        <p className="text-sm mb-6">
+          Sign in with Google to continue (MetaMask link later).
+        </p>
+        <button
+          onClick={signIn}
+          className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+        >
+          Sign in with Google
+        </button>
+      </div>
     </div>
   );
 }
