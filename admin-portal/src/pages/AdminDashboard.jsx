@@ -427,9 +427,9 @@ const approveProject = async (proj) => {
                     ({p.ownerKey})
                   </p>
                 </div>
-                <div className="flex items-center gap-5 sm:gap-5 flex-shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                   <div className="flex flex-col items-center gap-1">
-                        <CountUp end={50} duration={2} suffix="%" className="text-base sm:text-lg font-bold text-gray-700" />
+                        <CountUp end={50} duration={2} suffix="%" className="text-sm sm:text-base font-bold text-gray-700" />
                     <div className="w-8 h-1 bg-gray-300 rounded-full">
                       <div className="w-1/2 h-full bg-[#1DBF73] rounded-full"></div>
                     </div>

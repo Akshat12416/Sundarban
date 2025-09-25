@@ -8,7 +8,6 @@ import LoginTypeSelector from "./sections/LognCards/LoginTyleSelector";
 import ContributorLogin from "./sections/LognCards/ContributorLogin";
 import CompanyLogin from "./sections/LognCards/CompanyLogin";
 import AdminLogin from "./sections/LognCards/AdminLogin";
-import { MarketplaceSection } from "./sections/MarketplaceSection/MarketplaceSection";
 import PreloaderPage from "./sections/Preloader/PreloaderPage"; // Import the preloader component
 
 // Lazy load the specified components
@@ -16,6 +15,7 @@ const HeroSection = React.lazy(() => import("./sections/HeroSection/HeroSection"
 const ImageCarouselSection = React.lazy(() => import("./sections/ImageCarouselSection/ImageCarouselSection").then(module => ({ default: module.ImageCarouselSection })));
 const InfoCardsStack = React.lazy(() => import("./sections/InfoCardStacks/InfoCardStack").then(module => ({ default: module.InfoCardsStack })));
 const SiteFooterSection = React.lazy(() => import("./sections/SiteFooterSection/SiteFooterSection").then(module => ({ default: module.SiteFooterSection })));
+const MarketplaceSection = React.lazy(() => import("./sections/MarketplaceSection/MarketplaceSection").then(module => ({ default: module.MarketplaceSection })));
 
 export const ElementLight = (): JSX.Element => {
   const navigate = useNavigate();
@@ -87,6 +87,11 @@ export const ElementLight = (): JSX.Element => {
                 <Suspense fallback={<div className="flex justify-center items-center h-96"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-forest-green"></div></div>}>
                   <ImageCarouselSection />
                 </Suspense>
+                <div id="marketplace">
+                  <Suspense fallback={<div className="flex justify-center items-center h-96"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-forest-green"></div></div>}>
+                    <MarketplaceSection />
+                  </Suspense>
+                </div>
                 <ContactFormSection />
                 <Suspense fallback={<div className="flex justify-center items-center h-48"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-forest-green"></div></div>}>
                   <SiteFooterSection />
@@ -118,7 +123,7 @@ export const ElementLight = (): JSX.Element => {
       <Route path="/contributor-login" element={<ContributorLogin onBack={handleBack} />} />
       <Route path="/company-login" element={<CompanyLogin onBack={handleBack} />} />
       <Route path="/admin-login" element={<AdminLogin onBack={handleBack} />} />
-      <Route path="/marketplace" element={<MarketplaceSection />} />
+      <Route path="/marketplace" element={<Suspense fallback={<div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-32 w-32 border-b-2 border-forest-green"></div></div>}><MarketplaceSection /></Suspense>} />
     </Routes>
   );
 };

@@ -9,6 +9,7 @@ export default function NavBar() {
     { label: "Dashboard", path: "/" },
     { label: "Approved", path: "/approved" },
     { label: "Rejected", path: "/rejected" },
+    { label: "Marketplace", path: "/marketplace" },
   ];
 
   return (

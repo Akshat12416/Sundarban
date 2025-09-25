@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import CountUp from 'react-countup';
-import { TrendingUp, TrendingDown, Users, DollarSign, ChartBar as BarChart3, Grid3x2 as Grid3X3, List } from "lucide-react";
+import { TrendingUp, TrendingDown, Users, DollarSign, ChartBar as BarChart3, Grid3x3 as Grid3X3, List } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -511,27 +511,7 @@ export const MarketplaceSection = (): JSX.Element => {
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .text-[#1DBF73] {
-          color: #1DBF73;
-        }
-        .bg-[#1DBF73] {
-          background-color: #1DBF73;
-        }
-        .hover\\:bg-[#17a665]:hover {
-          background-color: #17a665;
-        }
-        .group-hover\\:text-[#1DBF73]:hover {
-          color: #1DBF73;
-        }
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
     </section>
   );
 };
+
