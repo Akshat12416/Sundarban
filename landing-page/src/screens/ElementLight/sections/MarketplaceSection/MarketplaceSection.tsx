@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import CountUp from 'react-countup';
-import { TrendingUp, TrendingDown, Users, DollarSign, ChartBar as BarChart3, Grid2x2 as Grid3X3, List } from "lucide-react";
+import { TrendingUp, TrendingDown, Users, DollarSign, ChartBar as BarChart3, Grid3x3 as Grid3X3, List } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -511,8 +511,7 @@ export const MarketplaceSection = (): JSX.Element => {
           </div>
         </div>
       </div>
-
-
     </section>
   );
 };
+

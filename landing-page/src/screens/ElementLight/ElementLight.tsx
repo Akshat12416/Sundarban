@@ -123,6 +123,7 @@ export const ElementLight = (): JSX.Element => {
       <Route path="/contributor-login" element={<ContributorLogin onBack={handleBack} />} />
       <Route path="/company-login" element={<CompanyLogin onBack={handleBack} />} />
       <Route path="/admin-login" element={<AdminLogin onBack={handleBack} />} />
+      <Route path="/marketplace" element={<Suspense fallback={<div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-32 w-32 border-b-2 border-forest-green"></div></div>}><MarketplaceSection /></Suspense>} />
     </Routes>
   );
 };
