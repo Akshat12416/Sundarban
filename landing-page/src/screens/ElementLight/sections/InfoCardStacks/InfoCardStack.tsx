@@ -192,13 +192,10 @@ export const InfoCardsStack = (): JSX.Element => {
     {
       title: (
         <>
-<<<<<<< HEAD
           Unlock the Future of
           <span className="text-[#1DBF73]"> Carbon Trading</span>.
-=======
           Be a 
           <span className="text-forest-green"> Change-Maker</span>.
->>>>>>> 3cda731f490c4c89ab943fe508669c245ba59322
         </>
       ),
       text1: `Contributors are the heart of this platform. Whether it’s planting trees, initiating eco-projects, or leading sustainability drives, you can easily register your efforts here. Every project you submit is verified using reliable methods, ensuring your contribution is genuine and impactful.`,
@@ -211,13 +208,10 @@ export const InfoCardsStack = (): JSX.Element => {
     {
       title: (
         <>
-<<<<<<< HEAD
           Empower Your
           <span className="text-[#1DBF73]"> Climate Action</span> with Carbon Credits.
-=======
           Ensuring 
           <span className="text-forest-green"> Trust</span> with Carbon Credits.
->>>>>>> 3cda731f490c4c89ab943fe508669c245ba59322
         </>
       ),
       text1: `Admins play a crucial role in maintaining the credibility of the ecosystem. They verify projects through satellite/ML data, documents, and on-ground validations to ensure authenticity. Only projects that meet sustainability standards are approved for rewards.`,
@@ -230,13 +224,9 @@ export const InfoCardsStack = (): JSX.Element => {
     {
       title: (
         <>
-<<<<<<< HEAD
           Experience Effortless Trading and Retirement of
-          <span className="text-[#1DBF73]"> Carbon Credits</span> with Confidence.
-=======
           Turning Green
           <span className="text-forest-green"> into Value</span> with Confidence.
->>>>>>> 3cda731f490c4c89ab943fe508669c245ba59322
         </>
       ),
       text1: `The marketplace is where environmental impact meets economic opportunity. Verified carbon credits earned by contributors can be listed, traded, or transferred securely with ease. Businesses and individuals looking to offset their carbon footprint can directly purchase genuine credits here.`,

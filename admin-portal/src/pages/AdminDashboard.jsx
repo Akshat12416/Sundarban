@@ -6,6 +6,7 @@ import { ethers } from "ethers";
 import CONTRACT_ABI from "../abi/CarbonCreditToken.json";
 import { keccak256, toUtf8Bytes } from "ethers";
 import SplitText from "../components/animations/SplitText";
+import CountUp from 'react-countup';
 import countdownImg from "../photos/countdown.png";
 import natureImg from "../photos/nature.png";
 import placeholderImg from "../photos/placeholder.png";
@@ -417,7 +418,7 @@ const approveProject = async (proj) => {
               onClick={() => toggleCardExpansion(cardId)}
             >
               {/* Always visible header with name and status */}
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-center">
                 <div className="flex-1 min-w-0">
                   <h2 className="text-lg sm:text-xl font-bold text-black truncate">
                     {p.orgName || p.userName}
@@ -426,7 +427,13 @@ const approveProject = async (proj) => {
                     ({p.ownerKey})
                   </p>
                 </div>
-                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                <div className="flex items-center gap-5 sm:gap-5 flex-shrink-0">
+                  <div className="flex flex-col items-center gap-1">
+                        <CountUp end={50} duration={2} suffix="%" className="text-base sm:text-lg font-bold text-gray-700" />
+                    <div className="w-8 h-1 bg-gray-300 rounded-full">
+                      <div className="w-1/2 h-full bg-[#1DBF73] rounded-full"></div>
+                    </div>
+                  </div>
                   <span className="px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border bg-[#aceec7] text-[#1DBF73]">
                     Pending
                   </span>
