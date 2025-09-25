@@ -9,7 +9,7 @@ export const SiteFooterSection = (): JSX.Element => {
     { name: "Carbon Trading", href: "#" },
     { name: "Carbon Credits", href: "#" },
     { name: "Verification", href: "#" },
-    { name: "Marketplace", href: "#" },
+    { name: "Marketplace", href: "#marketplace" },
     { name: "Analytics", href: "#" }
   ];
 
