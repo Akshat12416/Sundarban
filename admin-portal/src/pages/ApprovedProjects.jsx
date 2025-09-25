@@ -4,6 +4,7 @@ import { db } from "../firebase";
 import { ref, onValue } from "firebase/database";
 import { collectImgs, getImageSrc } from "../utils/projectUtils";
 import SplitText from "../components/animations/SplitText";
+import CountUp from 'react-countup';
 import countdownImg from "../photos/countdown.png";
 import natureImg from "../photos/nature.png";
 import placeholderImg from "../photos/placeholder.png";
@@ -134,6 +135,9 @@ const styles = `
 export default function ApprovedProjects() {
   const [projects, setProjects] = useState([]);
   const [cardsPerPage, setCardsPerPage] = useState(10);
+  const [expandedCards, setExpandedCards] = useState(new Set());
+  const [previewImg, setPreviewImg] = useState(null);
+  const [hoverPreview, setHoverPreview] = useState({ show: false, src: '', x: 0, y: 0 });
 
   useEffect(() => {
     const projectsRef = ref(db, "Projects");
@@ -164,6 +168,16 @@ export default function ApprovedProjects() {
       setCardsPerPage(projects.length);
     }
   }, [projects.length, cardsPerPage]);
+
+  const toggleCardExpansion = (cardId) => {
+    const newExpandedCards = new Set(expandedCards);
+    if (newExpandedCards.has(cardId)) {
+      newExpandedCards.delete(cardId);
+    } else {
+      newExpandedCards.add(cardId);
+    }
+    setExpandedCards(newExpandedCards);
+  };
 
   return (
     <div className="min-h-screen text-white bg-gray-100">
@@ -223,121 +237,202 @@ export default function ApprovedProjects() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-xl p-3 sm:p-4 lg:p-6">
-          <div className="grid gap-3 sm:gap-4 lg:gap-6 cards-enter">
+        <div className="bg-white rounded-lg shadow-xl p-2 sm:p-2 lg:p-2">
+          <div className="grid gap-2 sm:gap-2 lg:gap-2 cards-enter">
             {projects.length === 0 && (
               <div className="text-center py-8 sm:py-12">
                 <div className="text-gray-400 text-base sm:text-lg">No approved projects found.</div>
               </div>
             )}
 
-            {projects.slice(0, cardsPerPage).map((p) => (
-              <div
-                key={`${p.ownerKey}-${p.id}`}
-                className="bg-gray-50 rounded-lg shadow-xl p-3 sm:p-4 lg:p-6"
-              >
-                {/* Header with name and status */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3">
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-lg sm:text-xl font-bold text-black truncate">
-                      {p.orgName || p.userName}
-                    </h2>
-                    <p className="text-xs sm:text-sm text-gray-500 truncate">
-                      ({p.ownerKey})
-                    </p>
+            {projects.slice(0, cardsPerPage).map((p) => {
+              const cardId = `${p.ownerKey}-${p.id}`;
+              const isExpanded = expandedCards.has(cardId);
+
+              return (
+                <div
+                  key={cardId}
+                  className="bg-gray-100 rounded-lg cursor-pointer p-3 sm:p-4 lg:p-6"
+                  onClick={() => toggleCardExpansion(cardId)}
+                >
+                  {/* Always visible header with name and status */}
+                  <div className="flex justify-between items-center">
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-lg sm:text-xl font-bold text-black truncate">
+                        {p.orgName || p.userName}
+                      </h2>
+                      <p className="text-xs sm:text-sm text-gray-500 truncate">
+                        ({p.ownerKey})
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-5 sm:gap-5 flex-shrink-0">
+                      <div className="flex flex-col items-center gap-1">
+                        <CountUp end={100} duration={2} suffix="%" className="text-sm sm:text-base font-bold text-gray-700" />
+                        <div className="w-8 h-1 bg-gray-300 rounded-full">
+                          <div className="w-full h-full bg-[#1DBF73] rounded-full"></div>
+                        </div>
+                      </div>
+                      <span className="px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border bg-[#aceec7] text-[#1DBF73]">
+                        Approved
+                      </span>
+                      <svg
+                        className={`w-4 h-4 sm:w-5 sm:h-5 text-gray-400 transform transition-transform duration-300 ease-out hover:scale-110 ${
+                          isExpanded ? 'rotate-180' : ''
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                    <span className="px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border bg-[#aceec7] text-[#1DBF73]">
-                      Approved
-                    </span>
+
+                  {/* Expandable content */}
+                  <div
+                    className={`overflow-hidden transition-all duration-1000 ease-out ${
+                      isExpanded ? 'max-h-[2000px] opacity-100 mt-4 sm:mt-6' : 'max-h-0 opacity-0'
+                    }`}
+                  >
+                    {/* Three horizontal sections with images and info */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                      {/* Tree Type and Category Section */}
+                      <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-[#ACEEC7] transition-colors duration-200">
+                        <img src={natureImg} alt="nature" className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm sm:text-base font-medium text-gray-700">Tree Type & Category</p>
+                          <p className="text-sm sm:text-base text-gray-600 truncate">
+                            <strong>{p.treeType}</strong> | <strong>{p.treeCategory}</strong>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Count Section */}
+                      <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-[#ACEEC7] transition-colors duration-200">
+                        <img src={countdownImg} alt="countdown" className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm sm:text-base font-medium text-gray-700">Count</p>
+                          <p className="text-sm sm:text-base text-gray-600">
+                            <strong>{p.noTree}</strong>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Location Section */}
+                      <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-[#ACEEC7] transition-colors duration-200 sm:col-span-2 lg:col-span-1">
+                        <img src={placeholderImg} alt="location" className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm sm:text-base font-medium text-gray-700">Location</p>
+                          <p className="text-sm sm:text-base text-gray-600 truncate">
+                            {p.region}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
+                      <div className="lg:col-span-1">
+                        <h3 className="text-sm sm:text-base font-bold text-black mb-2 sm:mb-3">
+                          Before Images
+                        </h3>
+                        <div className="image-gallery">
+                          {p.beforeImages.map((src, i) => (
+                            <img
+                              key={i}
+                              src={src}
+                              alt={`before-${i}`}
+                              className="w-full h-16 sm:h-20 lg:h-24 object-cover rounded-lg sm:rounded-xl border border-green-600 cursor-pointer hover:border-green-400 hover:shadow-lg hover:scale-105 transition-all duration-300 ease-out"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPreviewImg(src);
+                              }}
+                              onMouseEnter={(e) => {
+                                e.stopPropagation();
+                                setHoverPreview({ show: true, src, x: e.clientX, y: e.clientY });
+                              }}
+                              onMouseLeave={(e) => {
+                                e.stopPropagation();
+                                setHoverPreview({ show: false, src: '', x: 0, y: 0 });
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex justify-center items-center">
+                        <div className="w-px h-24 sm:h-32 lg:w-full lg:h-px bg-gray-300"></div>
+                      </div>
+                      <div className="lg:col-span-1">
+                        <h3 className="text-sm sm:text-base font-bold text-black mb-2 sm:mb-3">
+                          After Images
+                        </h3>
+                        <div className="image-gallery">
+                          {p.afterImages.map((src, i) => (
+                            <img
+                              key={i}
+                              src={src}
+                              alt={`after-${i}`}
+                              className="w-full h-16 sm:h-20 lg:h-24 object-cover rounded-lg sm:rounded-xl border border-green-600 cursor-pointer hover:border-green-400 hover:shadow-lg hover:scale-105 transition-all duration-300 ease-out"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPreviewImg(src);
+                              }}
+                              onMouseEnter={(e) => {
+                                e.stopPropagation();
+                                setHoverPreview({ show: true, src, x: e.clientX, y: e.clientY });
+                              }}
+                              onMouseLeave={(e) => {
+                                e.stopPropagation();
+                                setHoverPreview({ show: false, src: '', x: 0, y: 0 });
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Contact Information */}
+                    <div className="p-2 sm:p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                      <p className="text-xs sm:text-sm text-gray-600 break-all">
+                        <strong>Project ID:</strong> <span className="font-mono">{p.id}</span> | <strong>Phone:</strong> {p.phone} | <strong>Email:</strong> {p.email}
+                      </p>
+                    </div>
                   </div>
                 </div>
-
-                {/* Project details */}
-                <div className="mt-4 sm:mt-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                    {/* Tree Type and Category Section */}
-                    <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                      <img src={natureImg} alt="nature" className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm sm:text-base font-medium text-gray-700">Tree Type & Category</p>
-                        <p className="text-sm sm:text-base text-gray-600 truncate">
-                          <strong>{p.treeType}</strong> | <strong>{p.treeCategory}</strong>
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Count Section */}
-                    <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                      <img src={countdownImg} alt="countdown" className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm sm:text-base font-medium text-gray-700">Count</p>
-                        <p className="text-sm sm:text-base text-gray-600">
-                          <strong>{p.noTree}</strong>
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Location Section */}
-                    <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200 sm:col-span-2 lg:col-span-1">
-                      <img src={placeholderImg} alt="location" className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm sm:text-base font-medium text-gray-700">Location</p>
-                        <p className="text-sm sm:text-base text-gray-600 truncate">
-                          {p.region}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
-                    <div className="lg:col-span-1">
-                      <h3 className="text-sm sm:text-base font-bold text-black mb-2 sm:mb-3">
-                        Before Images
-                      </h3>
-                      <div className="image-gallery">
-                        {p.beforeImages.map((src, i) => (
-                          <img
-                            key={i}
-                            src={src}
-                            alt={`before-${i}`}
-                            className="w-full h-16 sm:h-20 lg:h-24 object-cover rounded-lg sm:rounded-xl border border-green-600 cursor-pointer hover:border-green-400 hover:shadow-lg hover:scale-105 transition-all duration-300 ease-out"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex justify-center items-center">
-                      <div className="w-px h-24 sm:h-32 bg-gray-300"></div>
-                    </div>
-                    <div className="lg:col-span-1">
-                      <h3 className="text-sm sm:text-base font-bold text-black mb-2 sm:mb-3">
-                        After Images
-                      </h3>
-                      <div className="image-gallery">
-                        {p.afterImages.map((src, i) => (
-                          <img
-                            key={i}
-                            src={src}
-                            alt={`after-${i}`}
-                            className="w-full h-16 sm:h-20 lg:h-24 object-cover rounded-lg sm:rounded-xl border border-green-600 cursor-pointer hover:border-green-400 hover:shadow-lg hover:scale-105 transition-all duration-300 ease-out"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Contact Information */}
-                  <div className="p-2 sm:p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                    <p className="text-xs sm:text-sm text-gray-600 break-all">
-                      <strong>Project ID:</strong> <span className="font-mono">{p.id}</span> | <strong>Phone:</strong> {p.phone} | <strong>Email:</strong> {p.email}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
+
+      {hoverPreview.show && (
+        <div
+          className="fixed z-50 pointer-events-none"
+          style={{
+            left: Math.min(hoverPreview.x + 10, window.innerWidth - 200),
+            top: hoverPreview.y + 10,
+            animation: 'fadeInScale 0.2s ease-out forwards'
+          }}
+        >
+          <img
+            src={hoverPreview.src}
+            alt="hover-preview"
+            className="w-32 h-32 sm:w-48 sm:h-48 object-cover rounded-2xl shadow-2xl border-2 border-green-500 transform transition-all duration-300 ease-out hover:scale-105"
+          />
+        </div>
+      )}
+
+      {previewImg && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 sm:p-6 z-50"
+          onClick={() => setPreviewImg(null)}
+        >
+          <img
+            src={previewImg}
+            alt="preview"
+            className="max-h-full max-w-full rounded shadow-lg border border-green-500"
+          />
+        </div>
+      )}
     </div>
   );
 }

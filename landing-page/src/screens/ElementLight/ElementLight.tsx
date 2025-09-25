@@ -8,6 +8,7 @@ import LoginTypeSelector from "./sections/LognCards/LoginTyleSelector";
 import ContributorLogin from "./sections/LognCards/ContributorLogin";
 import CompanyLogin from "./sections/LognCards/CompanyLogin";
 import AdminLogin from "./sections/LognCards/AdminLogin";
+import { MarketplaceSection } from "./sections/MarketplaceSection/MarketplaceSection";
 import PreloaderPage from "./sections/Preloader/PreloaderPage"; // Import the preloader component
 
 // Lazy load the specified components
@@ -117,6 +118,7 @@ export const ElementLight = (): JSX.Element => {
       <Route path="/contributor-login" element={<ContributorLogin onBack={handleBack} />} />
       <Route path="/company-login" element={<CompanyLogin onBack={handleBack} />} />
       <Route path="/admin-login" element={<AdminLogin onBack={handleBack} />} />
+      <Route path="/marketplace" element={<MarketplaceSection />} />
     </Routes>
   );
 };
