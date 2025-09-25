@@ -1,312 +1,192 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { ethers } from "ethers";
+// src/pages/NewProject.jsx
+import React, { useState, useEffect } from "react";
+import { ref, push, set } from "firebase/database";
+import { db } from "../firebase";
+import { UserContext } from "../App";
+
+function readFilesToBase64(files) {
+  return Promise.all(
+    Array.from(files).map(
+      (f) =>
+        new Promise((res) => {
+          const r = new FileReader();
+          r.onload = () => res(r.result);
+          r.readAsDataURL(f);
+        })
+    )
+  );
+}
 
 export default function NewProject() {
+  const user = React.useContext(UserContext);
+  const [roleType, setRoleType] = useState("individual");
   const [form, setForm] = useState({
-    before_images: [],
-    after_images: [],
-    tree_type: "",
+    treeType: "",
+    noTree: "",
     area: "",
-    land_record: null,
-    mou: null,
-    org_name: "",
-    reg_no: "",
-    csr_budget: "",
-    community_name: "",
-    land_proof: null,
+    treeCategory: "Sapling",
+    upiMetamask: "",
+    description: "",
+    orgName: "",
+    orgId: ""
   });
+  const [beforeFiles, setBeforeFiles] = useState([]);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
-  const user = JSON.parse(localStorage.getItem("user")) || {};
-  const role = user.role;
-
-  // Get current location
-  useEffect(() => {
-    if ("geolocation" in navigator) {
+  // location + timestamp for before images when they are chosen
+  const getLocationStamp = async () =>
+    new Promise((res) => {
+      if (!("geolocation" in navigator)) return res(null);
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setForm((prev) => ({
-            ...prev,
-            location: { lat: pos.coords.latitude, lng: pos.coords.longitude },
-          }));
-        },
-        () => setError("Location access denied")
+        (p) => res(`Time: ${Date.now()} Lat: ${p.coords.latitude}=>Long: ${p.coords.longitude}`),
+        () => res(null),
+        { timeout: 5000 }
       );
-    }
-  }, []);
+    });
 
-  
-// File uploader -> uploads to backend immediately with signature
-const uploadFile = async (file) => {
-  if (!window.ethereum) throw new Error("MetaMask not installed");
-
-  // Convert file to ArrayBuffer for hashing
-  const buffer = await file.arrayBuffer();
-  const hashHex = ethers.sha256(new Uint8Array(buffer)); // keccak256 in ethers v6
-
-  // Ask wallet to sign this hash
-  const provider = new ethers.BrowserProvider(window.ethereum);
-  const signer = await provider.getSigner();
-  const signature = await signer.signMessage(ethers.getBytes(hashHex));
-
-  // Attach everything to FormData
-  const fd = new FormData();
-  fd.append("file", file);
-  fd.append("hash", hashHex);
-  fd.append("signature", signature);
-  fd.append("wallet_address", user.wallet_address);
-
-  const res = await fetch("http://localhost:5000/upload", {
-    method: "POST",
-    body: fd,
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error("Upload failed: " + err);
-  }
-
-  const data = await res.json();
-  return data.url; // backend should return full http://localhost:5000/uploads/xxx.png
-};
-
-
-  // Handle multiple file uploads
-  const handleFiles = async (e, field) => {
-    const files = Array.from(e.target.files);
-
-    if (field === "before_images" && files.length < 3) {
-      setError("Please select at least 3 before plantation images.");
+  const handleBefore = async (e) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    if (files.length < 3) {
+      setError("Please select at least 3 before images.");
       return;
     }
-
     setError("");
-    const urls = await Promise.all(files.map(uploadFile));
-    setForm((prev) => ({
-      ...prev,
-      [field]: urls,
-    }));
+    const b64 = await readFilesToBase64(files);
+    setBeforeFiles(b64);
   };
 
-  // Single file upload
-  const handleSingleFile = async (e, field) => {
-    const file = e.target.files[0];
-    if (file) {
-      const url = await uploadFile(file);
-      setForm((prev) => ({
-        ...prev,
-        [field]: url,
-      }));
+  const handleSubmit = async (ev) => {
+    ev.preventDefault();
+    setError("");
+    if (beforeFiles.length < 3) {
+      setError("Upload at least 3 before images.");
+      return;
     }
-  };
-
-  // ✅ Generate digital signature using wallet
-  const generateSignature = async (projectData) => {
-    if (!window.ethereum) {
-      throw new Error("MetaMask not installed");
-    }
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-
-    // Create a deterministic message
-    const message = JSON.stringify(projectData);
-    const signature = await signer.signMessage(message);
-
-    return { signature, message };
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!form.before_images || form.before_images.length < 3) {
-      setError("Please upload at least 3 before plantation images.");
+    if (!form.treeType || !form.noTree || !form.area) {
+      setError("Fill required fields.");
       return;
     }
 
-    const projectData = {
-      wallet_address: user.wallet_address,
-      role,
-      tree_type: form.tree_type,
-      area: form.area,
-      location: form.location,
-      before_images: form.before_images,
-      land_record: form.land_record,
-      mou: form.mou,
-      org_name: form.org_name,
-      reg_no: form.reg_no,
-      csr_budget: form.csr_budget,
-      community_name: form.community_name,
-      land_proof: form.land_proof,
+    const loc = await getLocationStamp();
+    const projectsRef = ref(db, "Projects");
+    // store under Projects/{emailEncoded}/{pushId}
+    const ownerKey = (user?.email || "unknown").replace(/\./g, ",");
+    const newProjRef = push(ref(db, `Projects/${ownerKey}`));
+    const projId = newProjRef.key;
+
+    // assemble data: store bImg1..bImgN, bLocation, other fields
+    const data = {
+      userName: user.displayName || "",
+      email: user.email || "",
+      phone: "",
+      region: "",
+      treeType: form.treeType,
+      noTree: String(form.noTree),
+      area: String(form.area),
+      treeCategory: form.treeCategory,
+      upiMetamask: form.upiMetamask,
+      description: form.description,
+      status: "waiting_for_after_images",
+      organizationId: "", // keep placeholder
+      orgName: form.orgName || "",
+      orgId: form.orgId || "",
+      createdAt: Date.now()
     };
 
-    try {
-      // ✅ Sign the project data
-      const { signature, message } = await generateSignature(projectData);
+    // attach before images as bImg1..N
+    beforeFiles.forEach((b64, idx) => {
+      data[`bImg${idx + 1}`] = b64;
+    });
+    if (loc) data.bLocation = loc;
 
-      const res = await fetch("http://localhost:5000/projects/new", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...projectData, signature, message }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        console.log("✅ Project created:", data);
-        navigate("/projects");
-      } else {
-        setError(data.error || "Failed to submit project");
-      }
-    } catch (err) {
-      setError(err.message || "Signature error");
-    }
+    await set(newProjRef, data);
+    alert("Project submitted. Upload after images later from My Projects.");
+    // reset
+    setBeforeFiles([]);
+    setForm({
+      treeType: "",
+      noTree: "",
+      area: "",
+      treeCategory: "Sapling",
+      upiMetamask: "",
+      description: "",
+      orgName: "",
+      orgId: ""
+    });
   };
 
   return (
-    <div className="min-h-screen bg-green-50 p-6">
-      <h1 className="text-2xl font-bold mb-4">
-        Submit Plantation Project ({role})
-      </h1>
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-lg shadow-md max-w-lg space-y-4"
-      >
-        {/* Before Images */}
-        <label className="block font-semibold">
-          Before Plantation Images (min 3):
-        </label>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(e) => handleFiles(e, "before_images")}
-        />
-        <div className="flex flex-wrap gap-2 mt-2">
-          {form.before_images.map((img, idx) => (
-            <img
-              key={idx}
-              src={img}
-              alt={`Before ${idx + 1}`}
-              className="w-20 h-20 object-cover rounded border"
-            />
-          ))}
+    <div className="max-w-4xl mx-auto p-6">
+      <h2 className="text-2xl font-bold mb-4 text-green-400">Submit New Project</h2>
+      <form onSubmit={handleSubmit} className="bg-white rounded p-6 shadow space-y-4">
+        <div>
+          <label className="block text-sm font-medium">Role</label>
+          <select value={roleType} onChange={(e)=>setRoleType(e.target.value)} className="border p-2 rounded w-48">
+            <option value="individual">Individual</option>
+            <option value="organisation">Organisation</option>
+          </select>
         </div>
 
-        {/* Tree Type */}
-        <input
-          type="text"
-          placeholder="Tree/Plant Type"
-          className="w-full border p-2 rounded"
-          onChange={(e) => setForm({ ...form, tree_type: e.target.value })}
-          required
-        />
+        <div>
+          <label className="block text-sm">Tree Type</label>
+          <input value={form.treeType} onChange={e=>setForm({...form, treeType: e.target.value})} required className="w-full border p-2 rounded" />
+        </div>
 
-        {/* Area */}
-        <input
-          type="number"
-          placeholder="Area Covered (in acres)"
-          className="w-full border p-2 rounded"
-          onChange={(e) => setForm({ ...form, area: e.target.value })}
-          required
-        />
-
-        {/* Role-specific fields */}
-        {role === "individual" && (
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block font-semibold">Upload Land Record:</label>
-            <input
-              type="file"
-              accept=".pdf,image/*"
-              onChange={(e) => handleSingleFile(e, "land_record")}
-            />
+            <label className="block text-sm">Number of Trees</label>
+            <input value={form.noTree} onChange={e=>setForm({...form, noTree: e.target.value})} required type="number" className="w-full border p-2 rounded" />
           </div>
-        )}
+          <div>
+            <label className="block text-sm">Area (acres)</label>
+            <input value={form.area} onChange={e=>setForm({...form, area: e.target.value})} required type="number" step="0.01" className="w-full border p-2 rounded" />
+          </div>
+        </div>
 
-        {role === "ngo" && (
+        <div>
+          <label className="block text-sm">Tree Category</label>
+          <select value={form.treeCategory} onChange={e=>setForm({...form, treeCategory: e.target.value})} className="border p-2 rounded w-48">
+            <option>Sapling</option>
+            <option>Young</option>
+            <option>Mature</option>
+          </select>
+        </div>
+
+        {roleType === "organisation" && (
           <>
-            <input
-              type="text"
-              placeholder="Organization Name"
-              className="w-full border p-2 rounded mb-3"
-              onChange={(e) => setForm({ ...form, org_name: e.target.value })}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Registration Number"
-              className="w-full border p-2 rounded mb-3"
-              onChange={(e) => setForm({ ...form, reg_no: e.target.value })}
-              required
-            />
-            <label className="block font-semibold">Upload MoU:</label>
-            <input
-              type="file"
-              accept=".pdf,image/*"
-              onChange={(e) => handleSingleFile(e, "mou")}
-            />
+            <div>
+              <label className="block text-sm">Organization Name</label>
+              <input value={form.orgName} onChange={e=>setForm({...form, orgName: e.target.value})} className="w-full border p-2 rounded" />
+            </div>
+            <div>
+              <label className="block text-sm">Org ID</label>
+              <input value={form.orgId} onChange={e=>setForm({...form, orgId: e.target.value})} className="w-full border p-2 rounded" />
+            </div>
           </>
         )}
 
-        {role === "corporate" && (
-          <>
-            <input
-              type="number"
-              placeholder="CSR Budget (in INR)"
-              className="w-full border p-2 rounded mb-3"
-              onChange={(e) =>
-                setForm({ ...form, csr_budget: e.target.value })
-              }
-              required
-            />
-            <label className="block font-semibold">
-              Upload CSR/MoU Document:
-            </label>
-            <input
-              type="file"
-              accept=".pdf,image/*"
-              onChange={(e) => handleSingleFile(e, "mou")}
-            />
-          </>
-        )}
+        <div>
+          <label className="block text-sm">Before Images (camera/gallery) — min 3</label>
+          <input type="file" accept="image/*" multiple onChange={handleBefore} />
+          <div className="flex gap-2 mt-2 flex-wrap">
+            {beforeFiles.map((s, i) => <img key={i} src={s} alt={`b${i}`} className="w-20 h-20 object-cover rounded border" />)}
+          </div>
+        </div>
 
-        {role === "community" && (
-          <>
-            <input
-              type="text"
-              placeholder="Community Name"
-              className="w-full border p-2 rounded mb-3"
-              onChange={(e) =>
-                setForm({ ...form, community_name: e.target.value })
-              }
-              required
-            />
-            <label className="block font-semibold">Upload Land Proof:</label>
-            <input
-              type="file"
-              accept=".pdf,image/*"
-              onChange={(e) => handleSingleFile(e, "land_proof")}
-            />
-          </>
-        )}
+        <div>
+          <label className="block text-sm">UPI or MetaMask (enter UPI like x@ybl or 0x...)</label>
+          <input value={form.upiMetamask} onChange={e=>setForm({...form, upiMetamask: e.target.value})} className="w-full border p-2 rounded" />
+        </div>
 
-        {/* Location */}
-        <p>
-          <strong>Location:</strong>{" "}
-          {form.location
-            ? `${form.location.lat}, ${form.location.lng}`
-            : "Fetching..."}
-        </p>
+        <div>
+          <label className="block text-sm">Description</label>
+          <textarea value={form.description} onChange={e=>setForm({...form, description: e.target.value})} className="w-full border p-2 rounded" />
+        </div>
 
-        {/* Submit */}
-        <button
-          type="submit"
-          className="bg-green-600 text-white w-full py-2 rounded hover:bg-green-700"
-        >
-          Submit Project
-        </button>
+        {error && <div className="text-red-600">{error}</div>}
 
-        {error && <p className="text-red-600 mt-3">{error}</p>}
+        <button className="bg-green-600 text-white py-2 px-4 rounded">Submit Project</button>
       </form>
     </div>
   );

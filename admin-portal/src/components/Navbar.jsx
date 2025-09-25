@@ -5,15 +5,11 @@ const logo = "/src/photos/logo.jpg"; // Same logo as hero section
 export default function NavBar() {
   const { pathname } = useLocation();
 
-  const logo = "/src/photos/logo.jpg";
-
   const navItems = [
     { label: "Dashboard", path: "/" },
     { label: "Approved", path: "/approved" },
     { label: "Rejected", path: "/rejected" },
   ];
-
-
 
   return (
     <>

@@ -7,9 +7,9 @@ import AnimatedButton from "../../../../components/animations/AnimatedButton";
 gsap.registerPlugin(ScrollTrigger);
 
 // Image paths
-const pic1 = "https://images.pexels.com/photos/15938873/pexels-photo-15938873.jpeg";
-const pic2 = "https://images.pexels.com/photos/1226302/pexels-photo-1226302.jpeg";
-const pic3 = "https://images.pexels.com/photos/1999579/pexels-photo-1999579.jpeg";
+const pic1 = "https://images.pexels.com/photos/5029919/pexels-photo-5029919.jpeg";
+const pic2 = "https://images.pexels.com/photos/5439372/pexels-photo-5439372.jpeg";
+const pic3 = "https://images.pexels.com/photos/1226302/pexels-photo-1226302.jpeg";
 
 export const InfoCardsStack = (): JSX.Element => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -192,12 +192,17 @@ export const InfoCardsStack = (): JSX.Element => {
     {
       title: (
         <>
+<<<<<<< HEAD
           Unlock the Future of
           <span className="text-[#1DBF73]"> Carbon Trading</span>.
+=======
+          Be a 
+          <span className="text-forest-green"> Change-Maker</span>.
+>>>>>>> 3cda731f490c4c89ab943fe508669c245ba59322
         </>
       ),
-      text1: `Our platform is revolutionizing carbon credit trading by bringing transparency, integrity, and trust through blockchain technology. Every credit is securely verified and recorded, eliminating risks of fraud or duplication while ensuring accountability at each step.`,
-      text2: `Users can easily track their contributions and see the real impact of the projects they support, from renewable energy to reforestation. This makes carbon offsetting not only reliable but also engaging, inspiring individuals and businesses to take meaningful action toward a sustainable future.`,
+      text1: `Contributors are the heart of this platform. Whether it’s planting trees, initiating eco-projects, or leading sustainability drives, you can easily register your efforts here. Every project you submit is verified using reliable methods, ensuring your contribution is genuine and impactful.`,
+      text2: `Once approved, your initiative earns blockchain-backed carbon credits directly in your wallet or get money directly in your bank account. You can showcase your efforts globally, creating both recognition and financial incentives for your green actions.`,
       buttonText: "Learn More",
       image: pic1,
       alt: "Forest landscape",
@@ -206,13 +211,18 @@ export const InfoCardsStack = (): JSX.Element => {
     {
       title: (
         <>
+<<<<<<< HEAD
           Empower Your
           <span className="text-[#1DBF73]"> Climate Action</span> with Carbon Credits.
+=======
+          Ensuring 
+          <span className="text-forest-green"> Trust</span> with Carbon Credits.
+>>>>>>> 3cda731f490c4c89ab943fe508669c245ba59322
         </>
       ),
-      text1: `Join us in transforming the voluntary carbon market through transparency and integrity. Our blockchain-enabled platform makes it easy for you to buy, trade, and retire carbon credits from verified afforestation projects.`,
-      text2: `Our platform makes it simple to buy, trade, and retire carbon credits sourced from verified afforestation projects. This ensures that your contributions directly support real, measurable climate action while building a sustainable future for generations to come.`,
-      buttonText: "Get Started",
+      text1: `Admins play a crucial role in maintaining the credibility of the ecosystem. They verify projects through satellite/ML data, documents, and on-ground validations to ensure authenticity. Only projects that meet sustainability standards are approved for rewards.`,
+      text2: `After approval, carbon credits are minted and recorded permanently on the blockchain. This ensures transparency, reduces fraud, and builds trust across all participants. Admins safeguard the system so that every credit truly represents a positive environmental impact.`,
+      buttonText: "Learn More",
       image: pic2,
       alt: "Forest conservation project",
       layout: "image-center"
@@ -220,13 +230,18 @@ export const InfoCardsStack = (): JSX.Element => {
     {
       title: (
         <>
+<<<<<<< HEAD
           Experience Effortless Trading and Retirement of
           <span className="text-[#1DBF73]"> Carbon Credits</span> with Confidence.
+=======
+          Turning Green
+          <span className="text-forest-green"> into Value</span> with Confidence.
+>>>>>>> 3cda731f490c4c89ab943fe508669c245ba59322
         </>
       ),
-      text1: `Our platform makes trading and retiring carbon credits simple and seamless for everyone. By supporting verified projects and maintaining transparent processes, we ensure that your participation in climate action is both trustworthy and impactful.`,
-      text2: `With every credit accounted for and traceable, you can confidently contribute to meaningful environmental change, knowing your efforts are making a real difference in building a sustainable future.`,
-      buttonText: "Trade Now",
+      text1: `The marketplace is where environmental impact meets economic opportunity. Verified carbon credits earned by contributors can be listed, traded, or transferred securely with ease. Businesses and individuals looking to offset their carbon footprint can directly purchase genuine credits here.`,
+      text2: `By enabling seamless transactions, the marketplace creates a circular green economy. It transforms sustainability efforts into tangible value, making climate action both rewarding and impactful. This is where contributors and buyers connect to drive global change.`,
+      buttonText: "Learn More",
       image: pic3,
       alt: "Sustainable forest ecosystem",
       layout: "image-right"
@@ -408,7 +423,7 @@ export const InfoCardsStack = (): JSX.Element => {
 
                         <div className="flex justify-end">
                           <AnimatedButton
-                            text="Get Started"
+                            text="Learn More"
                             bgColor="black"
                             textColor="white"
                           />
