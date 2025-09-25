@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -9,7 +9,7 @@ import  AnimatedButton  from "../../../../components/animations/AnimatedButton";
 gsap.registerPlugin(ScrollTrigger);
 
 const Herobg = "https://images.pexels.com/photos/8514903/pexels-photo-8514903.jpeg";
-const logo = "/src/photos/logo.jpg";
+const logo = "/src/photos/logo.svg";
 
 interface HeroSectionProps {
   onLoad?: () => void;
@@ -20,7 +20,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoad }) => {
   const parallaxRef = useRef<HTMLImageElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const newParaRef = useRef<HTMLParagraphElement>(null);
   const ctxRef = useRef<gsap.Context>();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Menu items for StaggeredMenu - kept exactly as original
   const menuItems = [
@@ -47,10 +49,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoad }) => {
 
   const handleMenuOpen = useCallback(() => {
     console.log('Menu opened');
+    setMenuOpen(true);
   }, []);
 
   const handleMenuClose = useCallback(() => {
     console.log('Menu closed');
+    setMenuOpen(false);
   }, []);
 
   useEffect(() => {
@@ -102,9 +106,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoad }) => {
         });
       }
 
+      if (newParaRef.current) {
+        gsap.set(newParaRef.current, { willChange: "transform, opacity" });
+        gsap.from(newParaRef.current, {
+          y: 50,
+          opacity: 0,
+          duration: 1,
+          ease: "power3.out",
+          delay: 1.0
+        });
+      }
+
       // Clean up will-change after animations for performance
       gsap.delayedCall(2, () => {
-        gsap.set([titleRef.current, subtitleRef.current, parallaxRef.current], {
+        gsap.set([titleRef.current, subtitleRef.current, newParaRef.current, parallaxRef.current], {
           clearProps: "willChange"
         });
         // Dispatch custom event when hero is fully loaded
@@ -121,26 +136,26 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoad }) => {
 
   return (
     <>
-      <section ref={heroRef} className="relative w-full lg:h-screen md:h-[90vh] sm:h-[90vh] overflow-hidden">
+      <section ref={heroRef} className="relative w-full lg:h-screen md:h-[90vh] sm:h-[90vh] overflow-hidden" style={{ overflow: menuOpen ? 'visible' : 'hidden' }}>
         <div className="relative h-full">
           {/* Parallax Background with Gradient Overlay - exactly as original */}
           <div className="absolute inset-0 overflow-hidden">
             <img
               ref={parallaxRef}
               src={Herobg}
-              className="absolute inset-0 w-full h-[140%] object-cover"
+              className="absolute inset-0 w-full h-[150%] object-cover"
               alt="Hero background"
               loading="lazy"
               decoding="async"
             />
             {/* Gradient overlay - exactly as original */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50"></div>
+            {/* <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent"></div> */}
           </div>
 
           {/* Main content - exactly as original layout */}
           <div className="relative z-10 h-full flex items-center flex-col max-w-full">
             {/* Header with logo and menu/login wrapper - exactly as original */}
-            <header className="flex w-full max-w-[1203px] items-center justify-between px-4 md:px-10 py-7 overflow-visible">
+            <header className="flex w-full max-w-[1203px]  items-center justify-between px-4 md:px-10 py-7 overflow-visible">
               {/* Logo - exactly as original */}
               <div className="flex items-center">
                 <img
@@ -154,7 +169,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoad }) => {
 
               {/* Menu and Login wrapper - exactly as original */}
               <div className="flex items-center gap-2 md:gap-4">
-                <Link to="/login-type-selector" className="[font-family:'Inter',Helvetica] font-semibold text-green-600 text-base md:text-lg tracking-[0] leading-[24px] cursor-pointer relative group hidden md:block">
+                <Link to="/login-type-selector" className="[font-family:'Inter',Helvetica] font-semibold text-white hover:text-[#1DBF73] text-base md:text-lg tracking-[0] leading-[24px] cursor-pointer relative group hidden md:block">
                   Log In
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-forest-green transition-all duration-300 group-hover:w-full"></span>
                 </Link>
@@ -173,8 +188,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoad }) => {
                     colors={['#228B22', '#32CD32', '#006400']} // Green theme colors
                     logoUrl={logo}
                     accentColor="#228B22" // Forest green accent
-                    onMenuOpen={() => console.log('Menu opened')}
-                    onMenuClose={() => console.log('Menu closed')}
+                    onMenuOpen={handleMenuOpen}
+                    onMenuClose={handleMenuClose}
                     embedded={true} // Add embedded prop to indicate it's inside header
                   />
                 </div>
@@ -186,10 +201,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoad }) => {
               <div className="max-w-full md:max-w-[718px]">
                 <div className="mb-4 sm:mb-5">
                   <SplitText
-                    text="Empowering Climate Action Through Blockchain Innovation"
+                    text="Sundarban."
                     tag="h1"
-                    className="[font-family:'Inter',Helvetica] font-bold text-black/90 text-2xl sm:text-5xl md:text-5xl lg:text-5xl xl:text-[74px] tracking-[-0.5px] sm:tracking-[-1px] md:tracking-[-2px] lg:tracking-[-3.20px] leading-tight sm:leading-tight md:leading-[1.1] lg:leading-[70px]"
-                    delay={50}
+                    className="[font-family:'Inter',Helvetica] font-bold text-black/90 text-9xl sm:text-5xl md:text-9xl lg:text-9xl xl:text-9xl tracking-[-0.5px] sm:tracking-[-1px] md:tracking-[-1.5px] lg:tracking-[-2px] xl:tracking-[-2.5px] leading-tight sm:leading-tight md:leading-[1.1] lg:leading-[1.05] xl:leading-[1.0] overflow-visible whitespace-nowrap"
+                    delay={150}
                     duration={0.5}
                     ease="power3.out"
                     splitType="words, chars"
@@ -200,6 +215,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoad }) => {
                     textAlign="left"
                     onLetterAnimationComplete={handleTitleAnimationComplete}
                   />
+                </div>
+                <div className="mb-4 sm:mb-6">
+                  <p ref={newParaRef} className="[font-family:'Inter',Helvetica] font-bold text-black/80 text-xl sm:text-sm md:text-xl text-left tracking-[-0.20px] sm:tracking-[-0.40px] md:tracking-[-0.80px] leading-4 sm:leading-5 px-4 sm:px-2 md:px-0">
+                    Empowering Climate Action Through Blockchain Innovation
+                  </p>
                 </div>
               </div>
 
@@ -217,7 +237,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoad }) => {
                   <div className="flex justify-center md:justify-end">
                     <AnimatedButton
                       text="Get Started"
-                      bgColor="white/70"
+                      bgColor="white"
                       textColor="black"
                       onClick={handleGetStarted}
                     />

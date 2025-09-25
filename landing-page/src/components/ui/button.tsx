@@ -13,13 +13,13 @@ const buttonVariants = cva(
         destructive:
           "bg-red-500 text-white shadow-lg hover:bg-red-600 hover:shadow-xl hover:shadow-red-500/25 hover:scale-105 active:scale-95",
         outline:
-          "border-2 border-forest-green bg-transparent text-forest-green shadow-sm hover:bg-forest-green hover:text-white hover:shadow-lg hover:shadow-forest-green/25 hover:scale-105 active:scale-95",
+          "border-2 border-forest-green bg-transparent text-[#1DBF73] shadow-sm hover:bg-forest-green hover:text-white hover:shadow-lg hover:shadow-forest-green/25 hover:scale-105 active:scale-95",
         secondary:
           "bg-gray-100 text-gray-900 shadow-sm hover:bg-gray-200 hover:shadow-lg hover:scale-105 active:scale-95",
         ghost: 
-          "hover:bg-forest-green/10 hover:text-forest-green hover:scale-105 active:scale-95",
+          "hover:bg-forest-green/10 hover:text-[#1DBF73] hover:scale-105 active:scale-95",
         link: 
-          "text-forest-green underline-offset-4 hover:underline hover:scale-105 active:scale-95",
+          "text-[#1DBF73] underline-offset-4 hover:underline hover:scale-105 active:scale-95",
       },
       size: {
         default: "h-12 px-6 py-3",

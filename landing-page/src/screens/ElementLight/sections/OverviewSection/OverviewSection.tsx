@@ -85,19 +85,19 @@ export const OverviewSection = (): JSX.Element => {
       <div className="w-full h-fit flex flex-col md:flex-row justify-between px-4 md:px-10 py-5 border-b border-forest-green/10 gap-4 md:gap-0">
         <div 
           ref={el => addToBarRefs(el, 0)}
-          className="w-full md:w-[300px] h-fit [font-family:'Inter',Helvetica] font-medium text-[#0f0f0f] text-base text-center md:text-left tracking-[-0.32px] leading-[25.6px] hover:text-forest-green transition-colors duration-300"
+          className="w-full md:w-[300px] h-fit [font-family:'Inter',Helvetica] font-medium text-[#0f0f0f] text-base text-center md:text-left tracking-[-0.32px] leading-[25.6px] hover:text-[#1DBF73] transition-colors duration-300"
         >
           Transparency
         </div>
         <div 
           ref={el => addToBarRefs(el, 1)}
-          className="w-full md:w-[300px] h-fit [font-family:'Inter',Helvetica] font-medium text-[#0f0f0f] text-base text-center tracking-[-0.32px] leading-[25.6px] hover:text-forest-green transition-colors duration-300"
+          className="w-full md:w-[300px] h-fit [font-family:'Inter',Helvetica] font-medium text-[#0f0f0f] text-base text-center tracking-[-0.32px] leading-[25.6px] hover:text-[#1DBF73] transition-colors duration-300"
         >
           Green Energy
         </div>
         <div 
           ref={el => addToBarRefs(el, 2)}
-          className="w-full md:w-[300px] h-fit [font-family:'Inter',Helvetica] font-medium text-[#0f0f0f] text-base text-center md:text-right tracking-[-0.32px] leading-[25.6px] hover:text-forest-green transition-colors duration-300"
+          className="w-full md:w-[300px] h-fit [font-family:'Inter',Helvetica] font-medium text-[#0f0f0f] text-base text-center md:text-right tracking-[-0.32px] leading-[25.6px] hover:text-[#1DBF73] transition-colors duration-300"
         >
           Eco Friendly
         </div>
@@ -111,7 +111,7 @@ export const OverviewSection = (): JSX.Element => {
             ref={el => addToOverviewRefs(el, 0)}
             className="h-full w-fit [font-family:'Inter',Helvetica] font-bold text-[#0f0f0f] text-xl md:text-2xl text-center lg:text-left align-text-top tracking-[-0.48px] leading-[38.4px] lg:self-start"
           >
-            Your Path to <span className="text-forest-green">Sustainable</span> <br />
+            Your Path to <span className="text-[#1DBF73]">Sustainable</span> <br />
             Change
           </div>
 
@@ -119,19 +119,19 @@ export const OverviewSection = (): JSX.Element => {
             ref={el => addToOverviewRefs(el, 1)}
             className="h-fit w-fit [font-family:'Inter',Helvetica] font-bold text-[#0f0f0f] text-sm md:text-base text-center lg:text-right tracking-[-0.32px] leading-[25.6px] space-y-1"
           >
-            <div className="hover:text-forest-green transition-colors duration-300">Transparent Carbon Action</div>
-            <div className="hover:text-forest-green transition-colors duration-300">Carbon Credits, Simplified</div>
-            <div className="hover:text-forest-green transition-colors duration-300">Real Projects. Real Impact.</div>
-            <div className="hover:text-forest-green transition-colors duration-300">Traceable Impact, Trusted Results</div>
+            <div className="hover:text-[#1DBF73] transition-colors duration-300">Transparent Carbon Action</div>
+            <div className="hover:text-[#1DBF73] transition-colors duration-300">Carbon Credits, Simplified</div>
+            <div className="hover:text-[#1DBF73] transition-colors duration-300">Real Projects. Real Impact.</div>
+            <div className="hover:text-[#1DBF73] transition-colors duration-300">Traceable Impact, Trusted Results</div>
           </div>
 
           <div 
             ref={el => addToOverviewRefs(el, 2)}
             className="h-full w-fit [font-family:'Inter',Helvetica] font-bold text-[#0f0f0f] text-5xl md:text-6xl lg:text-[80px] text-center lg:text-right tracking-[-1.60px] leading-tight lg:leading-[128px]"
           >
-            <span ref={measureRef} className="block hover:text-forest-green transition-colors duration-300">Measure.</span>
-            <span ref={tradeRef} className="block hover:text-forest-green transition-colors duration-300">Trade.</span>
-            <span ref={transformRef} className="block text-forest-green">Transform.</span>
+            <span ref={measureRef} className="block hover:text-[#1DBF73] transition-colors duration-300">Measure.</span>
+            <span ref={tradeRef} className="block hover:text-[#1DBF73] transition-colors duration-300">Trade.</span>
+            <span ref={transformRef} className="block text-[#1DBF73]">Transform.</span>
           </div>
         </div>
 
@@ -141,7 +141,7 @@ export const OverviewSection = (): JSX.Element => {
               key={index} 
               className="flex flex-col justify-center h-fit w-full group cursor-default"
             >
-              <div className="font-bold w-full h-fit text-black text-3xl md:text-[59.4px] leading-tight md:leading-[64px] [font-family:'Inter',Helvetica] text-center whitespace-nowrap group-hover:text-forest-green transition-colors duration-300">
+              <div className="font-bold w-full h-fit text-black text-3xl md:text-[59.4px] leading-tight md:leading-[64px] [font-family:'Inter',Helvetica] text-center whitespace-nowrap group-hover:text-[#1DBF73] transition-colors duration-300">
                 <CountUp
                   end={stat.number}
                   duration={2}
@@ -150,7 +150,7 @@ export const OverviewSection = (): JSX.Element => {
                   scrollSpyOnce
                 />
               </div>
-              <div className="font-normal w-full h-fit text-[#999999] text-base md:text-[20.5px] leading-tight md:leading-[22px] [font-family:'Inter',Helvetica] text-center whitespace-nowrap group-hover:text-forest-green/70 transition-colors duration-300">
+              <div className="font-normal w-full h-fit text-[#999999] text-base md:text-[20.5px] leading-tight md:leading-[22px] [font-family:'Inter',Helvetica] text-center whitespace-nowrap group-hover:text-[#1DBF73]/70 transition-colors duration-300">
                 {stat.label}
               </div>
             </div>
@@ -159,13 +159,13 @@ export const OverviewSection = (): JSX.Element => {
       </div>
 
       <style jsx>{`
-        .text-forest-green {
+        .text-[#1DBF73] {
           color: #228B22;
         }
-        .hover\\:text-forest-green:hover {
+        .hover\\:text-[#1DBF73]:hover {
           color: #228B22;
         }
-        .hover\\:text-forest-green\\/70:hover {
+        .hover\\:text-[#1DBF73]\\/70:hover {
           color: rgba(34, 139, 34, 0.7);
         }
         .border-forest-green\\/10 {

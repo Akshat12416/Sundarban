@@ -64,7 +64,7 @@ body {
   box-shadow: 0 25px 50px -12px rgba(34, 139, 34, 0.3);
 }
 
-.hover\:text-forest-green:hover {
+.hover\:text-[#1DBF73]:hover {
   color: var(--forest-green);
 }
 

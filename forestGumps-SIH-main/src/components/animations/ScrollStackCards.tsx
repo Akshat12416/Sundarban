@@ -196,7 +196,7 @@ export const ScrollStackCards: React.FC<ScrollStackCardsProps> = ({
                       {card.title.split(' ').map((word, wordIndex) => (
                         <span key={wordIndex}>
                           {word.includes('Carbon') || word.includes('Sustainable') || word.includes('Climate') || word.includes('Credits') ? (
-                            <span className="text-forest-green">{word}</span>
+                            <span className="text-[#1DBF73]">{word}</span>
                           ) : (
                             word
                           )}
@@ -240,7 +240,7 @@ export const ScrollStackCards: React.FC<ScrollStackCardsProps> = ({
       ))}
 
       <style jsx>{`
-        .text-forest-green {
+        .text-[#1DBF73] {
           color: #228B22;
         }
         .bg-forest-green {

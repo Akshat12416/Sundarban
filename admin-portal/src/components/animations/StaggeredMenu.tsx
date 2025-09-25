@@ -32,7 +32,7 @@ export interface StaggeredMenuProps {
 
 export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   position = 'right',
-  colors = ['#228B22', '#32CD32'],
+  colors = ['#1DBF73', '#1DBF73'],
   items = [],
   socialItems = [],
   displaySocials = true,
@@ -43,7 +43,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   openMenuButtonColor = '#fff',
   changeMenuColorOnOpen = true,
   embedded = false,
-  accentColor = '#228B22',
+  accentColor = '#1DBF73',
   onMenuOpen,
   onMenuClose
 }: StaggeredMenuProps) => {
@@ -357,17 +357,16 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         {/* Pre-layers for staggered animation */}
         <div
           ref={preLayersRef}
-          className={`sm-prelayers fixed top-0 ${position === 'right' ? 'right-0' : 'left-0'} w-full sm:w-[clamp(280px,45vw,450px)] md:w-[clamp(300px,40vw,420px)] lg:w-[clamp(260px,38vw,420px)] h-screen pointer-events-none z-[5]`}
+          className={`sm-prelayers absolute top-0 ${position === 'right' ? 'right-0' : 'left-0'} bottom-0 pointer-events-none z-[5]`}
           aria-hidden="true"
           style={{
-            position: 'fixed',
-            height: '100vh',
-            zIndex: 5
+            position: embedded ? 'fixed' : 'absolute',
+            height: embedded ? '100vh' : '100%',
+            width: embedded ? '100vw' : 'clamp(280px,45vw,450px)'
           }}
-          data-open={open || undefined}
         >
           {(() => {
-            const raw = colors && colors.length ? colors.slice(0, 4) : ['#228B22', '#32CD32'];
+            const raw = colors && colors.length ? colors.slice(0, 4) : ['#1DBF73', '#1DBF73'];
             let arr = [...raw];
             if (arr.length >= 3) {
               const mid = Math.floor(arr.length / 2);
@@ -376,13 +375,10 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
             return arr.map((c, i) => (
               <div
                 key={i}
-                className="sm-prelayer absolute top-0 right-0 h-full"
+                className="sm-prelayer absolute top-0 left-0 h-full w-full"
                 style={{
                   background: c,
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  height: '100%'
+                  transform: `translateX(${position === 'left' ? '-100%' : '100%'})`
                 }}
               />
             ));
@@ -528,32 +524,37 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       </div>
 
       <style>{`
-        /* Ensure pre-layers and panel cover full screen on all devices */
+        /* Ensure consistent pre-layer behavior across all screen sizes */
         .sm-prelayers {
-          height: 100vh !important;
-          top: 0 !important;
-          bottom: 0 !important;
+          width: clamp(280px,45vw,450px) !important;
         }
 
-        .sm-prelayer {
-          width: 100% !important;
-          height: 100vh !important;
-          top: 0 !important;
-          bottom: 0 !important;
+        @media (min-width: 640px) {
+          .sm-prelayers {
+            width: clamp(280px,45vw,450px) !important;
+          }
         }
 
-        /* Keep original panel width */
-        .staggered-menu-panel {
-          height: 100vh !important;
-          top: 0 !important;
-          bottom: 0 !important;
+        @media (min-width: 768px) {
+          .sm-prelayers {
+            width: clamp(300px,40vw,420px) !important;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .sm-prelayers {
+            width: clamp(260px,38vw,420px) !important;
+          }
         }
 
         @media (max-width: 640px) {
           .staggered-menu-panel {
             width: 100% !important;
-            left: 0 !important;
-            right: 0 !important;
+            left: 0;
+            right: 0;
+          }
+          .sm-prelayers {
+            width: 100% !important;
           }
         }
 
@@ -575,7 +576,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
           right: 0.1em;
           font-size: 14px;
           font-weight: 400;
-          color: var(--sm-accent, #228B22);
+          color: var(--sm-accent, #1DBF73);
           letter-spacing: 0;
           pointer-events: none;
           user-select: none;
@@ -611,7 +612,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
           height: 100vh;
           z-index: 9998;
         }
-
+        
         /* Ensure close button is always visible and on top */
         [data-embedded='true'][data-open='true'] .sm-toggle {
           position: fixed !important;
@@ -620,27 +621,11 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
           z-index: 9999 !important;
           color: #000 !important;
         }
-
+        
         @media (max-width: 640px) {
           [data-embedded='true'][data-open='true'] .sm-toggle {
             top: 1rem !important;
             right: 1rem !important;
-          }
-        }
-
-        /* CSS animation for pre-layers on mobile as fallback */
-        @keyframes slideInFromRight {
-          from {
-            transform: translateX(100%);
-          }
-          to {
-            transform: translateX(0);
-          }
-        }
-
-        @media (max-width: 640px) {
-          .sm-prelayer {
-            animation: slideInFromRight 0.3s ease-out;
           }
         }
       `}</style>

@@ -167,7 +167,7 @@ export const InfoCardsStack = (): JSX.Element => {
       title: (
         <>
           Unlock the Future of
-          <span className="text-forest-green"> Carbon Trading</span>.
+          <span className="text-[#1DBF73]"> Carbon Trading</span>.
         </>
       ),
       text1: `Our platform is revolutionizing carbon credit trading by bringing transparency, integrity, and trust through blockchain technology. Every credit is securely verified and recorded, eliminating risks of fraud or duplication while ensuring accountability at each step.`,
@@ -181,7 +181,7 @@ export const InfoCardsStack = (): JSX.Element => {
       title: (
         <>
           Empower Your
-          <span className="text-forest-green"> Climate Action</span> with Carbon Credits.
+          <span className="text-[#1DBF73]"> Climate Action</span> with Carbon Credits.
         </>
       ),
       text1: `Join us in transforming the voluntary carbon market through transparency and integrity. Our blockchain-enabled platform makes it easy for you to buy, trade, and retire carbon credits from verified afforestation projects.`,
@@ -195,7 +195,7 @@ export const InfoCardsStack = (): JSX.Element => {
       title: (
         <>
           Experience Effortless Trading and Retirement of
-          <span className="text-forest-green"> Carbon Credits</span> with Confidence.
+          <span className="text-[#1DBF73]"> Carbon Credits</span> with Confidence.
         </>
       ),
       text1: `Our platform makes trading and retiring carbon credits simple and seamless for everyone. By supporting verified projects and maintaining transparent processes, we ensure that your participation in climate action is both trustworthy and impactful.`,
@@ -425,7 +425,7 @@ export const InfoCardsStack = (): JSX.Element => {
       </div>
 
       <style>{`
-        .text-forest-green {
+        .text-[#1DBF73] {
           color: #228B22;
         }
         .bg-forest-green {

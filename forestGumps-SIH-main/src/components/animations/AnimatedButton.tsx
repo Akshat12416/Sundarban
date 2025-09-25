@@ -67,7 +67,7 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
       case 'secondary':
         return 'bg-black hover:bg-gray-800 text-white';
       case 'outline':
-        return 'border border-forest-green text-forest-green hover:bg-forest-green hover:text-white';
+        return 'border border-forest-green text-[#1DBF73] hover:bg-forest-green hover:text-white';
       default:
         return 'bg-forest-green hover:bg-emerald-700 text-white';
     }
@@ -121,7 +121,7 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
         .hover\\:bg-forest-green:hover {
           background-color: #228B22;
         }
-        .text-forest-green {
+        .text-[#1DBF73] {
           color: #228B22;
         }
         .border-forest-green {

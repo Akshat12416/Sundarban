@@ -1,11 +1,19 @@
+# Replace Green Colors with 1DBF73 - Landing Page
 
-# TODO: Update Social Media Div and Numbering Spacing
+## Plan Summary:
+Replace all green color references in the landing-page project with hex color `1DBF73`.
 
-## Tasks
-- [x] Update margin-bottom for social media div in SiteFooterSection.tsx for md and sm screen sizes
-- [x] Adjust numbering spacing in StaggeredMenu.tsx to bring numbers closer to text
-- [ ] Verify changes by running the app and checking responsiveness
+## Files to Update:
+- [ ] ScrollStackCards.tsx - replace #228B22, forest-green, green-600
+- [ ] StaggeredMenu.tsx - replace #228B22, #32CD32
+- [ ] CircularGallery.tsx - replace #228B22, emerald-700
+- [ ] AnimatedButton.tsx - replace #00ff00
+- [ ] Verify all changes and test visual appearance
 
-## Details
-- Social media div: Increase mb-8 to mb-12 for md and sm in SiteFooterSection.tsx
-- Numbers (01, 02, 03, 04): Reduce right offset from 0.2em to 0.1em and adjust font-size for better proximity in StaggeredMenu.tsx
+## Progress:
+- [ ] Plan created and confirmed
+- [ ] ScrollStackCards.tsx updated
+- [ ] StaggeredMenu.tsx updated
+- [ ] CircularGallery.tsx updated
+- [ ] AnimatedButton.tsx updated
+- [ ] Testing completed

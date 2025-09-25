@@ -136,15 +136,15 @@ export const SiteFooterSection = (): JSX.Element => {
               src="/mask-group.svg"
             />
             <div className="space-y-3">
-              <div className="flex items-center space-x-2 text-gray-600 hover:text-forest-green transition-colors duration-300">
+              <div className="flex items-center space-x-2 text-gray-600 hover:text-[#1DBF73] transition-colors duration-300">
                 <Mail size={16} />
                 <span className="text-sm">contact@carbonchain.eco</span>
               </div>
-              <div className="flex items-center space-x-2 text-gray-600 hover:text-forest-green transition-colors duration-300">
+              <div className="flex items-center space-x-2 text-gray-600 hover:text-[#1DBF73] transition-colors duration-300">
                 <Phone size={16} />
                 <span className="text-sm">+1 (555) 123-4567</span>
               </div>
-              <div className="flex items-center space-x-2 text-gray-600 hover:text-forest-green transition-colors duration-300">
+              <div className="flex items-center space-x-2 text-gray-600 hover:text-[#1DBF73] transition-colors duration-300">
                 <MapPin size={16} />
                 <span className="text-sm">San Francisco, CA</span>
               </div>
@@ -159,14 +159,14 @@ export const SiteFooterSection = (): JSX.Element => {
                 ref={el => addToColumnsRef(el, columnIndex)}
                 className="flex flex-col"
               >
-                <div className="[font-family:'Inter',Helvetica] font-semibold text-forest-green text-[16px] tracking-[-0.15px] leading-[18px] whitespace-nowrap mb-6">
+                <div className="[font-family:'Inter',Helvetica] font-semibold text-[#1DBF73] text-[16px] tracking-[-0.15px] leading-[18px] whitespace-nowrap mb-6">
                   {column.title}
                 </div>
                 {column.links.map((link, linkIndex) => (
                   <a
                     key={linkIndex}
                     href={link.href}
-                    className="[font-family:'Inter',Helvetica] font-medium text-[#666666] text-[14.5px] tracking-[-0.15px] leading-[16px] whitespace-nowrap mb-4 last:mb-0 hover:text-forest-green transition-all duration-300 hover:translate-x-1 cursor-pointer"
+                    className="[font-family:'Inter',Helvetica] font-medium text-[#666666] text-[14.5px] tracking-[-0.15px] leading-[16px] whitespace-nowrap mb-4 last:mb-0 hover:text-[#1DBF73] transition-all duration-300 hover:translate-x-1 cursor-pointer"
                   >
                     {link.name}
                   </a>
@@ -187,7 +187,7 @@ export const SiteFooterSection = (): JSX.Element => {
               <a
                 key={index}
                 href={social.href}
-                className="social-icon w-10 h-10 bg-white border border-forest-green/20 rounded-full flex items-center justify-center text-forest-green hover:bg-forest-green hover:text-white transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-forest-green/25"
+                className="social-icon w-10 h-10 bg-white border border-forest-green/20 rounded-full flex items-center justify-center text-[#1DBF73] hover:bg-forest-green hover:text-white transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-forest-green/25"
                 aria-label={social.name}
               >
                 <IconComponent size={20} />
@@ -208,10 +208,10 @@ export const SiteFooterSection = (): JSX.Element => {
       </div>
 
       <style jsx>{`
-        .text-forest-green {
+        .text-[#1DBF73] {
           color: #228B22;
         }
-        .hover\\:text-forest-green:hover {
+        .hover\\:text-[#1DBF73]:hover {
           color: #228B22;
         }
         .bg-forest-green {

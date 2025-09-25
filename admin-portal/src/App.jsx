@@ -2,13 +2,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AdminDashboard from "./pages/AdminDashboard";
 import ApprovedProjects from "./pages/ApprovedProjects";
 import RejectedProjects from "./pages/RejectedProjects";
-import NavBar from "./components/NavBar";
+import NavBar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="flex flex-col min-h-screen bg-black text-white">
+      <div className="flex flex-col min-h-screen text-white">
         {/* Nav */}
         <NavBar />
 

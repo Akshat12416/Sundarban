@@ -82,7 +82,7 @@ export const ImageCarouselSection = (): JSX.Element => {
           ref={titleRef}
           className="w-[896px] h-24 [font-family:'Inter',Helvetica] font-normal text-[#575757] text-5xl md:text-6xl lg:text-[80px] tracking-[0] leading-[96px] whitespace-nowrap"
         >
-          Building a <span className="text-forest-green font-semibold">Cleaner</span> Future.
+          Building a <span className="text-[#1DBF73] font-semibold">Cleaner</span> Future.
         </h1>
       </header>
 
@@ -104,17 +104,17 @@ export const ImageCarouselSection = (): JSX.Element => {
       <div className="flex justify-center pt-3">
         <p 
           ref={swipeTextRef}
-          className="w-[108px] h-[29px] [font-family:'Inter',Helvetica] font-normal text-[#575757] text-[21.6px] tracking-[0] leading-[28.8px] whitespace-nowrap text-center hover:text-forest-green transition-colors duration-300"
+          className="w-[108px] h-[29px] [font-family:'Inter',Helvetica] font-normal text-[#575757] text-[21.6px] tracking-[0] leading-[28.8px] whitespace-nowrap text-center hover:text-[#1DBF73] transition-colors duration-300"
         >
           …DRAG ...
         </p>
       </div>
 
       <style>{`
-        .text-forest-green {
+        .text-[#1DBF73] {
           color: #228B22;
         }
-        .hover\\:text-forest-green:hover {
+        .hover\\:text-[#1DBF73]:hover {
           color: #228B22;
         }
         .from-forest-green\\/30 {

@@ -68,7 +68,7 @@ export const MainContentSection = (): JSX.Element => {
             Our Commitment <br />
             to a <RotatingText 
               words={rotatingWords}
-              className="text-forest-green inline-block min-w-[200px] lg:min-w-[300px]"
+              className="text-[#1DBF73] inline-block min-w-[200px] lg:min-w-[300px]"
             /> <br />
             Future.
           </h2>
@@ -99,7 +99,7 @@ export const MainContentSection = (): JSX.Element => {
       </div>
 
       <style jsx>{`
-        .text-forest-green {
+        .text-[#1DBF73] {
           color: #228B22;
         }
         .bg-forest-green\\/30 {

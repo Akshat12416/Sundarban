@@ -8,6 +8,7 @@ import LoginTypeSelector from "./sections/LognCards/LoginTyleSelector";
 import ContributorLogin from "./sections/LognCards/ContributorLogin";
 import CompanyLogin from "./sections/LognCards/CompanyLogin";
 import AdminLogin from "./sections/LognCards/AdminLogin";
+import PreloaderPage from "./sections/Preloader/PreloaderPage"; // Import the preloader component
 
 // Lazy load the specified components
 const HeroSection = React.lazy(() => import("./sections/HeroSection/HeroSection").then(module => ({ default: module.HeroSection })));
@@ -18,6 +19,9 @@ const SiteFooterSection = React.lazy(() => import("./sections/SiteFooterSection/
 export const ElementLight = (): JSX.Element => {
   const navigate = useNavigate();
   const [isHeroLoaded, setIsHeroLoaded] = React.useState(false);
+  const [showPreloader, setShowPreloader] = React.useState(true);
+  const [preloaderFinished, setPreloaderFinished] = React.useState(false);
+  const [showBackToTop, setShowBackToTop] = React.useState(false);
 
   const handleSelectType = (type: string) => {
     console.log(`Selected login type: ${type}`);
@@ -27,6 +31,11 @@ export const ElementLight = (): JSX.Element => {
   const handleBack = () => {
     // Navigate back to login type selector
     navigate('/login-type-selector');
+  };
+
+  const handleLoadComplete = () => {
+    setShowPreloader(false);
+    setPreloaderFinished(true);
   };
 
   React.useEffect(() => {
@@ -41,18 +50,25 @@ export const ElementLight = (): JSX.Element => {
     };
   }, []);
 
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > window.innerHeight);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={
         <div className="relative w-full bg-white">
-          {/* Preloading Overlay */}
-          {!isHeroLoaded && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
-              <div className="flex flex-col items-center space-y-4">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-forest-green border-t-transparent"></div>
-                <p className="text-forest-green font-medium text-lg">Loading CarbonChain...</p>
-              </div>
-            </div>
+          {/* Beautiful animated preloader */}
+          {showPreloader && (
+            <PreloaderPage 
+              onLoadComplete={handleLoadComplete}
+              isLoaded={isHeroLoaded}
+            />
           )}
 
           <div className="relative w-full">
@@ -77,6 +93,20 @@ export const ElementLight = (): JSX.Element => {
               </div>
             </div>
           </div>
+
+          {/* Floating Back to Top Button */}
+          {showBackToTop && (
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              aria-label="Back to top"
+              className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-forest-green text-white shadow-lg hover:bg-forest-green/80 focus:outline-none focus:ring-2 focus:ring-forest-green focus:ring-offset-2 transition"
+              title="Back to top"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+              </svg>
+            </button>
+          )}
         </div>
       } />
       <Route path="/login-type-selector" element={
