@@ -411,7 +411,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         {/* Menu Toggle Button */}
         <button
           ref={toggleBtnRef}
-          className="sm-toggle relative inline-flex items-center gap-[0.25rem] sm:gap-[0.3rem] bg-transparent border-0 cursor-pointer text-white font-medium text-sm sm:text-base leading-none overflow-visible pointer-events-auto z-[9999]"
+          className="sm-toggle relative inline-flex items-center gap-[0.25rem] sm:gap-[0.3rem] bg-black rounded-full px-5 py-3 border-0 cursor-pointer text-white font-medium text-sm sm:text-base leading-none overflow-visible pointer-events-auto z-[9999]"
           style={{
             position: embedded && open ? 'fixed' : 'relative',
             top: embedded && open ? '1.5rem' : 'auto',
@@ -422,8 +422,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
           aria-expanded={open}
           aria-controls="staggered-menu-panel"
           onClick={toggleMenu}
-          type="button"
-        >
+>
           <span
             ref={textWrapRef}
             className="sm-toggle-textWrap relative inline-block h-[1em] overflow-hidden whitespace-nowrap w-[var(--sm-toggle-width,auto)] min-w-[var(--sm-toggle-width,auto)]"
@@ -470,7 +469,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         >
           <div className="sm-panel-inner flex-1 flex flex-col gap-4 sm:gap-5">
             <ul
-              className="sm-panel-list list-none m-0 p-0 flex flex-col gap-1 sm:gap-2"
+              className="sm-panel-list list-none m-0 p-0 flex flex-col gap-0.5 sm:gap-1"
               role="list"
               data-numbering={displayItemNumbering || undefined}
             >
@@ -618,7 +617,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
           top: 1.5rem !important;
           right: 1.5rem !important;
           z-index: 9999 !important;
-          color: #000 !important;
+          color: #fff !important;
         }
 
         @media (max-width: 640px) {

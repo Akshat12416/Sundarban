@@ -1,6 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
+import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { StaggeredMenu } from "../../../../components/animations/StaggeredMenu";
 import CountUp from 'react-countup';
 import { TrendingUp, TrendingDown, Users, DollarSign, ChartBar as BarChart3, Grid3x3 as Grid3X3, List } from "lucide-react";
 
@@ -23,9 +25,36 @@ interface Seller {
 export const MarketplaceSection = (): JSX.Element => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [sellers, setSellers] = useState<Seller[]>([]);
-  const headerRef = useRef<HTMLDivElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const statsRef = useRef<HTMLDivElement>(null);
   const sellersRef = useRef<HTMLDivElement>(null);
+
+  // Menu items for StaggeredMenu
+  const menuItems = [
+    { label: 'Home', ariaLabel: 'Go to home page', link: '/' },
+    { label: 'Market', ariaLabel: 'View marketplace', link: '/marketplace' },
+    { label: 'About', ariaLabel: 'Learn about us', link: '/about' },
+    { label: 'Contact', ariaLabel: 'Get in touch', link: '/contact' }
+  ];
+
+  const socialItems = [
+    { label: 'Twitter', link: 'https://twitter.com' },
+    { label: 'GitHub', link: 'https://github.com' },
+    { label: 'LinkedIn', link: 'https://linkedin.com' }
+  ];
+
+  // Memoized handlers for performance
+  const handleMenuOpen = useCallback(() => {
+    console.log('Menu opened');
+    setMenuOpen(true);
+  }, []);
+
+  const handleMenuClose = useCallback(() => {
+    console.log('Menu closed');
+    setMenuOpen(false);
+  }, []);
+
+  const logo = "src/photos/LOGOBGBlack.svg";
 
   // Dummy data for sellers
   useEffect(() => {
@@ -114,18 +143,6 @@ export const MarketplaceSection = (): JSX.Element => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Header animation
-      gsap.from(headerRef.current, {
-        y: -50,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: headerRef.current,
-          start: "top 90%",
-        }
-      });
-
       // Stats animation
       gsap.from(statsRef.current?.children || [], {
         y: 30,
@@ -188,330 +205,360 @@ export const MarketplaceSection = (): JSX.Element => {
   const verifiedSellers = sellers.filter(s => s.verified).length;
 
   return (
-    <section className="w-full bg-gradient-to-b from-white to-green-50/20 py-12 md:py-20 px-4 md:px-6">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* Header */}
-        <div ref={headerRef} className="text-center mb-12">
-          <h1 className="[font-family:'Inter',Helvetica] font-bold text-black text-4xl md:text-6xl lg:text-7xl tracking-tight leading-tight mb-4">
-            Carbon Credit <span className="text-[#1DBF73]">Marketplace</span>
-          </h1>
-          <p className="text-gray-600 text-lg md:text-xl max-w-3xl mx-auto">
-            Trade verified carbon credits from trusted sellers worldwide
-          </p>
+    <>
+      {/* Header */}
+      <header className="flex w-full max-w-[1203px]  items-center justify-between px-4 md:px-10 py-7 overflow-visible">
+        {/* Logo - exactly as original */}
+        <div className="flex items-center">
+          <Link to="/">
+            <img
+              src={logo}
+              alt="Logo"
+              className="h-10 w-10 object-cover cursor-pointer"
+              draggable={false}
+              loading="eager"
+            />
+          </Link>
         </div>
 
-        {/* Market Statistics */}
-        <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
-          <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3 mb-2">
-              <DollarSign className="w-5 h-5 text-[#1DBF73]" />
-              <span className="text-sm text-gray-500">Market Cap</span>
-            </div>
-            <div className="text-2xl md:text-3xl font-bold text-black">
-              $<CountUp end={totalMarketCap / 1000000} duration={2} decimals={1} suffix="M" enableScrollSpy scrollSpyOnce />
-            </div>
-            <div className="flex items-center gap-1 mt-1">
-              <TrendingUp className="w-3 h-3 text-green-500" />
-              <span className="text-xs text-green-500">+5.2%</span>
-            </div>
-          </div>
+        {/* Menu and Login wrapper - exactly as original */}
+        <div className="flex items-center gap-2 md:gap-2">
 
-          <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3 mb-2">
-              <BarChart3 className="w-5 h-5 text-[#1DBF73]" />
-              <span className="text-sm text-gray-500">Total Credits</span>
-            </div>
-            <div className="text-2xl md:text-3xl font-bold text-black">
-              <CountUp end={totalCredits / 1000} duration={2} decimals={0} suffix="K" enableScrollSpy scrollSpyOnce />
-            </div>
-            <div className="flex items-center gap-1 mt-1">
-              <TrendingUp className="w-3 h-3 text-green-500" />
-              <span className="text-xs text-green-500">+12.8%</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3 mb-2">
-              <DollarSign className="w-5 h-5 text-[#1DBF73]" />
-              <span className="text-sm text-gray-500">Avg Price</span>
-            </div>
-            <div className="text-2xl md:text-3xl font-bold text-black">
-              $<CountUp end={avgPrice} duration={2} decimals={2} enableScrollSpy scrollSpyOnce />
-            </div>
-            <div className="flex items-center gap-1 mt-1">
-              <TrendingDown className="w-3 h-3 text-red-500" />
-              <span className="text-xs text-red-500">-2.1%</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3 mb-2">
-              <Users className="w-5 h-5 text-[#1DBF73]" />
-              <span className="text-sm text-gray-500">Verified Sellers</span>
-            </div>
-            <div className="text-2xl md:text-3xl font-bold text-black">
-              <CountUp end={verifiedSellers} duration={2} enableScrollSpy scrollSpyOnce />
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-1 mt-2">
-              <div 
-                className="bg-[#1DBF73] h-1 rounded-full transition-all duration-1000"
-                style={{ width: `${(verifiedSellers / sellers.length) * 100}%` }}
-              ></div>
-            </div>
+          {/* StaggeredMenu Component - exactly as original */}
+          <div className="relative z-50">
+            <StaggeredMenu
+              position="right"
+              items={menuItems}
+              socialItems={socialItems}
+              displaySocials={true}
+              displayItemNumbering={true}
+              menuButtonColor="#fff"
+              openMenuButtonColor="#fff"
+              changeMenuColorOnOpen={true}
+              colors={['#228B22', '#32CD32', '#006400']} // Green theme colors
+              logoUrl={logo}
+              accentColor="#228B22" // Forest green accent
+              onMenuOpen={handleMenuOpen}
+              onMenuClose={handleMenuClose}
+              embedded={true} // Add embedded prop to indicate it's inside header
+            />
           </div>
         </div>
+      </header>
 
-        {/* View Toggle and Filters */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl md:text-2xl font-bold text-black">Active Sellers</h2>
-            <span className="text-sm text-gray-500">({sellers.length} sellers)</span>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="flex bg-gray-100 rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-md transition-all ${
-                  viewMode === 'list' 
-                    ? 'bg-white shadow-sm text-[#1DBF73]' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <List className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-md transition-all ${
-                  viewMode === 'grid' 
-                    ? 'bg-white shadow-sm text-[#1DBF73]' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <Grid3X3 className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+      <section className="w-full bg-gradient-to-b from-white to-green-50/20 py-4 md:py-4 px-4 md:px-6">
+        <div className="max-w-7xl mx-auto">
 
-        {/* Sellers List/Grid */}
-        <div ref={sellersRef}>
-          {viewMode === 'list' ? (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              {/* Table Header */}
-              <div className="grid grid-cols-12 gap-4 p-4 bg-gray-50 border-b border-gray-100 text-sm font-medium text-gray-600">
-                <div className="col-span-4">Seller</div>
-                <div className="col-span-2 text-center">Type</div>
-                <div className="col-span-2 text-right">Credits</div>
-                <div className="col-span-2 text-right">Price</div>
-                <div className="col-span-2 text-right">24h Change</div>
+
+
+          {/* Market Statistics */}
+          <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
+            <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-2">
+                <DollarSign className="w-5 h-5 text-[#1DBF73]" />
+                <span className="text-sm text-gray-500">Market Cap</span>
               </div>
-
-              {/* Table Rows */}
-              {sellers.map((seller, index) => (
-                <div 
-                  key={seller.id}
-                  className="grid grid-cols-12 gap-4 p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer group"
-                >
-                  <div className="col-span-4 flex items-center gap-3">
-                    <div className="relative">
-                      <img 
-                        src={seller.avatar} 
-                        alt={seller.name}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      {seller.verified && (
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#1DBF73] rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs">✓</span>
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <div className="font-semibold text-black group-hover:text-[#1DBF73] transition-colors">
-                        {seller.name}
-                      </div>
-                      <div className="text-sm text-gray-500">{seller.location}</div>
-                    </div>
-                  </div>
-
-                  <div className="col-span-2 flex justify-center items-center">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(seller.type)}`}>
-                      {getTypeIcon(seller.type)} {seller.type}
-                    </span>
-                  </div>
-
-                  <div className="col-span-2 text-right">
-                    <div className="font-semibold text-black">
-                      <CountUp end={seller.credits} duration={1.5} separator="," enableScrollSpy scrollSpyOnce />
-                    </div>
-                    <div className="text-sm text-gray-500">credits</div>
-                  </div>
-
-                  <div className="col-span-2 text-right">
-                    <div className="font-semibold text-black">
-                      $<CountUp end={seller.pricePerCredit} duration={1.5} decimals={2} enableScrollSpy scrollSpyOnce />
-                    </div>
-                    <div className="text-sm text-gray-500">per credit</div>
-                  </div>
-
-                  <div className="col-span-2 text-right">
-                    <div className={`font-semibold flex items-center justify-end gap-1 ${
-                      seller.change24h >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {seller.change24h >= 0 ? (
-                        <TrendingUp className="w-3 h-3" />
-                      ) : (
-                        <TrendingDown className="w-3 h-3" />
-                      )}
-                      <CountUp 
-                        end={Math.abs(seller.change24h)} 
-                        duration={1.5} 
-                        decimals={1} 
-                        suffix="%" 
-                        prefix={seller.change24h >= 0 ? '+' : '-'}
-                        enableScrollSpy 
-                        scrollSpyOnce 
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
+              <div className="text-2xl md:text-3xl font-bold text-black">
+                $<CountUp end={totalMarketCap / 1000000} duration={2} decimals={1} suffix="M" enableScrollSpy scrollSpyOnce />
+              </div>
+              <div className="flex items-center gap-1 mt-1">
+                <TrendingUp className="w-3 h-3 text-green-500" />
+                <span className="text-xs text-green-500">+5.2%</span>
+              </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sellers.map((seller) => (
-                <div 
-                  key={seller.id}
-                  className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 hover:scale-105 cursor-pointer group"
+
+            <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-2">
+                <BarChart3 className="w-5 h-5 text-[#1DBF73]" />
+                <span className="text-sm text-gray-500">Total Credits</span>
+              </div>
+              <div className="text-2xl md:text-3xl font-bold text-black">
+                <CountUp end={totalCredits / 1000} duration={2} decimals={0} suffix="K" enableScrollSpy scrollSpyOnce />
+              </div>
+              <div className="flex items-center gap-1 mt-1">
+                <TrendingUp className="w-3 h-3 text-green-500" />
+                <span className="text-xs text-green-500">+12.8%</span>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-2">
+                <DollarSign className="w-5 h-5 text-[#1DBF73]" />
+                <span className="text-sm text-gray-500">Avg Price</span>
+              </div>
+              <div className="text-2xl md:text-3xl font-bold text-black">
+                $<CountUp end={avgPrice} duration={2} decimals={2} enableScrollSpy scrollSpyOnce />
+              </div>
+              <div className="flex items-center gap-1 mt-1">
+                <TrendingDown className="w-3 h-3 text-red-500" />
+                <span className="text-xs text-red-500">-2.1%</span>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-2">
+                <Users className="w-5 h-5 text-[#1DBF73]" />
+                <span className="text-sm text-gray-500">Verified Sellers</span>
+              </div>
+              <div className="text-2xl md:text-3xl font-bold text-black">
+                <CountUp end={verifiedSellers} duration={2} enableScrollSpy scrollSpyOnce />
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-1 mt-2">
+                <div
+                  className="bg-[#1DBF73] h-1 rounded-full transition-all duration-1000"
+                  style={{ width: `${(verifiedSellers / sellers.length) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          {/* View Toggle and Filters */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div className="flex items-center gap-4">
+              <h2 className="text-xl md:text-2xl font-bold text-black">Active Sellers</h2>
+              <span className="text-sm text-gray-500">({sellers.length} sellers)</span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-md transition-all ${viewMode === 'list'
+                    ? 'bg-white shadow-sm text-[#1DBF73]'
+                    : 'text-gray-500 hover:text-gray-700'
+                    }`}
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
+                  <List className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-md transition-all ${viewMode === 'grid'
+                    ? 'bg-white shadow-sm text-[#1DBF73]'
+                    : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Sellers List/Grid */}
+          <div ref={sellersRef}>
+            {viewMode === 'list' ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                {/* Table Header */}
+                <div className="grid grid-cols-12 gap-4 p-4 bg-gray-50 border-b border-gray-100 text-sm font-medium text-gray-600">
+                  <div className="col-span-4">Seller</div>
+                  <div className="col-span-2 text-center">Type</div>
+                  <div className="col-span-2 text-right">Credits</div>
+                  <div className="col-span-2 text-right">Price</div>
+                  <div className="col-span-2 text-right">24h Change</div>
+                </div>
+
+                {/* Table Rows */}
+                {sellers.map((seller, index) => (
+                  <div
+                    key={seller.id}
+                    className="grid grid-cols-12 gap-4 p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer group"
+                  >
+                    <div className="col-span-4 flex items-center gap-3">
                       <div className="relative">
-                        <img 
-                          src={seller.avatar} 
+                        <img
+                          src={seller.avatar}
                           alt={seller.name}
-                          className="w-12 h-12 rounded-full object-cover"
+                          className="w-10 h-10 rounded-full object-cover"
                         />
                         {seller.verified && (
-                          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#1DBF73] rounded-full flex items-center justify-center">
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#1DBF73] rounded-full flex items-center justify-center">
                             <span className="text-white text-xs">✓</span>
                           </div>
                         )}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-black group-hover:text-[#1DBF73] transition-colors">
+                        <div className="font-semibold text-black group-hover:text-[#1DBF73] transition-colors">
                           {seller.name}
-                        </h3>
-                        <p className="text-sm text-gray-500">{seller.location}</p>
+                        </div>
+                        <div className="text-sm text-gray-500">{seller.location}</div>
                       </div>
                     </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(seller.type)}`}>
-                      {getTypeIcon(seller.type)}
-                    </span>
-                  </div>
 
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{seller.description}</p>
+                    <div className="col-span-2 flex justify-center items-center">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(seller.type)}`}>
+                        {getTypeIcon(seller.type)} {seller.type}
+                      </span>
+                    </div>
 
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">Available Credits</span>
-                      <span className="font-semibold text-black">
+                    <div className="col-span-2 text-right">
+                      <div className="font-semibold text-black">
                         <CountUp end={seller.credits} duration={1.5} separator="," enableScrollSpy scrollSpyOnce />
-                      </span>
+                      </div>
+                      <div className="text-sm text-gray-500">credits</div>
                     </div>
 
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">Price per Credit</span>
-                      <span className="font-semibold text-black">
+                    <div className="col-span-2 text-right">
+                      <div className="font-semibold text-black">
                         $<CountUp end={seller.pricePerCredit} duration={1.5} decimals={2} enableScrollSpy scrollSpyOnce />
-                      </span>
+                      </div>
+                      <div className="text-sm text-gray-500">per credit</div>
                     </div>
 
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">24h Change</span>
-                      <span className={`font-semibold flex items-center gap-1 ${
-                        seller.change24h >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
+                    <div className="col-span-2 text-right">
+                      <div className={`font-semibold flex items-center justify-end gap-1 ${seller.change24h >= 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
                         {seller.change24h >= 0 ? (
                           <TrendingUp className="w-3 h-3" />
                         ) : (
                           <TrendingDown className="w-3 h-3" />
                         )}
-                        <CountUp 
-                          end={Math.abs(seller.change24h)} 
-                          duration={1.5} 
-                          decimals={1} 
-                          suffix="%" 
+                        <CountUp
+                          end={Math.abs(seller.change24h)}
+                          duration={1.5}
+                          decimals={1}
+                          suffix="%"
                           prefix={seller.change24h >= 0 ? '+' : '-'}
-                          enableScrollSpy 
-                          scrollSpyOnce 
+                          enableScrollSpy
+                          scrollSpyOnce
                         />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sellers.map((seller) => (
+                  <div
+                    key={seller.id}
+                    className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 hover:scale-105 cursor-pointer group"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="relative">
+                          <img
+                            src={seller.avatar}
+                            alt={seller.name}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                          {seller.verified && (
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#1DBF73] rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs">✓</span>
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-black group-hover:text-[#1DBF73] transition-colors">
+                            {seller.name}
+                          </h3>
+                          <p className="text-sm text-gray-500">{seller.location}</p>
+                        </div>
+                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(seller.type)}`}>
+                        {getTypeIcon(seller.type)}
                       </span>
                     </div>
 
-                    {/* Progress bar for credits availability */}
-                    <div className="pt-2">
-                      <div className="flex justify-between text-xs text-gray-500 mb-1">
-                        <span>Availability</span>
-                        <span>{Math.min(100, (seller.credits / 100000) * 100).toFixed(0)}%</span>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{seller.description}</p>
+
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-500">Available Credits</span>
+                        <span className="font-semibold text-black">
+                          <CountUp end={seller.credits} duration={1.5} separator="," enableScrollSpy scrollSpyOnce />
+                        </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-[#1DBF73] h-2 rounded-full transition-all duration-1000"
-                          style={{ width: `${Math.min(100, (seller.credits / 100000) * 100)}%` }}
-                        ></div>
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-500">Price per Credit</span>
+                        <span className="font-semibold text-black">
+                          $<CountUp end={seller.pricePerCredit} duration={1.5} decimals={2} enableScrollSpy scrollSpyOnce />
+                        </span>
                       </div>
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-500">24h Change</span>
+                        <span className={`font-semibold flex items-center gap-1 ${seller.change24h >= 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                          {seller.change24h >= 0 ? (
+                            <TrendingUp className="w-3 h-3" />
+                          ) : (
+                            <TrendingDown className="w-3 h-3" />
+                          )}
+                          <CountUp
+                            end={Math.abs(seller.change24h)}
+                            duration={1.5}
+                            decimals={1}
+                            suffix="%"
+                            prefix={seller.change24h >= 0 ? '+' : '-'}
+                            enableScrollSpy
+                            scrollSpyOnce
+                          />
+                        </span>
+                      </div>
+
+                      {/* Progress bar for credits availability */}
+                      <div className="pt-2">
+                        <div className="flex justify-between text-xs text-gray-500 mb-1">
+                          <span>Availability</span>
+                          <span>{Math.min(100, (seller.credits / 100000) * 100).toFixed(0)}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-[#1DBF73] h-2 rounded-full transition-all duration-1000"
+                            style={{ width: `${Math.min(100, (seller.credits / 100000) * 100)}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      <button className="w-full mt-4 bg-[#1DBF73] text-white py-2 px-4 rounded-lg hover:bg-[#17a665] transition-colors font-medium">
+                        View Details
+                      </button>
                     </div>
-
-                    <button className="w-full mt-4 bg-[#1DBF73] text-white py-2 px-4 rounded-lg hover:bg-[#17a665] transition-colors font-medium">
-                      View Details
-                    </button>
                   </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Market Insights */}
+          <div className="mt-16 bg-white rounded-xl p-6 md:p-8 shadow-sm border border-gray-100">
+            <h3 className="text-xl md:text-2xl font-bold text-black mb-6">Market Insights</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-bold text-[#1DBF73] mb-2">
+                  <CountUp end={85} duration={2} suffix="%" enableScrollSpy scrollSpyOnce />
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+                <p className="text-gray-600">Verified Projects</p>
+                <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                  <div className="bg-[#1DBF73] h-2 rounded-full w-[85%] transition-all duration-1000"></div>
+                </div>
+              </div>
 
-        {/* Market Insights */}
-        <div className="mt-16 bg-white rounded-xl p-6 md:p-8 shadow-sm border border-gray-100">
-          <h3 className="text-xl md:text-2xl font-bold text-black mb-6">Market Insights</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#1DBF73] mb-2">
-                <CountUp end={85} duration={2} suffix="%" enableScrollSpy scrollSpyOnce />
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-bold text-[#1DBF73] mb-2">
+                  <CountUp end={42} duration={2} enableScrollSpy scrollSpyOnce />
+                </div>
+                <p className="text-gray-600">Countries Represented</p>
+                <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                  <div className="bg-[#1DBF73] h-2 rounded-full w-[70%] transition-all duration-1000"></div>
+                </div>
               </div>
-              <p className="text-gray-600">Verified Projects</p>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div className="bg-[#1DBF73] h-2 rounded-full w-[85%] transition-all duration-1000"></div>
-              </div>
-            </div>
 
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#1DBF73] mb-2">
-                <CountUp end={42} duration={2} enableScrollSpy scrollSpyOnce />
-              </div>
-              <p className="text-gray-600">Countries Represented</p>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div className="bg-[#1DBF73] h-2 rounded-full w-[70%] transition-all duration-1000"></div>
-              </div>
-            </div>
-
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#1DBF73] mb-2">
-                $<CountUp end={2.4} duration={2} decimals={1} suffix="B" enableScrollSpy scrollSpyOnce />
-              </div>
-              <p className="text-gray-600">Total Volume Traded</p>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div className="bg-[#1DBF73] h-2 rounded-full w-[95%] transition-all duration-1000"></div>
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-bold text-[#1DBF73] mb-2">
+                  $<CountUp end={2.4} duration={2} decimals={1} suffix="B" enableScrollSpy scrollSpyOnce />
+                </div>
+                <p className="text-gray-600">Total Volume Traded</p>
+                <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                  <div className="bg-[#1DBF73] h-2 rounded-full w-[95%] transition-all duration-1000"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 

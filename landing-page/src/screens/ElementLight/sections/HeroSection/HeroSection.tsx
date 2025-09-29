@@ -9,7 +9,7 @@ import  AnimatedButton  from "../../../../components/animations/AnimatedButton";
 gsap.registerPlugin(ScrollTrigger);
 
 const Herobg = "https://images.pexels.com/photos/8514903/pexels-photo-8514903.jpeg";
-const logo = "/src/photos/logo.svg";
+const logo = "/src/photos/LOGOBGBlack.svg";
 
 interface HeroSectionProps {
   onLoad?: () => void;
@@ -27,7 +27,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoad }) => {
   // Menu items for StaggeredMenu - kept exactly as original
   const menuItems = [
     { label: 'Home', ariaLabel: 'Go to home page', link: '/' },
-    { label: 'Marketplace', ariaLabel: 'View marketplace', link: '/marketplace' },
+    { label: 'Market', ariaLabel: 'View marketplace', link: '/marketplace' },
     { label: 'About', ariaLabel: 'Learn about us', link: '/about' },
     { label: 'Contact', ariaLabel: 'Get in touch', link: '/contact' }
   ];
@@ -69,7 +69,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoad }) => {
       // Parallax effect for background - optimized but maintains original effect
       if (parallaxRef.current) {
         gsap.set(parallaxRef.current, { willChange: "transform" });
-        
+
         gsap.to(parallaxRef.current, {
           yPercent: -30,
           ease: "none",
@@ -161,17 +161,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoad }) => {
                 <img
                   src={logo}
                   alt="Logo"
-                  className="h-8 w-8 object-cover rounded-md"
+                  className="h-10 w-10 object-cover"
                   draggable={false}
                   loading="eager"
                 />
               </div>
 
               {/* Menu and Login wrapper - exactly as original */}
-              <div className="flex items-center gap-2 md:gap-4">
-                <Link to="/login-type-selector" className="[font-family:'Inter',Helvetica] font-semibold text-white hover:text-[#1DBF73] text-base md:text-lg tracking-[0] leading-[24px] cursor-pointer relative group hidden md:block">
+              <div className="flex items-center gap-2 md:gap-2">
+                <Link to="/login-type-selector" className="[font-family:'Inter',Helvetica] font-semibold bg-[#1DBF73] px-5 rounded-full py-2 text-white hover:text-[#1DBF73] text-base md:text-lg tracking-[0] leading-[24px] cursor-pointer relative group hidden md:block">
                   Log In
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-forest-green transition-all duration-300 group-hover:w-full"></span>
                 </Link>
 
                 {/* StaggeredMenu Component - exactly as original */}
@@ -227,7 +226,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoad }) => {
                 <div className="max-w-full md:max-w-[499px]">
                   <div className="mb-4 sm:mb-6">
                     <p ref={subtitleRef} className="[font-family:'Inter',Helvetica] font-bold text-black/80 text-xs sm:text-sm md:text-[16px] text-center md:text-right tracking-[-0.20px] sm:tracking-[-0.40px] md:tracking-[-0.80px] leading-4 sm:leading-5 px-4 sm:px-2 md:px-0">
-                      Our blockchain-enabled carbon credit platform ensures 
+                      Our blockchain-enabled carbon credit platform ensures
                       transparency and integrity in the voluntary carbon market.{" "}
                       Join us in making a measurable impact through verified
                       afforestation projects.
@@ -294,13 +293,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoad }) => {
           0%, 100% { transform: translateY(0px) translateX(0px); }
           50% { transform: translateY(-15px) translateX(15px); }
         }
-        
+
         /* Performance optimizations without changing appearance */
         * {
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
-        
+
         @media (prefers-reduced-motion: reduce) {
           * {
             animation-duration: 0.01ms !important;

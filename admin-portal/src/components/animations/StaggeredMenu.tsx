@@ -466,7 +466,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         >
           <div className="sm-panel-inner flex-1 flex flex-col gap-4 sm:gap-5">
             <ul
-              className="sm-panel-list list-none m-0 p-0 flex flex-col gap-1 sm:gap-2"
+              className="sm-panel-list list-none m-0 p-0 flex flex-col gap-0.5 sm:gap-1"
               role="list"
               data-numbering={displayItemNumbering || undefined}
             >
