@@ -4,7 +4,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { StaggeredMenu } from "../../../../components/animations/StaggeredMenu";
 import CountUp from 'react-countup';
-import { TrendingUp, TrendingDown, Users, DollarSign, ChartBar as BarChart3, Grid3x3 as Grid3X3, List } from "lucide-react";
+import { TrendingUp, TrendingDown, Users, IndianRupee, ChartBar as BarChart3, Grid3x3 as Grid3X3, List } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -61,66 +61,66 @@ export const MarketplaceSection = (): JSX.Element => {
     const dummySellers: Seller[] = [
       {
         id: '1',
-        name: 'Amazon Rainforest Initiative',
+        name: 'NCCR Projects',
         type: 'government',
-        credits: 50000,
+        credits: 5000,
         pricePerCredit: 15.50,
         totalValue: 775000,
         change24h: 2.5,
         verified: true,
-        location: 'Brazil',
+        location: 'Chennai',
         avatar: 'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
-        description: 'Large-scale reforestation project in the Amazon basin'
+        description: 'Large-scale reforestation project in Chennai'
       },
       {
         id: '2',
         name: 'GreenTech Solutions',
         type: 'organization',
-        credits: 25000,
+        credits: 250,
         pricePerCredit: 12.75,
         totalValue: 318750,
         change24h: -1.2,
         verified: true,
-        location: 'California, USA',
+        location: 'Mumbai',
         avatar: 'https://images.pexels.com/photos/2280549/pexels-photo-2280549.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
         description: 'Renewable energy and carbon capture technology'
       },
       {
         id: '3',
-        name: 'Nordic Forest Alliance',
-        type: 'government',
-        credits: 75000,
+        name: 'Akshat',
+        type: 'Individual',
+        credits: 75,
         pricePerCredit: 18.25,
         totalValue: 1368750,
         change24h: 4.8,
         verified: true,
-        location: 'Norway',
-        avatar: 'https://images.pexels.com/photos/1632790/pexels-photo-1632790.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
+        location: 'Kochi',
+        avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
         description: 'Sustainable forestry and conservation programs'
       },
       {
         id: '4',
-        name: 'John Smith',
-        type: 'individual',
-        credits: 500,
+        name: 'Gujarat Government',
+        type: 'Government',
+        credits: 5000,
         pricePerCredit: 10.00,
         totalValue: 5000,
         change24h: 0.5,
         verified: true,
-        location: 'Oregon, USA',
-        avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
-        description: 'Small-scale tree planting on private land'
+        location: 'Gujarat',
+        avatar: 'https://images.pexels.com/photos/1632790/pexels-photo-1632790.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
+        description: 'Restoring Blue Carbon plantations'
       },
       {
         id: '5',
-        name: 'Australian Carbon Fund',
-        type: 'government',
-        credits: 100000,
+        name: 'Mangrove Move',
+        type: 'NGO',
+        credits: 200,
         pricePerCredit: 20.00,
         totalValue: 2000000,
         change24h: 3.2,
         verified: true,
-        location: 'Australia',
+        location: 'Puducherry',
         avatar: 'https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
         description: 'National carbon offset and conservation initiative'
       },
@@ -128,12 +128,12 @@ export const MarketplaceSection = (): JSX.Element => {
         id: '6',
         name: 'EcoVentures Ltd',
         type: 'organization',
-        credits: 15000,
+        credits: 1500,
         pricePerCredit: 14.30,
         totalValue: 214500,
         change24h: -0.8,
         verified: false,
-        location: 'London, UK',
+        location: 'Surat',
         avatar: 'https://images.pexels.com/photos/1108101/pexels-photo-1108101.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
         description: 'Urban reforestation and green infrastructure'
       }
@@ -255,11 +255,11 @@ export const MarketplaceSection = (): JSX.Element => {
           <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
             <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               <div className="flex items-center gap-3 mb-2">
-                <DollarSign className="w-5 h-5 text-[#1DBF73]" />
+                <IndianRupee className="w-5 h-5 text-[#1DBF73]" />
                 <span className="text-sm text-gray-500">Market Cap</span>
               </div>
               <div className="text-2xl md:text-3xl font-bold text-black">
-                $<CountUp end={totalMarketCap / 1000000} duration={2} decimals={1} suffix="M" enableScrollSpy scrollSpyOnce />
+                ₹<CountUp end={totalMarketCap / 1000000} duration={2} decimals={1} suffix="M" enableScrollSpy scrollSpyOnce />
               </div>
               <div className="flex items-center gap-1 mt-1">
                 <TrendingUp className="w-3 h-3 text-green-500" />
@@ -283,11 +283,11 @@ export const MarketplaceSection = (): JSX.Element => {
 
             <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               <div className="flex items-center gap-3 mb-2">
-                <DollarSign className="w-5 h-5 text-[#1DBF73]" />
+                <IndianRupee className="w-5 h-5 text-[#1DBF73]" />
                 <span className="text-sm text-gray-500">Avg Price</span>
               </div>
               <div className="text-2xl md:text-3xl font-bold text-black">
-                $<CountUp end={avgPrice} duration={2} decimals={2} enableScrollSpy scrollSpyOnce />
+                ₹<CountUp end={avgPrice} duration={2} decimals={2} enableScrollSpy scrollSpyOnce />
               </div>
               <div className="flex items-center gap-1 mt-1">
                 <TrendingDown className="w-3 h-3 text-red-500" />
@@ -398,7 +398,7 @@ export const MarketplaceSection = (): JSX.Element => {
 
                     <div className="col-span-2 text-right">
                       <div className="font-semibold text-black">
-                        $<CountUp end={seller.pricePerCredit} duration={1.5} decimals={2} enableScrollSpy scrollSpyOnce />
+                        ₹<CountUp end={seller.pricePerCredit} duration={1.5} decimals={2} enableScrollSpy scrollSpyOnce />
                       </div>
                       <div className="text-sm text-gray-500">per credit</div>
                     </div>
@@ -471,7 +471,7 @@ export const MarketplaceSection = (): JSX.Element => {
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-500">Price per Credit</span>
                         <span className="font-semibold text-black">
-                          $<CountUp end={seller.pricePerCredit} duration={1.5} decimals={2} enableScrollSpy scrollSpyOnce />
+                          ₹<CountUp end={seller.pricePerCredit} duration={1.5} decimals={2} enableScrollSpy scrollSpyOnce />
                         </span>
                       </div>
 
@@ -547,7 +547,7 @@ export const MarketplaceSection = (): JSX.Element => {
 
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-[#1DBF73] mb-2">
-                  $<CountUp end={2.4} duration={2} decimals={1} suffix="B" enableScrollSpy scrollSpyOnce />
+                  ₹<CountUp end={2.4} duration={2} decimals={1} suffix="B" enableScrollSpy scrollSpyOnce />
                 </div>
                 <p className="text-gray-600">Total Volume Traded</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">

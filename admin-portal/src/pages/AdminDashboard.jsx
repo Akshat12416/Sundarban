@@ -429,12 +429,12 @@ const approveProject = async (proj) => {
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                   <div className="flex flex-col items-center gap-1">
-                        <CountUp end={50} duration={2} suffix="%" className="text-sm sm:text-base font-bold text-gray-700" />
+                        <CountUp end={8} duration={2} suffix="%" className="text-sm sm:text-base font-bold text-gray-700" />
                     <div className="w-8 h-1 bg-gray-300 rounded-full">
-                      <div className="w-1/2 h-full bg-[#1DBF73] rounded-full"></div>
+                      <div className="w-1/2 h-full bg-[#ef5656] rounded-full"></div>
                     </div>
                   </div>
-                  <span className="px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border bg-[#aceec7] text-[#1DBF73]">
+                  <span className="px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border bg-[#f1a4a4] text-[#f13939]">
                     Pending
                   </span>
                   <svg
