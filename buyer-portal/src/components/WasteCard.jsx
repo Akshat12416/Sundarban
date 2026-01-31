@@ -3,14 +3,18 @@ import { db } from "../firebase";
 
 export default function WasteCard({ waste }) {
 
-  const expressInterest = async () => {
-    const path = `WasteProjects/${waste.userKey}/${waste.id}`;
-    await update(ref(db, path), {
-      interested: true,
-      interestedAt: Date.now(),
-    });
-    alert("Interest recorded!");
-  };
+  const buyAndProcess = async () => {
+  const path = `WasteProjects/${waste.userKey}/${waste.id}`;
+
+  await update(ref(db, path), {
+    status: "RESERVED",
+    buyerId: "buyer_demo",
+    reservedAt: Date.now()
+  });
+
+  alert("Waste reserved for processing");
+};
+
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
@@ -39,10 +43,10 @@ export default function WasteCard({ waste }) {
       </p>
 
       <button
-        onClick={expressInterest}
+        onClick={buyAndProcess}
         className="mt-4 w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
       >
-        Express Interest
+        Buy & Process
       </button>
     </div>
   );
