@@ -19,7 +19,7 @@ export default function BuyerDashboard() {
       const flat = [];
       Object.entries(data).forEach(([userKey, userNode]) => {
         Object.entries(userNode || {}).forEach(([id, waste]) => {
-          if (waste.status === "VERIFIED") {
+          if (waste.status === "APPROVED") {
             flat.push({ id, userKey, ...waste });
           }
         });
