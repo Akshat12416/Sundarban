@@ -1,9 +1,16 @@
-import React from 'react'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import BuyerDashboard from "./pages/BuyerDashboard";
+import Navbar from "./components/Navbar";
 
-function App() {
+export default function App() {
   return (
-    <div>App</div>
-  )
+    <BrowserRouter>
+      <div className="min-h-screen bg-gray-100">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<BuyerDashboard />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
 }
-
-export default App
