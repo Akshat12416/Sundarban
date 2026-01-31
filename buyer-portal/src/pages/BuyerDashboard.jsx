@@ -4,7 +4,7 @@ import { db } from "../firebase";
 import WasteCard from "../components/WasteCard";
 import Filters from "../components/Filters";
 
-const LISTABLE_STATUS = "APPROVED"; // Step 4 entry point
+const LISTABLE_STATUS = "APPROVED";
 
 export default function BuyerDashboard() {
   const [wasteList, setWasteList] = useState([]);
@@ -25,7 +25,6 @@ export default function BuyerDashboard() {
 
       Object.entries(data).forEach(([userKey, userNode]) => {
         Object.entries(userNode || {}).forEach(([id, waste]) => {
-          // STEP 4: Only show OPEN listings
           if (waste.status === LISTABLE_STATUS) {
             flat.push({ id, userKey, ...waste });
           }
@@ -66,7 +65,7 @@ export default function BuyerDashboard() {
           <WasteCard
             key={waste.id}
             waste={waste}
-            mode="BUY"   // prepares card for Step 4 action
+            mode="BUY"
           />
         ))}
       </div>

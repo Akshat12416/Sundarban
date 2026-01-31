@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import BuyerDashboard from "./pages/BuyerDashboard";
+import MyOrders from "./pages/MyOrders";
 import Navbar from "./components/Navbar";
 
 export default function App() {
@@ -9,6 +10,7 @@ export default function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<BuyerDashboard />} />
+          <Route path="/orders" element={<MyOrders />} />
         </Routes>
       </div>
     </BrowserRouter>
