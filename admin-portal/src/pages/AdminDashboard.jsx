@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { ref, onValue, update, push, set } from "firebase/database";
 import { db } from "../firebase";
+import { getImageSrc } from "../utils/imageUtils";
+
 
 const IMPACT_FACTOR = {
   Organic: 1.2,
@@ -180,9 +182,19 @@ export default function AdminDashboard() {
             className="bg-white rounded shadow p-4 flex flex-col justify-between"
           >
             <div>
-              <h3 className="font-semibold text-lg">
-                {waste.wasteName}
-              </h3>
+  <h3 className="font-semibold text-lg">
+    {waste.wasteName}
+  </h3>
+
+  {/* Waste Image */}
+  {waste.photo && (
+    <img
+      src={getImageSrc(waste.photo)}
+      alt="Waste"
+      className="mt-2 w-full h-40 object-cover rounded border"
+    />
+  )}
+
 
               <p className="text-sm text-gray-600">
                 Status: <strong>{waste.status}</strong>

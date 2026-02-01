@@ -3,6 +3,8 @@ import { ref, onValue, update, push } from "firebase/database";
 import { db } from "../firebase";
 import { ethers } from "ethers";
 import CONTRACT_ABI from "../abi/CarbonCreditToken.json";
+import { getImageSrc } from "../utils/imageUtils";
+
 
 const CONTRACT_ADDRESS = "0x1448d4966Cf9748f708ef4607BE5685f0e9AF0B9";
 
@@ -189,8 +191,18 @@ export default function PlantationExecution() {
             className="bg-white rounded shadow p-4"
           >
             <h3 className="font-semibold text-lg">
-              {waste.wasteName}
-            </h3>
+  {waste.wasteName}
+</h3>
+
+{/* Waste Image */}
+{waste.photo && (
+  <img
+    src={getImageSrc(waste.photo)}
+    alt="Waste"
+    className="mt-2 w-full h-40 object-cover rounded border"
+  />
+)}
+
 
             <p className="text-sm text-gray-600">
               Category: {waste.aiCategory}

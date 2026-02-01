@@ -10,7 +10,8 @@ export default function NavBar() {
     { label: "Approved", path: "/approved" },
     { label: "Rejected", path: "/rejected" },
     { label: "Marketplace", path: "/marketplace" },
-    { label: "Plantation Execution", path: "/plantation-execution"}
+    { label: "Plantation Execution", path: "/plantation-execution"},
+    { label: "Plantation Verification", path: "/plantation-verification"}
   ];
 
   return (
