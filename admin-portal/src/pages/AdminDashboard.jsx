@@ -1,194 +1,213 @@
 import React, { useEffect, useState } from "react";
+import { ref, onValue, update, push, set } from "firebase/database";
 import { db } from "../firebase";
-import { ref, onValue, update } from "firebase/database";
-import SplitText from "../components/animations/SplitText";
+
+const IMPACT_FACTOR = {
+  Organic: 1.2,
+  Recyclable: 0.8,
+  Electronic: 0.6,
+  Construction: 0.3,
+  Inert: 0.1
+};
+
+
+const classifyWaste = (wasteName = "") => {
+  const name = wasteName.toLowerCase();
+
+  if (name.includes("rice")) return "Organic";
+  if (name.includes("wrapper")) return "Recyclable";
+  if (name.includes("can")) return "Recyclable";
+  if (name.includes("paper")) return "Recyclable";
+  if (name.includes("mobile")) return "Electronic";
+
+  return "Inert";
+};
 
 export default function AdminDashboard() {
-  const [wasteProjects, setWasteProjects] = useState([]);
+  const [wasteList, setWasteList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [expandedCards, setExpandedCards] = useState(new Set());
-
-  /* ---------------- FETCH WASTE PROJECTS ---------------- */
 
   useEffect(() => {
     const wasteRef = ref(db, "WasteProjects");
 
-    const unsubscribe = onValue(wasteRef, (snapshot) => {
+    const unsub = onValue(wasteRef, async (snapshot) => {
       const data = snapshot.val();
       if (!data) {
-        setWasteProjects([]);
+        setWasteList([]);
         setLoading(false);
         return;
       }
 
       const flat = [];
 
-      Object.entries(data).forEach(([userKey, userNode]) => {
-        Object.entries(userNode || {}).forEach(([wasteId, wasteData]) => {
+      for (const [userKey, userNode] of Object.entries(data)) {
+        for (const [id, waste] of Object.entries(userNode || {})) {
+          const updates = {};
+
+          // ---------- AUTO AI VERIFICATION ----------
+          if (!waste.status || waste.status === "SUBMITTED") {
+            updates.status = "AI_VERIFIED";
+          }
+
+          // ---------- AUTO CATEGORY CLASSIFICATION ----------
+          if (!waste.aiCategory && waste.wasteName) {
+            updates.aiCategory = classifyWaste(waste.wasteName);
+          }
+
+          // Apply updates once (safe)
+          if (Object.keys(updates).length > 0) {
+            await update(
+              ref(db, `WasteProjects/${userKey}/${id}`),
+              updates
+            );
+          }
+
           flat.push({
-            id: wasteId,
+            id,
             userKey,
-            ...wasteData,
+            ...waste,
+            ...updates
           });
-        });
-      });
+        }
+      }
 
-      // Show only AI verified waste for admin
-      const filtered = flat.filter(
-        (w) => w.status === "AI_VERIFIED"
-      );
+      // Latest first (demo clarity)
+      flat.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-      setWasteProjects(filtered);
+      setWasteList(flat);
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => unsub();
   }, []);
 
-  /* ---------------- ADMIN ACTIONS ---------------- */
+  // ---------- ADMIN ACTIONS ----------
 
   const approveWaste = async (waste) => {
-    const path = `WasteProjects/${waste.userKey}/${waste.id}`;
+    await update(
+      ref(db, `WasteProjects/${waste.userKey}/${waste.id}`),
+      {
+        status: "APPROVED",
+        approvedAt: Date.now(),
+        approvedBy: "admin"
+      }
+    );
 
-    await update(ref(db, path), {
-      status: "APPROVED",
-      approvedBy: "admin",
-      approvedAt: Date.now(),
-    });
-
-    alert("Waste approved for listing & impact attribution");
+    alert("Waste approved and listed");
   };
 
-  const rejectWaste = async (waste) => {
-    const path = `WasteProjects/${waste.userKey}/${waste.id}`;
+  const allocateToPlantationPool = async (waste) => {
+    const factor = IMPACT_FACTOR[waste.aiCategory] || 0.1;
+    const finalWeight = Number(waste.finalWeightKg || 0);
+    const plantationUnits = finalWeight * factor;
 
-    await update(ref(db, path), {
-      status: "REJECTED",
-      rejectedBy: "admin",
-      rejectedAt: Date.now(),
+    const poolRef = ref(db, "PlantationPool");
+    const entryRef = push(poolRef);
+
+    await set(entryRef, {
+      wasteId: waste.id,
+      sourceUser: waste.userKey,
+      buyerId: waste.buyerId || null,
+      aiCategory: waste.aiCategory,
+      finalWeightKg: finalWeight,
+      plantationUnits,
+      status: "POOL_LOCKED",
+      createdAt: Date.now()
     });
+
+    await update(
+      ref(db, `WasteProjects/${waste.userKey}/${waste.id}`),
+      {
+        status: "POOL_ALLOCATED",
+        poolEntryId: entryRef.key,
+        poolAllocatedAt: Date.now()
+      }
+    );
+
+    alert("Allocated to Plantation Pool");
   };
 
-  const toggleExpand = (id) => {
-    const next = new Set(expandedCards);
-    next.has(id) ? next.delete(id) : next.add(id);
-    setExpandedCards(next);
+  // ---------- UI ACTION HANDLER ----------
+  const renderAction = (waste) => {
+    switch (waste.status) {
+      case "AI_VERIFIED":
+        return (
+          <button
+            onClick={() => approveWaste(waste)}
+            className="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Approve
+          </button>
+        );
+
+      case "WEIGHT_VERIFIED":
+        return (
+          <button
+            onClick={() => allocateToPlantationPool(waste)}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Allocate to Plantation Pool
+          </button>
+        );
+
+      default:
+        return (
+          <span className="text-sm text-gray-500">
+            No action required
+          </span>
+        );
+    }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading waste submissions...
+      <div className="p-6 text-gray-600">
+        Loading admin dashboard…
       </div>
     );
   }
 
-  /* ---------------- RENDER ---------------- */
-
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <SplitText
-        text="Admin Dashboard – Waste Verification"
-        tag="h1"
-        className="text-4xl font-bold text-green-600 mb-6"
-      />
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl font-bold text-green-700 mb-6">
+        Admin Dashboard – Waste Lifecycle Control
+      </h1>
 
-      {wasteProjects.length === 0 && (
-        <p className="text-gray-500">No AI-verified waste found.</p>
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {wasteList.map((waste) => (
+          <div
+            key={waste.id}
+            className="bg-white rounded shadow p-4 flex flex-col justify-between"
+          >
+            <div>
+              <h3 className="font-semibold text-lg">
+                {waste.wasteName}
+              </h3>
 
-      <div className="space-y-4">
-        {wasteProjects.map((waste) => {
-          const expanded = expandedCards.has(waste.id);
+              <p className="text-sm text-gray-600">
+                Status: <strong>{waste.status}</strong>
+              </p>
 
-          return (
-            <div
-              key={waste.id}
-              className="bg-white rounded-lg shadow p-4 cursor-pointer"
-              onClick={() => toggleExpand(waste.id)}
-            >
-              {/* HEADER */}
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="font-semibold text-lg text-black">
-                    {waste.wasteName}
-                  </h2>
-                  <p className="text-xs text-gray-500">
-                    {waste.city}, {waste.state}
-                  </p>
-                </div>
+              <p className="text-sm text-gray-600">
+                Category: {waste.aiCategory}
+              </p>
 
-                <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm">
-                  AI Verified
-                </span>
-              </div>
+              <p className="text-sm text-gray-600">
+                Declared Weight: {waste.wasteWeight} kg
+              </p>
 
-              {/* EXPANDED DETAILS */}
-              {expanded && (
-                <div className="mt-4 space-y-2 text-sm text-gray-700">
-                  <p>
-                    <strong>User:</strong> {waste.userKey}
-                  </p>
-
-                  <p>
-                    <strong>Declared Quantity:</strong>{" "}
-                    {waste.quantityKg} kg
-                  </p>
-
-                  <p>
-                    <strong>AI Classified Category:</strong>{" "}
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
-                      {waste.aiCategory || "Recyclable"}
-                    </span>
-                  </p>
-
-                  <p>
-                    <strong>AI Confidence:</strong>{" "}
-                    {waste.aiConfidence
-                      ? `${waste.aiConfidence}%`
-                      : "—"}
-                  </p>
-
-                  <p>
-                    <strong>Location:</strong>{" "}
-                    {waste.landMark}, {waste.pincode}
-                  </p>
-
-                  {waste.photo && (
-                    <img
-                      src={waste.photo}
-                      alt="waste"
-                      className="w-48 h-48 object-cover rounded border"
-                    />
-                  )}
-
-                  {/* ACTIONS */}
-                  <div className="flex gap-3 mt-4">
-                    <button
-                      className="bg-green-600 text-white px-4 py-2 rounded"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        approveWaste(waste);
-                      }}
-                    >
-                      Approve
-                    </button>
-
-                    <button
-                      className="bg-red-500 text-white px-4 py-2 rounded"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        rejectWaste(waste);
-                      }}
-                    >
-                      Reject
-                    </button>
-                  </div>
-                </div>
+              {waste.finalWeightKg && (
+                <p className="text-sm text-gray-600">
+                  Final Weight: {waste.finalWeightKg} kg
+                </p>
               )}
             </div>
-          );
-        })}
+
+            <div className="mt-4">
+              {renderAction(waste)}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

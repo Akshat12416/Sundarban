@@ -214,6 +214,11 @@
 				"internalType": "uint256",
 				"name": "credits",
 				"type": "uint256"
+			},
+			{
+				"internalType": "enum CarbonCreditToken.ProjectType",
+				"name": "projectType",
+				"type": "uint8"
 			}
 		],
 		"name": "registerProject",
@@ -394,6 +399,52 @@
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "projectId",
+				"type": "uint256"
+			}
+		],
+		"name": "getProject",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "dataHash",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "creditsIssued",
+						"type": "uint256"
+					},
+					{
+						"internalType": "enum CarbonCreditToken.ProjectType",
+						"name": "projectType",
+						"type": "uint8"
+					},
+					{
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct CarbonCreditToken.Project",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "name",
 		"outputs": [
@@ -455,6 +506,16 @@
 			{
 				"internalType": "uint256",
 				"name": "creditsIssued",
+				"type": "uint256"
+			},
+			{
+				"internalType": "enum CarbonCreditToken.ProjectType",
+				"name": "projectType",
+				"type": "uint8"
+			},
+			{
+				"internalType": "uint256",
+				"name": "timestamp",
 				"type": "uint256"
 			}
 		],

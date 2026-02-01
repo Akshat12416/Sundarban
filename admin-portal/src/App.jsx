@@ -4,6 +4,7 @@ import ApprovedProjects from "./pages/ApprovedProjects";
 import RejectedProjects from "./pages/RejectedProjects";
 import NavBar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
+import PlantationExecution from "./pages/PlantationExecution.jsx";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/" element={<AdminDashboard />} />
             <Route path="/approved" element={<ApprovedProjects />} />
             <Route path="/rejected" element={<RejectedProjects />} />
+            <Route path="/plantation-execution" element={<PlantationExecution />} />
           </Routes>
         </main>
 
