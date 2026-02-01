@@ -3,6 +3,7 @@ import { ref, onValue } from "firebase/database";
 import { db } from "../firebase";
 import WasteCard from "../components/WasteCard";
 import Filters from "../components/Filters";
+import { getImageSrc } from "../utils/imageUtils";
 
 const LISTABLE_STATUS = "APPROVED";
 
