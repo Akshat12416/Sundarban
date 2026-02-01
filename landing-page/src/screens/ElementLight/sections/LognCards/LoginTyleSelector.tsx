@@ -132,7 +132,7 @@ function LoginTypeSelector() {
               onClick={() => navigate('/company-login')}
               className="w-full justify-between group bg-green-500 hover:bg-green-600 text-white"
             >
-              <span>Continue as Company</span>
+              <span>Continue as Buyer</span>
               <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
