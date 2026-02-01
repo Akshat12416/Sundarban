@@ -16,4 +16,4 @@ Replace all green color references in the landing-page project with hex color `1
 - [ ] StaggeredMenu.tsx updated
 - [ ] CircularGallery.tsx updated
 - [ ] AnimatedButton.tsx updated
-- [ ] Testing completed
+- [ ] Testing completed.
