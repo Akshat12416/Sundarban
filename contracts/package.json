@@ -1,0 +1,8 @@
+{
+  "name": "sundarban-contracts",
+  "private": true,
+  "description": "OpenZeppelin v5 is installed for Solidity imports only. Compilation is later.",
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0"
+  }
+}
