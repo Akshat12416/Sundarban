@@ -54,11 +54,10 @@ Paste into `services/verifier/secrets/firebase-web.env`:
 | `apiKey` | `VITE_FIREBASE_API_KEY` |
 | `authDomain` | `VITE_FIREBASE_AUTH_DOMAIN` |
 | `projectId` | `VITE_FIREBASE_PROJECT_ID` |
-| `storageBucket` | `VITE_FIREBASE_STORAGE_BUCKET` |
 | `messagingSenderId` | `VITE_FIREBASE_MESSAGING_SENDER_ID` |
 | `appId` | `VITE_FIREBASE_APP_ID` |
 
-Leave `measurementId` unset. Analytics is off. Leave `databaseURL` unset.
+Leave `measurementId` unset. Analytics is off. Leave `databaseURL` unset. Leave `storageBucket` out. Each line is `NAME=value`. Do not paste the JavaScript `firebaseConfig` block into this file.
 
 Check: **Authentication → Sign-in method** shows Google as **Enabled**. The web app is listed under **Project settings → General → Your apps**.
 
@@ -67,9 +66,7 @@ Check: **Authentication → Sign-in method** shows Google as **Enabled**. The we
 1. Open **Build → Firestore Database**.
 2. Click **Create database**.
 3. Edition: **Standard**. The data model in the plan is standard documents.
-4. Location: choose once. It cannot be changed.
-   - `us-central1` if you want the Storage bucket to be eligible for the Always Free tier in step 4.
-   - `asia-south1` (Mumbai) if you would rather have lower latency from India and pay Cloud Storage rates.
+4. Location: choose once. It cannot be changed. Pick `asia-south1` (Mumbai). Evidence files are stored in Supabase, so this choice is only for Firestore.
 5. Rules: **Production mode**. The default rules deny all reads and writes.
 6. Click **Create**.
 
@@ -77,44 +74,11 @@ Nothing from this step is a secret. Write the location you chose in a note for t
 
 Check: the Firestore page shows an empty database. The **Rules** tab contains `allow read, write: if false`.
 
-## 4. Cloud Storage and the paid plan
+## 4. Skip Firebase Cloud Storage
 
-A new Firebase project needs the **Blaze** (pay as you go) plan to create or use a Cloud Storage bucket. That requirement has been in force since 3 February 2026. On the Spark plan the console will not open the bucket, and Storage API calls fail with 402 or 403.
+Do not upgrade this Firebase project to Blaze, and do not create a Firebase Storage bucket. Evidence files go to Supabase. Follow `docs/guides/SUPABASE_STORAGE.md`.
 
-Source: [Firebase Storage billing FAQ](https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024), checked 2026-10-20.
-
-Blaze still includes no-cost usage. A new default bucket is named `PROJECT_ID.firebasestorage.app` and follows Cloud Storage pricing. For buckets in `us-west1`, `us-central1`, or `us-east1`, the Always Free limits are aggregated across those three regions ([Cloud Storage pricing](https://cloud.google.com/storage/pricing), checked 2026-10-20):
-
-| Resource | Monthly Always Free limit |
-|---|---|
-| Standard storage | 5 GB-months |
-| Class A operations | 5,000 |
-| Class B operations | 50,000 |
-| Data transfer | 100 GB from North America to each eligible destination (Australia and China excluded) |
-
-Always Free does not apply to the Rapid storage class, and it does not apply to `asia-south1`. A brand-new Google Cloud billing account may also be offered a trial credit. The console is the place that says whether your account is eligible. Do not count on it.
-
-### Options
-
-1. **Blaze, bucket in `us-central1`, budget alert.** This is the option that can stay inside Always Free for Storage. Use it if a zero Storage bill matters more than round-trip time from India. You still link a card.
-2. **Blaze, bucket in `asia-south1`, budget alert.** Same plan, closer region, Storage is billed at normal Cloud Storage rates. A student prototype is a small bill if the alert is set, and it is not free.
-3. **Stay on Spark and use only the emulator.** The emulator does not need Blaze and does not store real photos. Local development is supposed to use the emulator anyway. A phone upload or a demo against a live bucket still needs option 1 or 2 before that path can run.
-
-The old bucket on `carbonvault-c2f6a` is not one of the options.
-
-### If you choose Blaze
-
-1. Gear → **Usage and billing** → **Details and settings** → **Modify plan** → **Blaze**.
-2. Link a Cloud Billing account. The account needs the **Owner** role on the project.
-3. Accept the budget alert the wizard offers. Pick a low monthly amount you are willing to notice.
-4. Open **Build → Storage** → **Get started**.
-5. Start in **production mode** (deny rules).
-6. If it asks for a location, use the region you chose in step 3. The console often ties the first bucket to the project's default location.
-7. Copy the bucket name.
-
-Paste the bucket name into `services/verifier/secrets/firebase-web.env` as `VITE_FIREBASE_STORAGE_BUCKET` if it differs from what the web-app wizard wrote.
-
-Check: the Storage page shows a bucket ending in `.firebasestorage.app`. On Spark, that page sends you to the upgrade screen instead, which is the signal to use option 3 until you upgrade.
+Firestore and Google sign-in stay on the Spark plan. The web config does not need `VITE_FIREBASE_STORAGE_BUCKET`.
 
 ## 5. Generate a service account key
 
@@ -160,7 +124,7 @@ The CLI stores its login under your home directory (`~/.config/configstore/fireb
 | Item | Why |
 |---|---|
 | `services/verifier/secrets/firebase-admin.json` | Private key for the admin service account. |
-| `services/verifier/.env` | Points at that key and names the project. |
+| `services/verifier/.env` | Firebase project id, service-account path, and the Supabase secret key and database password. |
 | `services/verifier/secrets/firebase-web.env` | Web API key, sender id, and app id. |
 | Any future `apps/*/.env` or Expo env file | Same web config, once Phase 1 creates the apps. |
 | `~/.config/configstore/firebase-tools.json` | Your CLI login. |
@@ -174,8 +138,8 @@ Commit `.env.example` files only, and only with empty values. The repo gitignore
 - A new project exists and its id is not `carbonvault-c2f6a`.
 - Google is Enabled under Authentication.
 - Firestore is in production mode and you know the region.
-- You have either a Blaze bucket plus a budget alert, or a written choice to stay on the emulator until a demo needs a real bucket.
+- Firebase stays on Spark. The Supabase checks in `docs/guides/SUPABASE_STORAGE.md` printed `public False`, then `upload 200` or `upload 201`, and `delete 200`.
 - `services/verifier/secrets/firebase-admin.json` exists, `git status` is clean of it, and the Python check prints the new project id.
 - `firebase projects:list` shows the project.
 
-Tell the next session the project id, the Firestore region, and whether the project is on Blaze. Do not paste the JSON or the API key.
+Tell the next session the Firebase project id, the Firestore region, and the Supabase region. Do not paste the JSON, the Firebase API key, or the Supabase secret key.
