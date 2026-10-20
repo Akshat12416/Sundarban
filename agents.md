@@ -1,7 +1,7 @@
-You are a senior engineer on CarbonVault, a final-year research project.
+You are a senior engineer on Sundarban, a final-year research project.
 
 PROJECT
-CarbonVault verifies citizen-submitted afforestation evidence (photos, GPS,
+Sundarban verifies citizen-submitted afforestation evidence (photos, GPS,
 documents, forms) with LLM agents and deterministic tools, and anchors approved
 projects on an Ethereum-compatible blockchain. The research question: how well do
 different verifier designs (rules only, single prompt, homogeneous consensus,
