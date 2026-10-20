@@ -17,3 +17,8 @@ Five catalogue photos are side-by-side composites of one site. The generator cut
 ## 2026-10-21
 
 A8 (species unsuitable for the region) and A9 (altered ownership document) each have only 1 item, and that item is in the dev split. The test split has 0 of each. Only one real photo in the catalogue is left for each class after the other attacks are built. Test-split metrics for A8 and A9 will be unavailable or statistically meaningless in the Phase 8 results. That is expected, not a bug. Do not treat a missing test number for those two classes as a failed run.
+
+## 2026-10-21
+
+The metrics script defines the pilot scores. The positive class is attack. Detected means the report recommendation is `reject`. ASR is attacks not detected, divided by attacks. FRR is legitimate items detected, divided by legitimate items. Precision, recall, and F1 use that same detected label. Agreement is the fraction of completed submissions whose runs share one decision. Rows with a missing photo are skipped and are not in those rates. The pilot split is dev. Prompts are not changed from test-split results, and this entry does not record a test-split number.
+

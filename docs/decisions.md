@@ -32,3 +32,12 @@ The duplicate index takes the registry as an argument. It does not keep a proces
 
 The analysis cache key is the concatenation `sha256(evidence) + agent id + prompt version + model id`. Pytest uses in-memory nonce, device, and evidence stores. A normal server process uses Firestore when the Admin SDK is ready. Bench runs use SQLite through `bench/analysis_cache.py`. Signed URLs last `SIGNED_URL_TTL_SECONDS` (120).
 
+## 2026-10-21 — Verifiers C0, C1, and C2
+
+C0 is rules only. C1 is one multimodal call. C2 is three C1 calls with agent ids `c2-1`, `c2-2`, and `c2-3`, the same prompt version, and the same model id. Temperature is 0. A majority is more than half of the three decisions. Without a majority the decision is review.
+
+The pilot split is `dev`. The runner does not look at `test`. A missing photo is a skipped row, not a pass or a reject. Detected, for the metrics script, means `recommendation` is `reject`. ASR is attacks not detected divided by attacks. FRR is legitimate items detected divided by legitimate items. Agreement is the share of completed submissions whose runs all have the same decision.
+
+The cost gate reads `MAX_RUN_COST`, then `GEMINI_RUN_COST_CAP_USD`. The price table is `bench/prices.json`, copied from the Gemini pricing page on 2026-10-21. The default tier is the paid standard rate. `GEMINI_PRICE_TIER=free` selects the published free-tier rate of zero. The output token count in an estimate is the configured ceiling of 1024 per call, not a measured response. `--dry-run` counts input tokens and does not call `generateContent`. An estimate above the cap exits 2 unless `--force` is set.
+
+

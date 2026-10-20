@@ -19,6 +19,9 @@ Run each one from the repository root unless the line says otherwise.
 | Test vectors | `cd packages/test-vectors && .venv/bin/pytest` |
 | Shared TypeScript crypto | `cd packages/cv-crypto-ts && npm test` |
 | Admin claim | `python3 scripts/set_admin_claim.py --email you@example.com` |
+| Verifier pilot | `services/verifier/.venv/bin/python -m bench.run --config C0 --split dev --runs 3` |
+| Cost estimate | `services/verifier/.venv/bin/python -m bench.estimate_cost --config C1 --split dev --runs 1` |
+| Metrics | `services/verifier/.venv/bin/python -m bench.metrics --input bench/results/C0-dev.jsonl` |
 
 First-time setup for a Python component is `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt` inside that directory. Admin web is `cd apps/admin-web && npm install`. Contracts also need `cd contracts && npm install` so OpenZeppelin v5 is on disk for later Solidity imports.
 

@@ -67,20 +67,23 @@ class GeminiGenerator:
         temperature: float,
         max_output_tokens: int,
     ) -> tuple[str, int]:
-        response = self._client.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-            params={"key": self._api_key},
-            json={
-                "contents": [{"role": "user", "parts": parts}],
-                "generationConfig": {
-                    "temperature": temperature,
-                    "maxOutputTokens": max_output_tokens,
-                    "responseMimeType": "application/json",
-                    "responseSchema": schema,
-                    "thinkingConfig": {"thinkingLevel": "minimal"},
+        try:
+            response = self._client.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                params={"key": self._api_key},
+                json={
+                    "contents": [{"role": "user", "parts": parts}],
+                    "generationConfig": {
+                        "temperature": temperature,
+                        "maxOutputTokens": max_output_tokens,
+                        "responseMimeType": "application/json",
+                        "responseSchema": schema,
+                        "thinkingConfig": {"thinkingLevel": "minimal"},
+                    },
                 },
-            },
-        )
+            )
+        except httpx.HTTPError as exc:
+            raise LlmError(f"gemini transport {type(exc).__name__}") from None
         if response.status_code >= 400:
             raise LlmError(f"gemini status {response.status_code}")
         body = response.json()
@@ -89,11 +92,14 @@ class GeminiGenerator:
         return text, tokens
 
     def count_tokens(self, model: str, parts: list[dict[str, Any]]) -> int:
-        response = self._client.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:countTokens",
-            params={"key": self._api_key},
-            json={"contents": [{"parts": parts}]},
-        )
+        try:
+            response = self._client.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{model}:countTokens",
+                params={"key": self._api_key},
+                json={"contents": [{"parts": parts}]},
+            )
+        except httpx.HTTPError as exc:
+            raise LlmError(f"countTokens transport {type(exc).__name__}") from None
         if response.status_code >= 400:
             raise LlmError(f"countTokens status {response.status_code}")
         return int(response.json().get("totalTokens") or 0)
