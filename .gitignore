@@ -4,9 +4,9 @@ node_modules/
 
 # Production builds
 dist/
-*/dist/
+**/dist/
 dist-ssr/
-*/dist-ssr/
+**/dist-ssr/
 
 # Environment and secrets
 .env

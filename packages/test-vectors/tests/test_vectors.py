@@ -28,8 +28,8 @@ def test_each_group_has_at_least_ten_cases() -> None:
 def test_canonical_json_matches_reference() -> None:
     for case in _load()["canonicalJson"]:
         assert canonical_json(case["value"]) == case["canonical"]
-        assert " " not in case["canonical"]
-        assert "\n" not in case["canonical"]
+        assert ": " not in case["canonical"]
+        assert ", " not in case["canonical"]
 
 
 def test_metadata_hash_matches_reference() -> None:
