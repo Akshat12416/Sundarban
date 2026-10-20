@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     supabase_secret_key: str | None = None
     supabase_storage_bucket: str = "evidence"
     disk_storage_dir: str = "services/verifier/data"
+    signed_url_ttl_seconds: int = 120
+    phash_hamming_threshold: int = 8
+    nonce_ttl_seconds: int = 600
     firestore_emulator_host: str | None = Field(default=None)
     firebase_auth_emulator_host: str | None = Field(default=None)
 
