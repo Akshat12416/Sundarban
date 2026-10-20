@@ -1,12 +1,16 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-21 00:20 | by: Grok 4.7 | commit: 0fea73e
+Last updated (UTC): 2026-10-21 05:40 | by: Grok 4.7 | commit: 2ad7a88
 
 ## 1. Next step (read this first)
-The evidence layer is in place: storage, image pipeline, duplicate index, Python and TypeScript crypto, analysis cache, nonces, ID-token role checks, and the four evidence routes. Verified on 2026-10-21: `cd services/verifier && .venv/bin/pytest` (19 passed, 1 skipped live Supabase test) and `cd packages/cv-crypto-ts && node --experimental-strip-types --test src/index.test.ts` (5 passed).
+C0, C1, and C2 share `verify(submission) -> Report`. The rules pilot is written. The model pilot did not generate.
 
-The user does `docs/guides/PHASE_4_PREREQUISITES.md` before any Gemini experiment. First action: confirm `gemini-3.8-flash` is still the lower-cost Flash model in AI Studio, then set `GEMINI_RUN_COST_CAP_USD` in `bench/.env`. Do not start a full run until Phase 4 adds `python -m bench.estimate_cost` and that command exits 0.
+`services/verifier/.venv/bin/python -m bench.run --config C0 --split dev --runs 3` wrote `bench/results/C0-dev.jsonl`. `python -m bench.metrics --input bench/results/C0-dev.jsonl` printed the table below. 36 of 80 dev rows were skipped because the photo file is not on disk. Rates use the 44 completed rows. Do not tune the prompt or the rules from the test split. The test split was not run.
 
-`POST /v1/projects/{id}/verify` is not implemented. That is the next service work, after the guide. `packages/test-vectors` still stores accuracy as integer `accuracyM`. New uploads require a one-decimal `accuracy` string. Both hash libraries accept the vectors as they are.
+Paid dry-runs on 2026-10-21, one run, dev split, no `generateContent`: C1 estimate `0.2506185` USD (108878 input tokens, output ceiling 45056). C2 estimate `0.7522515` USD (327162 input tokens, output ceiling 135168). Both exited 2 because `GEMINI_RUN_COST_CAP_USD` is below those estimates. `MAX_RUN_COST` is unset, so the runner used that cap.
+
+User action before a C1 generation run: confirm the key is still the free-tier Flash model, then either set `GEMINI_PRICE_TIER=free` in `bench/.env` or raise the cap above the C1 estimate. Then run `services/verifier/.venv/bin/python -m bench.run --config C1 --split dev --runs 1` and `python -m bench.metrics --input bench/results/C1-dev.jsonl`. Do not pass `--force` unless you mean to ignore the cap. Do not pass `--split test`.
+
+C0 dev metrics from that command: completed 44, skipped 36, attacks 39, legit 5, ASR 0.385, FRR 0.000, precision 1.000, recall 0.615, F1 0.762, agreement 1.000. Detected counts: A1 5/5, A2 5/5, A6 1/1, A7 1/1, A8 1/1, A9 1/1, A10 5/5, A12 5/5, A3 0/1, A4 0/5, A5 0/4, A11 0/5, legit 0/5.
 
 Do not copy `legacy/` into the new apps. The only admin files a later phase may copy, and then edit, are `legacy/admin-portal/src/components/Navbar.jsx`, `legacy/admin-portal/src/components/Footer.jsx`, and the card markup in `ApprovedProjects.jsx` and `RejectedProjects.jsx`.
 
@@ -40,7 +44,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | 2a Benchmark pilot | in progress | 280ea07 | Manifest generator done. No LLM calls. |
 | 2b Benchmark full | not started | | |
 | 3 Evidence service and cache | done | 0fea73e | Nonce, device, evidence, and admin file routes. Cache tested: a second analysis of the same evidence makes no model call. Live Supabase test is skipped unless `SUPABASE_LIVE_TEST=1`. |
-| 4a Verifiers C0-C2 and runner | not started | | |
+| 4a Verifiers C0-C2 and runner | in progress | 2ad7a88 | C0 dev run is in `bench/results/C0-dev.jsonl`. C1 and C2 code is tested with a fake model. Paid dry-runs exited 2 under the cap. No test split. |
 | 4b Verifiers C3-C4 and metrics | not started | | |
 | 5a Mobile shell | not started | | Screen map is `docs/design/SCREENS.md`. |
 | 5b Attestation and capture | not started | | |
@@ -69,6 +73,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | Test vectors | `packages/test-vectors` | `cd packages/test-vectors && .venv/bin/python generate.py` | `cd packages/test-vectors && .venv/bin/pytest` | Python reference unchanged. Service and TypeScript libraries matched `vectors.json` on 2026-10-21. |
 | TypeScript crypto | `packages/cv-crypto-ts` | | `cd packages/cv-crypto-ts && node --experimental-strip-types --test src/index.test.ts` | Verified 2026-10-21: 5 passed, including Merkle proofs. Node v22.16.0. |
 | Benchmark manifest | `bench/data/manifest.jsonl` | `python -m bench.generate --seed 42` | `python -m bench.validate` | Verified 2026-10-20: validate pass; second generate byte-identical. |
+| C0 pilot | `bench/results/C0-dev.jsonl` | `services/verifier/.venv/bin/python -m bench.run --config C0 --split dev --runs 3` | `services/verifier/.venv/bin/python -m bench.metrics --input bench/results/C0-dev.jsonl` | Verified 2026-10-21: metrics command printed ASR 0.385, FRR 0.000, 44 completed, 36 skipped. |
 
 ## 6. Environment and accounts (names only, never values)
 | Item | Where it lives | Set up? | Notes |
@@ -77,7 +82,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | Service account file | `services/verifier/secrets/firebase-admin.json` | yes | Symlink to the downloaded Admin SDK JSON. Gitignored. `GOOGLE_APPLICATION_CREDENTIALS` points here. Admin init returned ready. |
 | Web Firebase config | `services/verifier/secrets/firebase-web.env` | yes | Keys present: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`. No storage bucket variable. The file had been a JS snippet; rewritten to env lines on 2026-10-20. Values not verified against the console. |
 | Supabase URL, secret, bucket | `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SUPABASE_STORAGE_BUCKET`, `SUPABASE_DB_PASSWORD` in `services/verifier/.env` | yes | Bucket value is `evidence`. Region reported by the user: `ap-southeast-1`. `STORAGE_BACKEND` is still `disk`, so the service does not call Supabase until that is changed. |
-| GEMINI_API_KEY and GEMINI_MODEL | `services/verifier/.env` and `bench/.env` | yes | Both names are non-empty in both files. The API was not called this session. |
+| GEMINI_API_KEY and GEMINI_MODEL | `services/verifier/.env` and `bench/.env` | yes | Model id `gemini-3.8-flash` in both files. `countTokens` was called for the C1 and C2 dry-runs. `generateContent` was not called. |
 | Sepolia RPC and deployer key variables | `contracts/.env` | partial | No `contracts/.env`. The placeholder test used the public default RPC and read chain id 11155111. `DEPLOYER_PRIVATE_KEY` is unset. |
 | Expo project id and app ids | | no | |
 
@@ -89,10 +94,11 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 - Test vectors: `packages/test-vectors/vectors.json`. Python implementation `services/verifier/cv_crypto`. TypeScript implementation `packages/cv-crypto-ts`. Vectors use integer `accuracyM`; upload metadata uses a one-decimal `accuracy` string.
 - Cache: Firestore collection `analysisCache` in the service, SQLite via `bench/analysis_cache.py` for bench runs. Key is `sha256(evidence) + agent id + prompt version + model id`.
 - Duplicate lookup: `app.duplicates.DuplicateIndex` takes an explicit registry. It is not global state. The bench runner passes one submission's `registry_context`.
+- Verifiers: `verify(submission)` for C0, C1, and C2. Prompt `services/verifier/prompts/c1_v1.txt`. Schema `docs/schemas/agent_output.json`. `POST /v1/projects/{id}/verify` is still not wired to HTTP.
 - Admin claim script: `scripts/set_admin_claim.py`. Unit-tested with a fake Admin SDK. Not run against the emulator or the live project this session.
 
 ## 8. Experiments and results
-No model id pinned, no prompt versions, nothing frozen, no runs, no files in `bench/results/`. H1 to H4 are not started.
+Model id in both env files: `gemini-3.8-flash`. Prompt version `c1-v1` in `services/verifier/prompts/c1_v1.txt`. Rules version `c0-v1`. No test-split run. No C1 or C2 generation. The only result file is `bench/results/C0-dev.jsonl`, written by `bench.run` on 2026-10-21. H1 to H4 are not started.
 
 ## 9. Waiting on the user
 - [x] Firebase project id is in `services/verifier/.env` and is not the old project. Console visit not re-checked this session.
@@ -103,9 +109,10 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 - [x] Firebase CLI is logged in. `firebase projects:list` included `sundarban-a64ea` on 2026-10-20.
 - [x] 40 catalogue rows are in `bench/data/raw/sources.csv`. Raw image files are gitignored.
 - [ ] Phase 3 checks in `docs/guides/PHASE_3_PREREQUISITES.md`: set `STORAGE_BACKEND=supabase` and delete the extra `FIREBASE_PROJECT_ID` line. Not re-checked this session. `STORAGE_BACKEND` was still `disk`.
-- [ ] Phase 4 checks in `docs/guides/PHASE_4_PREREQUISITES.md`: confirm the Flash model in AI Studio, set `GEMINI_RUN_COST_CAP_USD`, and set a billing alert if a card is linked. Local files already agree on `gemini-3.8-flash`. The cap is unset.
+- [ ] Phase 4 checks in `docs/guides/PHASE_4_PREREQUISITES.md`: confirm the Flash model in AI Studio, and set a billing alert if a card is linked. Local files agree on `gemini-3.8-flash`. `GEMINI_RUN_COST_CAP_USD` is set and is below the paid C1 estimate, so generation did not start. AI Studio was not opened.
 
 ## 10. Gotchas and failed approaches (newest first)
+- 2026-10-21: 13 catalogue filenames are not on disk, so 36 dev submissions were skipped. The C0 rates are not rates over all 80 dev rows. C1 and C2 `generateContent` did not run: the paid estimates were above `GEMINI_RUN_COST_CAP_USD`. `--force` was not used.
 - 2026-10-21: Pytest forces in-memory nonce, device, and evidence stores because `PYTEST_CURRENT_TEST` is set. A normal `uvicorn` process uses Firestore when the Admin SDK is ready. `scripts/set_admin_claim.py` loads `services/verifier/.env`, so `FIREBASE_AUTH_EMULATOR_HOST` sends it to the emulator. Unset that variable before setting a claim on the real project.
 - 2026-10-21: `bench/injectors/` does not exist. A5, A10, A11 and A12 are built from legitimate items. `vegetation-Uganda.jpg` is forced to before-like in `bench/data/overrides.csv`.
 - 2026-10-20: `SUPABASE_SERVICE_KEY` is unset. The secret name is `SUPABASE_SECRET_KEY`. A one-off HTTP check on 2026-10-20 uploaded, signed, and deleted an object. Public fetch returned 400. The verifier now uses the same HTTP API and does not call it while `STORAGE_BACKEND=disk`.
@@ -121,7 +128,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | Evidence storage, image pipeline, duplicate index, shared crypto, cache, nonces, admin file route, and the Phase 4 guide. | 0fea73e |
+| 2026-10-21 | Grok 4.7 | C0, C1, and C2 verifiers, the cost-gated runner, and the C0 dev metrics. C1 and C2 generation refused by the cap. | 2ad7a88 |
 | 2026-10-21 | Grok 4.7 | Noted that A8 and A9 have one dev item and no test item, which is expected. | f0b37d4 |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
