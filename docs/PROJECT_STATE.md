@@ -1,8 +1,10 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-20 19:50 | by: Grok 4.7 | commit: c5a3899
+Last updated (UTC): 2026-10-20 22:05 | by: Grok 4.7 | commit: pending this session
 
 ## 1. Next step (read this first)
-The spec in `AGENTS.md` and `docs/PLAN-SPEC.md` now records Supabase storage, the signed-file route, the Firestore recapture rule, canonical JSON without floats, the benchmark pair rules, and `packages/cv-crypto-ts`. None of that new behaviour is implemented. The user still needs the openly licensed photos in `docs/guides/PHASE_2_PREREQUISITES.md`.
+The user does `docs/guides/PHASE_3_PREREQUISITES.md` before the evidence service. First action: confirm `services/verifier/secrets/firebase-admin.json`, then set `STORAGE_BACKEND=supabase` and remove the duplicate `FIREBASE_PROJECT_ID` line.
+
+The manifest generator is `python -m bench.generate --seed 42`. It reads `bench/data/raw/sources.csv` and `bench/data/attack_raw/a4/` (the task text said `attacks_raw`; the files are in `attack_raw`). Verified 2026-10-20: 40 real photos, 2 before_like, 3 after_like, 35 unclassified, 8 synthetic before files, 2 synthetic after files, 3 A4 items (2 fake-before, 1 fake-after), 2 ai_log mismatches. `python -m bench.validate` passed. A second generate matched `manifest.jsonl` byte for byte.
 
 `packages/cv-crypto-ts` does not exist. The current vectors store accuracy as an integer field `accuracyM`, while the spec now requires a one-decimal string. `GET /v1/files/{evidenceId}` is specified and not implemented.
 
@@ -30,14 +32,14 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | 2026-10-20 | Contributors read and write only their own projects until submission, and again while the status is `needs_more_evidence`. They cannot change status or write `leaf`. | Plan section 5.2. The emulator rules already allow those three statuses. |
 | 2026-10-20 | `packages/cv-crypto-ts` is the TypeScript crypto package shared by the mobile app and the admin web. | Plan section 5.1 and `AGENTS.md` rule 7. Directory absent. Verified by a file search on 2026-10-20. |
 | 2026-10-20 | `GET /v1/files/{evidenceId}` is admin-only and returns a short-lived signed URL. | Plan section 5.3. Not implemented. |
-| 2026-10-20 | Legitimate benchmark items are real photographs. Evaluation is stateless and includes `registry_context`. Splits and resampling use `pair_id`. | Plan section 5.9 and `AGENTS.md` rule 12. |
+| 2026-10-20 | Legitimate benchmark items are real photographs. Evaluation is stateless and includes `registry_context`. The catalogue has no `pair_id`, so this generator splits by real-photo filename. | Plan section 5.9 still says `pair_id`. The deviation is in `docs/CHANGELOG-PAPER.md`. |
 
 ## 4. Phase status
 | Phase | Status (not started / in progress / done) | Last commit | Notes |
 |---|---|---|---|
 | 0 Setup and audit | done | 48ea760 | Audit, tokens, screens, and the Phase 1 prerequisite guide are written. No application code. |
 | 1 Scaffold and Firebase | done | 6858268 | Emulators, /health, Sepolia chain id, admin build, and vector tests ran on 2026-10-20. No Firebase Storage. |
-| 2a Benchmark pilot | not started | | |
+| 2a Benchmark pilot | in progress | pending this session | Manifest generator done. No LLM calls. |
 | 2b Benchmark full | not started | | |
 | 3 Evidence service and cache | not started | | |
 | 4a Verifiers C0-C2 and runner | not started | | |
@@ -66,6 +68,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | Admin web | `apps/admin-web` | `cd apps/admin-web && npm run dev` | `cd apps/admin-web && npm run build` | Verified 2026-10-20 19:16 UTC: dev server HTTP 200; build exit 0. No test script. Dev server then stopped. |
 | Contracts | `contracts` | | `cd contracts && .venv/bin/pytest` | Verified 2026-10-20: Sepolia chain id 11155111 and OpenZeppelin v5 import check passed. |
 | Test vectors | `packages/test-vectors` | `cd packages/test-vectors && .venv/bin/python generate.py` | `cd packages/test-vectors && .venv/bin/pytest` | Verified 2026-10-20: 7 tests passed. 10 cases in each of the four groups. |
+| Benchmark manifest | `bench/data/manifest.jsonl` | `python -m bench.generate --seed 42` | `python -m bench.validate` | Verified 2026-10-20: validate pass; second generate byte-identical. |
 
 ## 6. Environment and accounts (names only, never values)
 | Item | Where it lives | Set up? | Notes |
@@ -95,9 +98,11 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 - [x] Supabase env vars are set. Bucket name `evidence`. Region reported as `ap-southeast-1`.
 - [x] Service account path resolves and Admin SDK initialises.
 - [x] Firebase CLI is logged in. `firebase projects:list` included `sundarban-a64ea` on 2026-10-20.
-- [ ] 40 to 60 openly licensed photos and `sources.csv` rows. `docs/guides/PHASE_2_PREREQUISITES.md`. The Gemini variable names are already non-empty.
+- [x] 40 catalogue rows are in `bench/data/raw/sources.csv`. Raw image files are gitignored.
+- [ ] Phase 3 checks in `docs/guides/PHASE_3_PREREQUISITES.md`: set `STORAGE_BACKEND=supabase` and delete the extra `FIREBASE_PROJECT_ID` line.
 
 ## 10. Gotchas and failed approaches (newest first)
+- 2026-10-20: A4 files are in `bench/data/attack_raw/a4/`, not `attacks_raw`. Seven of the ten synthetic files did not become items: the stripped name missed the catalogue, or the real photo was not the required class. Two `ai_log.csv` rows warn and do not stop the run.
 - 2026-10-20: No Supabase client exists. `SUPABASE_SERVICE_KEY` is unset. The live check used `SUPABASE_SECRET_KEY` over HTTP. Public object fetch returned 400. After delete, an authenticated GET returned 400; a prefix list returned count 0.
 - 2026-10-20: Firestore emulator refused Java 17. `firebase-tools` requires Java 21. Installed `openjdk@21` with Homebrew and left it keg-only so `java` on PATH stays 17. The README command sets `JAVA_HOME` for the emulator only. Verified by "All emulators ready".
 - 2026-10-20: `npm install -g firebase-tools` failed with EACCES because `/usr/local/lib/node_modules` is owned by root. Installed with `brew install firebase-cli` (15.34.0). Then `brew unlink node` so `node` stayed v22.16.0 at `/usr/local/bin/node`. Verified by `firebase --version` outside the sandbox.
@@ -111,10 +116,10 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-20 | Grok 4.7 | Wrote the Supabase, Firestore, canonical-JSON, benchmark, and cv-crypto-ts decisions into `AGENTS.md` and `docs/PLAN-SPEC.md`. No code. | c5a3899 |
+| 2026-10-20 | Grok 4.7 | Deterministic manifest from the real catalogue and pre-made A4 files. Validator, licences, paper changelog, Phase 3 guide. | pending this session |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
 | 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | 48ea760 |
 
 ## 12. Paper impact
-The draft says originals are stored in object storage and does not name Supabase. It also leaves room for generated legitimate after-images. The new rules require real photographs for legitimate items, stateless evaluation with `registry_context`, and `pair_id` splits and resampling. `docs/CHANGELOG-PAPER.md` was not added: this task allowed edits only in `AGENTS.md`, `docs/PLAN-SPEC.md`, and this file.
+`docs/CHANGELOG-PAPER.md` records category-matched legitimate pairs, the two A4 directions, and filename splits. The draft still describes same-site growth pairs, AI-generated after images only, and `pair_id` resampling.
