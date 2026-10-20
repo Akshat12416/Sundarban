@@ -1,5 +1,5 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-20 22:05 | by: Grok 4.7 | commit: 280ea07
+Last updated (UTC): 2026-10-20 22:05 | by: Grok 4.7 | commit: e35c883
 
 ## 1. Next step (read this first)
 The manifest generator is `python -m bench.generate --seed 42`. Verified after the keyword, matching, and composite patch: 41 catalogue rows, 5 composite pairs split into `bench/data/derived/`, 9 of 10 A4 files used (the remaining one clashes because its real partner is after-like). `python -m bench.validate` passed. A second generate matched the manifest byte for byte.
@@ -116,7 +116,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | Patched keyword lists, A4 stem matching, class gating, and composite splits. 5 composites and 9 of 10 A4 files. | pending this session |
+| 2026-10-21 | Grok 4.7 | Patched keyword lists, A4 stem matching, class gating, and composite splits. 5 composites and 9 of 10 A4 files. | e35c883 |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
 | 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | 48ea760 |
