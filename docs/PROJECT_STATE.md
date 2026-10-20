@@ -1,5 +1,5 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-20 19:16 | by: Grok 4.7 | commit: pending this session
+Last updated (UTC): 2026-10-20 19:16 | by: Grok 4.7 | commit: 196f43f
 
 ## 1. Next step (read this first)
 Phase 1 scaffold is in the tree and was re-checked on 2026-10-20. The user still needs the openly licensed photos in `docs/guides/PHASE_2_PREREQUISITES.md`. `GEMINI_API_KEY` and `GEMINI_MODEL` are non-empty in both env files; they were not called during the inspection.
@@ -106,7 +106,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-20 | Grok 4.7 | Read-only inspection of Phase 1, Supabase, Firebase, API, and bench. No application code changed. | pending this session |
+| 2026-10-20 | Grok 4.7 | Read-only inspection of Phase 1, Supabase, Firebase, API, and bench. No application code changed. | 196f43f |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
 | 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | 48ea760 |
