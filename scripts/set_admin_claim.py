@@ -41,7 +41,7 @@ def initialise(admin_module: object, env: dict[str, str]) -> None:
         raise SystemExit("GOOGLE_APPLICATION_CREDENTIALS is not set")
     path = Path(raw)
     if not path.is_file():
-        rooted = Path(__file__).resolve().parents[2] / raw
+        rooted = Path(__file__).resolve().parents[1] / raw
         path = rooted if rooted.is_file() else path
     if not path.is_file():
         raise SystemExit("GOOGLE_APPLICATION_CREDENTIALS does not point at a file")

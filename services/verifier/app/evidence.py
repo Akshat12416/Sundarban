@@ -199,7 +199,7 @@ def accept_evidence(
         raise EvidenceError("project not found")
     _validate_metadata(metadata, project_id)
     try:
-        nonces.consume(str(metadata["nonce"]), project_id, uid)
+        nonces.assert_usable(str(metadata["nonce"]), project_id, uid)
     except NonceError as exc:
         raise EvidenceError(str(exc)) from exc
     device = devices.get(str(metadata["deviceId"]))
@@ -221,8 +221,16 @@ def accept_evidence(
 
         image_sha = hashlib.sha256(original).digest()
 
-    if not _signature_ok(public_key, image_sha, metadata, signature):
+    try:
+        signed = _signature_ok(public_key, image_sha, metadata, signature)
+    except TypeError as exc:
+        raise EvidenceError("floats are not allowed in metadata") from exc
+    if not signed:
         raise EvidenceError("signature rejected")
+    try:
+        nonces.consume(str(metadata["nonce"]), project_id, uid)
+    except NonceError as exc:
+        raise EvidenceError(str(exc)) from exc
 
     evidence_id = uuid.uuid4().hex
     ext = _extension(filename, content_type)

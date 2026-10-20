@@ -81,7 +81,14 @@ class NonceService:
         self.store.put(record)
         return record
 
+    def assert_usable(self, nonce: str, project_id: str, uid: str, now: datetime | None = None) -> None:
+        self._check(nonce, project_id, uid, now)
+
     def consume(self, nonce: str, project_id: str, uid: str, now: datetime | None = None) -> None:
+        self._check(nonce, project_id, uid, now)
+        self.store.mark_used(nonce)
+
+    def _check(self, nonce: str, project_id: str, uid: str, now: datetime | None) -> None:
         record = self.store.get(nonce)
         moment = now or datetime.now(timezone.utc)
         if record is None:
@@ -92,7 +99,6 @@ class NonceService:
             raise NonceError("nonce does not belong to this project")
         if _parse(record.expires_at) <= moment:
             raise NonceError("nonce expired")
-        self.store.mark_used(nonce)
 
 
 def _stamp(moment: datetime) -> str:

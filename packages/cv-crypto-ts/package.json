@@ -1,0 +1,13 @@
+{
+  "name": "@sundarban/cv-crypto",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Canonical JSON, attestation hashes, and Merkle proofs. The mobile app and the admin web import this package.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --test src/index.test.ts"
+  }
+}

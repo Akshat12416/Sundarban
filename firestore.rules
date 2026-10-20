@@ -103,6 +103,14 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    match /evidenceIndex/{evidenceId} {
+      allow read, write: if false;
+    }
+
+    match /analysisCache/{cacheId} {
+      allow read, write: if false;
+    }
+
     match /reports/{projectId}/versions/{n} {
       allow read: if isAdmin();
       allow write: if false;
