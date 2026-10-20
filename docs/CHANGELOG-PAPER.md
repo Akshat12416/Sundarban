@@ -9,3 +9,7 @@ The benchmark generator in `bench/generate.py` changes two claims in the draft (
 2. A4 has two directions. A synthetic before with a real after, and a real before with a synthetic after. Both were made in the Gemini app, not through the paid API, and each file is logged in `bench/data/attack_raw/a4/ai_log.csv`. Table 1 currently describes only an AI-generated after image.
 
 The catalogue also has no `pair_id`. Dev/test assignment is by real-photo filename, and an A4 item inherits the split of its real half. Where the draft and the spec say splits and resampling use `pair_id`, the implemented unit is that filename until a real pair id exists.
+
+## 2026-10-21
+
+Five catalogue photos are side-by-side composites of one site. The generator cuts them into before and after halves under `bench/data/derived/` and uses those halves as legitimate same-site pairs. They take priority over category-matched pairs. The earlier entry still applies to every other legitimate pair: those remain category-matched, not same-site.

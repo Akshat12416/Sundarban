@@ -2,9 +2,9 @@
 Last updated (UTC): 2026-10-20 22:05 | by: Grok 4.7 | commit: 280ea07
 
 ## 1. Next step (read this first)
-The user does `docs/guides/PHASE_3_PREREQUISITES.md` before the evidence service. First action: confirm `services/verifier/secrets/firebase-admin.json`, then set `STORAGE_BACKEND=supabase` and remove the duplicate `FIREBASE_PROJECT_ID` line.
+The manifest generator is `python -m bench.generate --seed 42`. Verified after the keyword, matching, and composite patch: 41 catalogue rows, 5 composite pairs split into `bench/data/derived/`, 9 of 10 A4 files used (the remaining one clashes because its real partner is after-like). `python -m bench.validate` passed. A second generate matched the manifest byte for byte.
 
-The manifest generator is `python -m bench.generate --seed 42`. It reads `bench/data/raw/sources.csv` and `bench/data/attack_raw/a4/` (the task text said `attacks_raw`; the files are in `attack_raw`). Verified 2026-10-20: 40 real photos, 2 before_like, 3 after_like, 35 unclassified, 8 synthetic before files, 2 synthetic after files, 3 A4 items (2 fake-before, 1 fake-after), 2 ai_log mismatches. `python -m bench.validate` passed. A second generate matched `manifest.jsonl` byte for byte.
+The user does `docs/guides/PHASE_3_PREREQUISITES.md` before the evidence service. First action: confirm `services/verifier/secrets/firebase-admin.json`, then set `STORAGE_BACKEND=supabase` and remove the duplicate `FIREBASE_PROJECT_ID` line.
 
 `packages/cv-crypto-ts` does not exist. The current vectors store accuracy as an integer field `accuracyM`, while the spec now requires a one-decimal string. `GET /v1/files/{evidenceId}` is specified and not implemented.
 
@@ -102,7 +102,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 - [ ] Phase 3 checks in `docs/guides/PHASE_3_PREREQUISITES.md`: set `STORAGE_BACKEND=supabase` and delete the extra `FIREBASE_PROJECT_ID` line.
 
 ## 10. Gotchas and failed approaches (newest first)
-- 2026-10-20: A4 files are in `bench/data/attack_raw/a4/`, not `attacks_raw`. Seven of the ten synthetic files did not become items: the stripped name missed the catalogue, or the real photo was not the required class. Two `ai_log.csv` rows warn and do not stop the run.
+- 2026-10-21: A4 matching uses a normalized stem, then a substring fallback. A before-fake is rejected only when the real partner is before-like, and an after-fake only when it is after-like. `After-vegetation-Uganda.jpg` still clashes because that note is after-like.
 - 2026-10-20: No Supabase client exists. `SUPABASE_SERVICE_KEY` is unset. The live check used `SUPABASE_SECRET_KEY` over HTTP. Public object fetch returned 400. After delete, an authenticated GET returned 400; a prefix list returned count 0.
 - 2026-10-20: Firestore emulator refused Java 17. `firebase-tools` requires Java 21. Installed `openjdk@21` with Homebrew and left it keg-only so `java` on PATH stays 17. The README command sets `JAVA_HOME` for the emulator only. Verified by "All emulators ready".
 - 2026-10-20: `npm install -g firebase-tools` failed with EACCES because `/usr/local/lib/node_modules` is owned by root. Installed with `brew install firebase-cli` (15.34.0). Then `brew unlink node` so `node` stayed v22.16.0 at `/usr/local/bin/node`. Verified by `firebase --version` outside the sandbox.
@@ -116,7 +116,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-20 | Grok 4.7 | Deterministic manifest from the real catalogue and pre-made A4 files. Validator, licences, paper changelog, Phase 3 guide. | 280ea07 |
+| 2026-10-21 | Grok 4.7 | Patched keyword lists, A4 stem matching, class gating, and composite splits. 5 composites and 9 of 10 A4 files. | pending this session |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
 | 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | 48ea760 |

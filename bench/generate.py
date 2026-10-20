@@ -574,10 +574,9 @@ def print_report(
     print(f"reserved {counts['reserved']}")
     print(f"composite_pairs {counts['composite_pairs']}")
     print(class_table(items))
-    if unmatched:
-        print("unmatched")
-        for line in unmatched:
-            print(line)
+    print(f"unmatched {len(unmatched)}")
+    for line in unmatched:
+        print(line)
     for warning in warnings:
         print(f"warning: {warning}", file=sys.stderr)
 
