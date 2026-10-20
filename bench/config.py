@@ -10,9 +10,21 @@ BEFORE_KEYWORDS = [
     "empty plot",
     "unplanted",
     "cleared",
+    "clearing",
     "fallow",
     "degraded",
+    "desert",
+    "dry earth",
+    "cracked earth",
+    "parched",
+    "no vegetation",
+    "devoid of vegetation",
+    "idle beach",
+    "idle land",
+    "exposed soil",
     "mudflat",
+    "mud flat",
+    "tidal flat",
 ]
 
 AFTER_KEYWORDS = [
@@ -26,10 +38,23 @@ AFTER_KEYWORDS = [
     "rows of",
     "restoration",
     "replanted",
+    "reforestation",
+    "regeneration",
+    "regrowth",
+    "recovery",
+    "forest",
     "forested",
+    "vegetation",
+    "woodland",
+    "dense trees",
+    "greenery",
+    "man-made forest",
     "mature trees",
     "canopy",
 ]
+
+# These words show up in both barren and planted descriptions. Never use them.
+EXCLUDED_KEYWORDS = ("plantation", "planting")
 
 # Classes that reuse another submission. Their registry_context names that item.
 REGISTRY_CONTEXT_CLASSES = ("A1", "A2", "A12")

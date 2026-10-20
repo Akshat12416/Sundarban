@@ -11,10 +11,11 @@ import argparse
 import json
 import random
 import sys
+from difflib import SequenceMatcher
 from pathlib import Path
 
 from bench.catalog import a4_directory, load_ai_log, load_sources, repo_root
-from bench.classify import classify_notes
+from bench.classify import classify_notes, composite_orientation
 from bench.config import LEFTOVER_ATTACKS
 from bench.device_captures import load_device_capture_items
 
@@ -30,22 +31,33 @@ def strip_role_prefix(name: str) -> tuple[str | None, str]:
     return None, cleaned
 
 
-def _norm_name(value: str) -> str:
-    return " ".join(value.strip().casefold().split())
+def normalize_stem(name: str) -> str:
+    stem = Path(name.strip()).stem.casefold()
+    return "".join(character for character in stem if character.isalnum())
 
 
-def log_mismatches(log_rows: list[dict[str, str]]) -> list[str]:
-    """Warn when a log row's stripped filename does not equal inspired_by."""
-    warnings: list[str] = []
-    for row in log_rows:
-        filename = row.get("filename") or ""
-        inspired = row.get("inspired_by") or ""
-        _role, remainder = strip_role_prefix(filename)
-        if _norm_name(remainder) != _norm_name(inspired):
-            warnings.append(
-                f"ai_log inspired_by does not match stripped filename: {filename.strip()}"
-            )
-    return warnings
+def _similarity(left: str, right: str) -> float:
+    return SequenceMatcher(None, left, right).ratio()
+
+
+def match_catalogue(query: str, filenames: list[str]) -> tuple[str | None, str | None]:
+    """Return (matched filename, suggestion). Suggestion is set only on a miss."""
+    needle = normalize_stem(query)
+    if not needle or not filenames:
+        return None, None
+    exact = [name for name in filenames if normalize_stem(name) == needle]
+    if exact:
+        return sorted(exact)[0], None
+    contained = [
+        name
+        for name in filenames
+        if normalize_stem(name) and (needle in normalize_stem(name) or normalize_stem(name) in needle)
+    ]
+    if contained:
+        contained.sort(key=lambda name: (-_similarity(needle, normalize_stem(name)), name))
+        return contained[0], None
+    closest = max(filenames, key=lambda name: (_similarity(needle, normalize_stem(name)), name))
+    return None, closest
 
 
 def assign_splits(filenames: list[str], rng: random.Random) -> dict[str, str]:
@@ -88,11 +100,13 @@ def build_a4(
     synthetic_files: list[Path],
     by_name: dict[str, dict],
     classes: dict[str, str],
-) -> tuple[list[dict], set[str], list[str]]:
+    reserved: set[str],
+) -> tuple[list[dict], set[str], list[str], list[str]]:
     items: list[dict] = []
-    reserved: set[str] = set()
     warnings: list[str] = []
+    unmatched: list[str] = []
     candidates = []
+    catalogue = list(by_name)
     for path in sorted(synthetic_files, key=lambda item: item.name.strip().casefold()):
         if path.name.startswith("."):
             continue
@@ -102,33 +116,37 @@ def build_a4(
         if role is None:
             warnings.append(f"synthetic file has no before-/after- prefix: {path.name.strip()}")
             continue
-        real = by_name.get(remainder)
-        if real is None:
-            warnings.append(f"no real photo named {remainder} for {path.name.strip()}")
+        matched, suggestion = match_catalogue(remainder, catalogue)
+        if matched is None:
+            nearest = suggestion or "(none)"
+            message = f"no real photo for {path.name.strip()}; closest is {nearest}"
+            warnings.append(message)
+            unmatched.append(message)
             continue
-        kind = classes[remainder]
-        expected = "after_like" if role == "before" else "before_like"
-        if kind != expected:
-            article = "an" if expected.startswith(("a", "e", "i", "o", "u")) else "a"
+        kind = classes[matched]
+        clash = (role == "before" and kind == "before_like") or (
+            role == "after" and kind == "after_like"
+        )
+        if clash:
             warnings.append(
-                f"{path.name.strip()} needs {article} {expected} partner, {remainder} is {kind}"
+                f"{path.name.strip()} clashes with {matched}, which is {kind}"
             )
             continue
-        if remainder in reserved:
-            warnings.append(f"real photo already reserved: {remainder}")
+        if matched in reserved:
+            warnings.append(f"real photo already reserved: {matched}")
             continue
-        candidates.append((path, role, remainder))
-        reserved.add(remainder)
+        candidates.append((path, role, matched))
+        reserved.add(matched)
 
-    for index, (path, role, remainder) in enumerate(candidates, start=1):
+    for index, (path, role, matched) in enumerate(candidates, start=1):
         if role == "before":
             photos = [
                 _photo(path.name.strip(), "before", "synthetic"),
-                _photo(remainder, "after", "real"),
+                _photo(matched, "after", "real"),
             ]
         else:
             photos = [
-                _photo(remainder, "before", "real"),
+                _photo(matched, "before", "real"),
                 _photo(path.name.strip(), "after", "synthetic"),
             ]
         items.append(
@@ -142,6 +160,87 @@ def build_a4(
                 registry_context=[],
             )
         )
+    return items, reserved, warnings, unmatched
+
+
+def resolve_raw(root: Path, filename: str) -> Path | None:
+    raw = root / "bench" / "data" / "raw"
+    direct = raw / filename
+    if direct.is_file():
+        return direct
+    stem = Path(filename).stem
+    for extension in (".jpg", ".jpeg", ".png", ".webp", ".JPG", ".JPEG", ".PNG"):
+        candidate = raw / f"{filename}{extension}"
+        if candidate.is_file():
+            return candidate
+        candidate = raw / f"{stem}{extension}"
+        if candidate.is_file():
+            return candidate
+    target = filename.casefold()
+    stem_target = stem.casefold()
+    if not raw.is_dir():
+        return None
+    for path in sorted(raw.iterdir()):
+        if not path.is_file() or path.name.startswith("."):
+            continue
+        if path.name.casefold() == target or path.stem.casefold() == stem_target:
+            return path
+    return None
+
+
+def split_composite(source: Path, dest_dir: Path, orientation: str) -> tuple[str, str]:
+    from PIL import Image
+
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    with Image.open(source) as image:
+        rgb = image.convert("RGB")
+        width, height = rgb.size
+        if orientation == "composite_tb":
+            before_image = rgb.crop((0, 0, width, height // 2))
+            after_image = rgb.crop((0, height // 2, width, height))
+        else:
+            before_image = rgb.crop((0, 0, width // 2, height))
+            after_image = rgb.crop((width // 2, 0, width, height))
+        stem = "".join(character if character.isalnum() else "-" for character in source.stem)
+        before_name = f"{stem}-before.jpg"
+        after_name = f"{stem}-after.jpg"
+        before_image.save(dest_dir / before_name, format="JPEG", quality=95)
+        after_image.save(dest_dir / after_name, format="JPEG", quality=95)
+    return before_name, after_name
+
+
+def build_composites(
+    root: Path,
+    rows: list[dict[str, str]],
+) -> tuple[list[dict], set[str], list[str]]:
+    items: list[dict] = []
+    reserved: set[str] = set()
+    warnings: list[str] = []
+    found = [
+        row for row in rows if composite_orientation(row.get("notes") or "") is not None
+    ]
+    for index, row in enumerate(sorted(found, key=lambda item: item["filename"]), start=1):
+        orientation = composite_orientation(row.get("notes") or "")
+        source = resolve_raw(root, row["filename"])
+        if source is None or orientation is None:
+            warnings.append(f"composite photo has no file: {row['filename']}")
+            continue
+        before_name, after_name = split_composite(
+            source, root / "bench" / "data" / "derived", orientation
+        )
+        item = _item(
+            f"legit-composite-{index:04d}",
+            "legit",
+            "unset",
+            [
+                _photo(before_name, "before", "real"),
+                _photo(after_name, "after", "real"),
+            ],
+        )
+        item["composite"] = orientation
+        item["source_filename"] = row["filename"]
+        items.append(item)
+        reserved.add(row["filename"])
     return items, reserved, warnings
 
 
@@ -308,7 +407,21 @@ def build_other_attacks(
     return attacks
 
 
-def apply_a4_splits(items: list[dict], splits: dict[str, str]) -> None:
+def unmatched_log_rows(log_rows: list[dict[str, str]], filenames: list[str]) -> list[str]:
+    lines: list[str] = []
+    for row in log_rows:
+        filename = (row.get("filename") or "").strip()
+        inspired = (row.get("inspired_by") or "").strip()
+        _role, remainder = strip_role_prefix(filename)
+        matched_name, suggestion_name = match_catalogue(remainder or filename, filenames)
+        matched_inspired, suggestion_inspired = (
+            match_catalogue(inspired, filenames) if inspired else (None, None)
+        )
+        if matched_name or matched_inspired:
+            continue
+        suggestion = suggestion_inspired or suggestion_name or "(none)"
+        lines.append(f"{filename} -> {suggestion}")
+    return lines
     for item in items:
         if item["attack_class"] != "A4":
             continue
@@ -324,19 +437,27 @@ def synthetic_files(directory: Path) -> list[Path]:
     return [path for path in directory.iterdir() if path.is_file() and not path.name.startswith(".")]
 
 
-def build_manifest(root: Path, seed: int) -> tuple[list[dict], list[str], dict[str, int]]:
+def build_manifest(root: Path, seed: int) -> tuple[list[dict], list[str], dict[str, int], list[str]]:
     sources_path = root / "bench" / "data" / "raw" / "sources.csv"
     rows = load_sources(sources_path)
+    for row in rows:
+        for key in ("filename", "source_url", "author", "licence", "accessed_on", "notes"):
+            if row.get(key) is None:
+                row[key] = ""
     classes = {row["filename"]: classify_notes(row.get("notes") or "") for row in rows}
     by_name = {row["filename"]: row for row in rows}
+
+    composites, reserved, composite_warnings = build_composites(root, rows)
+    warnings = list(composite_warnings)
 
     a4_dir = a4_directory(root)
     files = synthetic_files(a4_dir)
     log_rows = load_ai_log(a4_dir / "ai_log.csv")
-    warnings = log_mismatches(log_rows)
+    unmatched = unmatched_log_rows(log_rows, list(by_name))
 
-    a4_items, reserved, a4_warnings = build_a4(files, by_name, classes)
+    a4_items, reserved, a4_warnings, a4_unmatched = build_a4(files, by_name, classes, reserved)
     warnings.extend(a4_warnings)
+    unmatched.extend(a4_unmatched)
 
     rng = random.Random(seed)
     splits = assign_splits([row["filename"] for row in rows], rng)
@@ -347,7 +468,7 @@ def build_manifest(root: Path, seed: int) -> tuple[list[dict], list[str], dict[s
     attacks = build_other_attacks(legit, leftovers, splits)
 
     device_items = load_device_capture_items(root)
-    items = sorted(a4_items + legit + attacks + device_items, key=lambda item: item["id"])
+    items = sorted(composites + a4_items + legit + attacks + device_items, key=lambda item: item["id"])
 
     before_files = [
         path for path in files if strip_role_prefix(path.name)[0] == "before"
@@ -365,8 +486,9 @@ def build_manifest(root: Path, seed: int) -> tuple[list[dict], list[str], dict[s
         "ai_log_mismatches": len(log_mismatches(log_rows)),
         "a4_items": len(a4_items),
         "reserved": len(reserved),
+        "composite_pairs": len(composites),
     }
-    return items, warnings, counts
+    return items, warnings, counts, unmatched
 
 
 def dump_jsonl(items: list[dict]) -> str:
