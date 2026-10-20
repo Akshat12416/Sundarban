@@ -1,0 +1,512 @@
+{
+  "canonicalJson": [
+    {
+      "name": "empty-object",
+      "value": {},
+      "canonical": "{}"
+    },
+    {
+      "name": "key-order",
+      "value": {
+        "b": 1,
+        "a": 2
+      },
+      "canonical": "{\"a\":2,\"b\":1}"
+    },
+    {
+      "name": "nested-key-order",
+      "value": {
+        "z": {
+          "b": 1,
+          "a": 2
+        }
+      },
+      "canonical": "{\"z\":{\"a\":2,\"b\":1}}"
+    },
+    {
+      "name": "array",
+      "value": {
+        "items": [
+          3,
+          1,
+          {
+            "b": true,
+            "a": null
+          }
+        ]
+      },
+      "canonical": "{\"items\":[3,1,{\"a\":null,\"b\":true}]}"
+    },
+    {
+      "name": "unicode",
+      "value": {
+        "place": "Sundarban mangrove"
+      },
+      "canonical": "{\"place\":\"Sundarban mangrove\"}"
+    },
+    {
+      "name": "escaped-string",
+      "value": {
+        "note": "line\n\"quote\""
+      },
+      "canonical": "{\"note\":\"line\\n\\\"quote\\\"\"}"
+    },
+    {
+      "name": "bool-and-null",
+      "value": {
+        "ok": true,
+        "missing": null,
+        "no": false
+      },
+      "canonical": "{\"missing\":null,\"no\":false,\"ok\":true}"
+    },
+    {
+      "name": "integers",
+      "value": {
+        "n": 0,
+        "neg": -12,
+        "big": 1600
+      },
+      "canonical": "{\"big\":1600,\"n\":0,\"neg\":-12}"
+    },
+    {
+      "name": "metadata-shape",
+      "value": {
+        "accuracyM": 4,
+        "capturedAt": "2026-10-20T12:01:00Z",
+        "deviceId": "device-1",
+        "latitude": "22.500001",
+        "longitude": "88.300001",
+        "nonce": "nonce-1",
+        "projectId": "project-1"
+      },
+      "canonical": "{\"accuracyM\":4,\"capturedAt\":\"2026-10-20T12:01:00Z\",\"deviceId\":\"device-1\",\"latitude\":\"22.500001\",\"longitude\":\"88.300001\",\"nonce\":\"nonce-1\",\"projectId\":\"project-1\"}"
+    },
+    {
+      "name": "mixed",
+      "value": {
+        "tags": [
+          "before",
+          "after"
+        ],
+        "owner": {
+          "name": "Ada",
+          "id": "u1"
+        },
+        "count": 4
+      },
+      "canonical": "{\"count\":4,\"owner\":{\"id\":\"u1\",\"name\":\"Ada\"},\"tags\":[\"before\",\"after\"]}"
+    }
+  ],
+  "metadataHash": [
+    {
+      "name": "metadata-0",
+      "metadata": {
+        "accuracyM": 3,
+        "capturedAt": "2026-10-20T12:00:00Z",
+        "deviceId": "device-0",
+        "latitude": "22.500000",
+        "longitude": "88.300000",
+        "nonce": "nonce-0",
+        "projectId": "project-0"
+      },
+      "sha256": "c25510d187607c8ff6fd5c7bc6b7ef8b9638bf5b5ffefcb69cddf05269201a63"
+    },
+    {
+      "name": "metadata-1",
+      "metadata": {
+        "accuracyM": 4,
+        "capturedAt": "2026-10-20T12:01:00Z",
+        "deviceId": "device-1",
+        "latitude": "22.500001",
+        "longitude": "88.300001",
+        "nonce": "nonce-1",
+        "projectId": "project-1"
+      },
+      "sha256": "9b7b5361a7e0fa5bc01108345178fd6b2cd54dce0871449c352239243dc82efd"
+    },
+    {
+      "name": "metadata-2",
+      "metadata": {
+        "accuracyM": 5,
+        "capturedAt": "2026-10-20T12:02:00Z",
+        "deviceId": "device-2",
+        "latitude": "22.500002",
+        "longitude": "88.300002",
+        "nonce": "nonce-2",
+        "projectId": "project-2"
+      },
+      "sha256": "246865591ef7fa61df94f87f35ab950b263322befb36295c725f679feb99ed76"
+    },
+    {
+      "name": "metadata-3",
+      "metadata": {
+        "accuracyM": 6,
+        "capturedAt": "2026-10-20T12:03:00Z",
+        "deviceId": "device-3",
+        "latitude": "22.500003",
+        "longitude": "88.300003",
+        "nonce": "nonce-3",
+        "projectId": "project-3"
+      },
+      "sha256": "7bbb7d110cbd44e93833951024d1b9ed364c51da3eed113f1f579615b8eaed1b"
+    },
+    {
+      "name": "metadata-4",
+      "metadata": {
+        "accuracyM": 7,
+        "capturedAt": "2026-10-20T12:04:00Z",
+        "deviceId": "device-4",
+        "latitude": "22.500004",
+        "longitude": "88.300004",
+        "nonce": "nonce-4",
+        "projectId": "project-4"
+      },
+      "sha256": "69b8c64a56881befe0c1b1ad855801a3d64ca354436cbddd9da58c20deebc7fb"
+    },
+    {
+      "name": "metadata-5",
+      "metadata": {
+        "accuracyM": 8,
+        "capturedAt": "2026-10-20T12:05:00Z",
+        "deviceId": "device-5",
+        "latitude": "22.500005",
+        "longitude": "88.300005",
+        "nonce": "nonce-5",
+        "projectId": "project-5"
+      },
+      "sha256": "47a402af8bcc9daa27bef44fc92cf5772b32273426ee957561927334a15e16ea"
+    },
+    {
+      "name": "metadata-6",
+      "metadata": {
+        "accuracyM": 9,
+        "capturedAt": "2026-10-20T12:06:00Z",
+        "deviceId": "device-6",
+        "latitude": "22.500006",
+        "longitude": "88.300006",
+        "nonce": "nonce-6",
+        "projectId": "project-6"
+      },
+      "sha256": "b1d18fd06a6d805c579ed01d58555b4b1915e728dfec638cffedf9c02669cf3a"
+    },
+    {
+      "name": "metadata-7",
+      "metadata": {
+        "accuracyM": 10,
+        "capturedAt": "2026-10-20T12:07:00Z",
+        "deviceId": "device-7",
+        "latitude": "22.500007",
+        "longitude": "88.300007",
+        "nonce": "nonce-7",
+        "projectId": "project-7"
+      },
+      "sha256": "7264f872b12df4cabf0f9d997155669ba4546ab4d89c4d01c48cacfb3d7063f0"
+    },
+    {
+      "name": "metadata-8",
+      "metadata": {
+        "accuracyM": 11,
+        "capturedAt": "2026-10-20T12:08:00Z",
+        "deviceId": "device-8",
+        "latitude": "22.500008",
+        "longitude": "88.300008",
+        "nonce": "nonce-8",
+        "projectId": "project-8"
+      },
+      "sha256": "03107e2d763a801503c3f2a722e294c53ac666f95edf97a0c323c49156614a1f"
+    },
+    {
+      "name": "metadata-9",
+      "metadata": {
+        "accuracyM": 12,
+        "capturedAt": "2026-10-20T12:09:00Z",
+        "deviceId": "device-9",
+        "latitude": "22.500009",
+        "longitude": "88.300009",
+        "nonce": "nonce-9",
+        "projectId": "project-9"
+      },
+      "sha256": "da0e143d18007145e3c95510ad248c28b6279620e16fd19ea0ed897f591f3d05"
+    }
+  ],
+  "leafHash": [
+    {
+      "name": "leaf-0",
+      "imageSha256": "3dd3f8d1db39a536c4f48318eda8e4a804f53fbc2b25b94e3aa98b201be050da",
+      "metadata": {
+        "accuracyM": 3,
+        "capturedAt": "2026-10-20T12:00:00Z",
+        "deviceId": "device-0",
+        "latitude": "22.500000",
+        "longitude": "88.300000",
+        "nonce": "nonce-0",
+        "projectId": "project-0"
+      },
+      "signature": "4d90490648791c63236da0de99dfea492075bdcdc0f68b594aac5151f597a75efe4316e18fa24eb838ec9ddd458422a815b55a0f1f992730c1a7b8f7d09100b1",
+      "leaf": "4976d3643b7629bcea595dafd9a0c0508f716a39f3e0468c41a037799e5ee407"
+    },
+    {
+      "name": "leaf-1",
+      "imageSha256": "0cf457e24a479f02fd4d34540389f720f0807dcff92a7562108165b2637ea82f",
+      "metadata": {
+        "accuracyM": 4,
+        "capturedAt": "2026-10-20T12:01:00Z",
+        "deviceId": "device-1",
+        "latitude": "22.500001",
+        "longitude": "88.300001",
+        "nonce": "nonce-1",
+        "projectId": "project-1"
+      },
+      "signature": "6244580a346acf5d814a48dcf65bcdab5530088ca268c31dc5866944207e893848c779e7aaac086da264377d712eed91a2010ffdda7dd00882f3cce42e925b55",
+      "leaf": "9680e78a378939e5ce37c09efd639a60671821da960c8c46b27d50c024206255"
+    },
+    {
+      "name": "leaf-2",
+      "imageSha256": "5a0717cb6596468ea1dffa86011f9b0f497348d80421835b51799f9aeb455642",
+      "metadata": {
+        "accuracyM": 5,
+        "capturedAt": "2026-10-20T12:02:00Z",
+        "deviceId": "device-2",
+        "latitude": "22.500002",
+        "longitude": "88.300002",
+        "nonce": "nonce-2",
+        "projectId": "project-2"
+      },
+      "signature": "0e982fbf2b80be4e197076754a204fb700e197d4751f259038cf12fdb956afd2ead88df896707fae3e2755450edb98fbf48265f4c83ac59f1955fef04695b064",
+      "leaf": "d17112fb8d07cf4bccac21d5be20808e63bb4e892dc269740cbdd115f6b7e5d4"
+    },
+    {
+      "name": "leaf-3",
+      "imageSha256": "d9f313aef2d97e58def0511fdc17512d53e6b30d578860ae04b5288c6a239010",
+      "metadata": {
+        "accuracyM": 6,
+        "capturedAt": "2026-10-20T12:03:00Z",
+        "deviceId": "device-3",
+        "latitude": "22.500003",
+        "longitude": "88.300003",
+        "nonce": "nonce-3",
+        "projectId": "project-3"
+      },
+      "signature": "101450d79aee7a6849316ba9eb7ff90493510ebe02a832be99b6b88d5eaaf2be1bd64c2748945fcd2862b95b285c563a0810105a4a2fc770ab1846914a146f4e",
+      "leaf": "34f096236a914dde9dfe2150e9e1022b1b8e222807da85e8594e347961a7e4c4"
+    },
+    {
+      "name": "leaf-4",
+      "imageSha256": "cd9642ec4090bd48559965f15bacc913b5420818d39d0cc7e1b59f4a9257c920",
+      "metadata": {
+        "accuracyM": 7,
+        "capturedAt": "2026-10-20T12:04:00Z",
+        "deviceId": "device-4",
+        "latitude": "22.500004",
+        "longitude": "88.300004",
+        "nonce": "nonce-4",
+        "projectId": "project-4"
+      },
+      "signature": "112e7e5df176d66aabeabccd6a845bc5e6f95ae932ea17dc6fe7e30d993b3f0c21e340992f1d6bcc3c044f66aedb99a36816d065b3ee7565a5ca3af942dc4c49",
+      "leaf": "8dc731e798b4b90b590fe45dd7b11d51e8205b84d4b81d7808bc637ad530d1cc"
+    },
+    {
+      "name": "leaf-5",
+      "imageSha256": "32d86efbce5098c8a227b0581016904fc508cd2f8770f26d750c35aeb53d48e4",
+      "metadata": {
+        "accuracyM": 8,
+        "capturedAt": "2026-10-20T12:05:00Z",
+        "deviceId": "device-5",
+        "latitude": "22.500005",
+        "longitude": "88.300005",
+        "nonce": "nonce-5",
+        "projectId": "project-5"
+      },
+      "signature": "8f2116b6950db29c5ee1ffbb6e3a06d6eaed27ded90cfd70ecf73eb507ad9760c90fc13bfcd6a7d1034a1a2f8da0bda2af4090849b0771e02382146aee030b3f",
+      "leaf": "0198b9226879c4d6e3ff139125ab3921a9804e79daf56f42280d99b8bbbe75be"
+    },
+    {
+      "name": "leaf-6",
+      "imageSha256": "ab8a2ec1f732c35036207d3843583dff1869301e574c15badd23f80cd05ad19a",
+      "metadata": {
+        "accuracyM": 9,
+        "capturedAt": "2026-10-20T12:06:00Z",
+        "deviceId": "device-6",
+        "latitude": "22.500006",
+        "longitude": "88.300006",
+        "nonce": "nonce-6",
+        "projectId": "project-6"
+      },
+      "signature": "c77c81b7b5979e552eff2dbeea7892f73ea3f0f6660fec45d47857f88508d8fdb0a15b5c3e29fa537be834691ef484433e4ac78af6de138fada457cc32b273ce",
+      "leaf": "317c664915f487ed72bba07725e007b292276f3ac857eee9bb229775babe6d56"
+    },
+    {
+      "name": "leaf-7",
+      "imageSha256": "85b78513b6710b7086fb09fc9d8296d422cfb650b92b7a555ef570144cd34e0f",
+      "metadata": {
+        "accuracyM": 10,
+        "capturedAt": "2026-10-20T12:07:00Z",
+        "deviceId": "device-7",
+        "latitude": "22.500007",
+        "longitude": "88.300007",
+        "nonce": "nonce-7",
+        "projectId": "project-7"
+      },
+      "signature": "6a4707d370d039e8be084ed86f3acc9fee7bcc5144bfc0b48b63252fe69b71f785af7d0e7443d0df354c880975224a2061312db793b79c91000d1d28b6872412",
+      "leaf": "5acfa65160d68e9733e56980a4399f85934d9226667e966bbaab3c9dacffee6a"
+    },
+    {
+      "name": "leaf-8",
+      "imageSha256": "7bbdc68b22c5789b4d43254b1b59fc1346ac64699dc061947e05113195d99c4b",
+      "metadata": {
+        "accuracyM": 11,
+        "capturedAt": "2026-10-20T12:08:00Z",
+        "deviceId": "device-8",
+        "latitude": "22.500008",
+        "longitude": "88.300008",
+        "nonce": "nonce-8",
+        "projectId": "project-8"
+      },
+      "signature": "6c7cfd224198241c85b5be4b30cd1717129dc3864660b70321a11ed0fce4fff7c0c72055897b0fa4a48564155d98ca56c4c02b74e01776f337b9ae5c83ec2161",
+      "leaf": "b8b02b6997451d4b23073f5650d61b735e617b71db99f17975471be5f0e7d571"
+    },
+    {
+      "name": "leaf-9",
+      "imageSha256": "0246a19cef4dd8058031d65967efbe2dbabe95b65124b0a0c5f7bea5b862c773",
+      "metadata": {
+        "accuracyM": 12,
+        "capturedAt": "2026-10-20T12:09:00Z",
+        "deviceId": "device-9",
+        "latitude": "22.500009",
+        "longitude": "88.300009",
+        "nonce": "nonce-9",
+        "projectId": "project-9"
+      },
+      "signature": "ba55faa98ca9c0734f0ba6956ae6961cf9d1cf52138ca926be986588f071c952d8406a87b953c9ae3be01167316210ca4ec890fabecc7807a457aef83a957363",
+      "leaf": "c4371acbfeabf3efd8daea83d3bf943b0bf4601e2f3d4f419708e37444df1681"
+    }
+  ],
+  "merkleRoot": [
+    {
+      "name": "merkle-1",
+      "leafCount": 1,
+      "leaves": [
+        "d2dbf006f96dd05044a8f63d8f118f23925ba4cc5750f8b6c8e287fd506c8188"
+      ],
+      "root": "d2dbf006f96dd05044a8f63d8f118f23925ba4cc5750f8b6c8e287fd506c8188"
+    },
+    {
+      "name": "merkle-2",
+      "leafCount": 2,
+      "leaves": [
+        "d2dbf006f96dd05044a8f63d8f118f23925ba4cc5750f8b6c8e287fd506c8188",
+        "4140bf0e8569ed03ec838871ff2f190e9b3ea86bc083d7e9901049f75f00e855"
+      ],
+      "root": "c76c1321b98ab0ea04447b38d8daeb85fa04df66731a8f25a60c84a1548d9831"
+    },
+    {
+      "name": "merkle-3",
+      "leafCount": 3,
+      "leaves": [
+        "d2dbf006f96dd05044a8f63d8f118f23925ba4cc5750f8b6c8e287fd506c8188",
+        "4140bf0e8569ed03ec838871ff2f190e9b3ea86bc083d7e9901049f75f00e855",
+        "649837ddcb7e1967086d7d35aaef7b975c513815d96fc6e70015e93a2bfe0f9a"
+      ],
+      "root": "5317bbe39fd5b7fd659f724b506994a5860ee6d309f6a7071c0da40e13467b98"
+    },
+    {
+      "name": "merkle-4",
+      "leafCount": 4,
+      "leaves": [
+        "d2dbf006f96dd05044a8f63d8f118f23925ba4cc5750f8b6c8e287fd506c8188",
+        "4140bf0e8569ed03ec838871ff2f190e9b3ea86bc083d7e9901049f75f00e855",
+        "649837ddcb7e1967086d7d35aaef7b975c513815d96fc6e70015e93a2bfe0f9a",
+        "9fde56c376760bd399b82eb8569229a2dff19219411ac71154dfeab2cf502454"
+      ],
+      "root": "1313c93ce2269a6e22eeb1bf7e902daa94b13c138c33a1eee66a248cf566e0be"
+    },
+    {
+      "name": "merkle-5",
+      "leafCount": 5,
+      "leaves": [
+        "d2dbf006f96dd05044a8f63d8f118f23925ba4cc5750f8b6c8e287fd506c8188",
+        "4140bf0e8569ed03ec838871ff2f190e9b3ea86bc083d7e9901049f75f00e855",
+        "649837ddcb7e1967086d7d35aaef7b975c513815d96fc6e70015e93a2bfe0f9a",
+        "9fde56c376760bd399b82eb8569229a2dff19219411ac71154dfeab2cf502454",
+        "697f943b9ec5f90eddda8ae7473f5eb688187e3467f312fefa8677dde255042c"
+      ],
+      "root": "62af2b9bd0803636dffaf4848f8764eb3d47d2327112bf608168b82ef4134007"
+    },
+    {
+      "name": "merkle-6",
+      "leafCount": 6,
+      "leaves": [
+        "d2dbf006f96dd05044a8f63d8f118f23925ba4cc5750f8b6c8e287fd506c8188",
+        "4140bf0e8569ed03ec838871ff2f190e9b3ea86bc083d7e9901049f75f00e855",
+        "649837ddcb7e1967086d7d35aaef7b975c513815d96fc6e70015e93a2bfe0f9a",
+        "9fde56c376760bd399b82eb8569229a2dff19219411ac71154dfeab2cf502454",
+        "697f943b9ec5f90eddda8ae7473f5eb688187e3467f312fefa8677dde255042c",
+        "fb1ec199d052a3ce6d141a28c2d706a51b99f09c2a8d61243062a046f06b68f1"
+      ],
+      "root": "53ead6f45f4a284c375d3480c5ee12f4a7732742436db0b5148e3350a89d2b4e"
+    },
+    {
+      "name": "merkle-7",
+      "leafCount": 7,
+      "leaves": [
+        "d2dbf006f96dd05044a8f63d8f118f23925ba4cc5750f8b6c8e287fd506c8188",
+        "4140bf0e8569ed03ec838871ff2f190e9b3ea86bc083d7e9901049f75f00e855",
+        "649837ddcb7e1967086d7d35aaef7b975c513815d96fc6e70015e93a2bfe0f9a",
+        "9fde56c376760bd399b82eb8569229a2dff19219411ac71154dfeab2cf502454",
+        "697f943b9ec5f90eddda8ae7473f5eb688187e3467f312fefa8677dde255042c",
+        "fb1ec199d052a3ce6d141a28c2d706a51b99f09c2a8d61243062a046f06b68f1",
+        "add4b896cb06bf0d24fd68948f1e9f7e0084b19f7b37f3fbc0f4b5d0d58ae277"
+      ],
+      "root": "5c63521cf9585362deb4d0405c9faaee4edb51fd04e653f1c90c63a8622cabc4"
+    },
+    {
+      "name": "merkle-8",
+      "leafCount": 8,
+      "leaves": [
+        "d2dbf006f96dd05044a8f63d8f118f23925ba4cc5750f8b6c8e287fd506c8188",
+        "4140bf0e8569ed03ec838871ff2f190e9b3ea86bc083d7e9901049f75f00e855",
+        "649837ddcb7e1967086d7d35aaef7b975c513815d96fc6e70015e93a2bfe0f9a",
+        "9fde56c376760bd399b82eb8569229a2dff19219411ac71154dfeab2cf502454",
+        "697f943b9ec5f90eddda8ae7473f5eb688187e3467f312fefa8677dde255042c",
+        "fb1ec199d052a3ce6d141a28c2d706a51b99f09c2a8d61243062a046f06b68f1",
+        "add4b896cb06bf0d24fd68948f1e9f7e0084b19f7b37f3fbc0f4b5d0d58ae277",
+        "3c9bcfc57bee1ac26ef0036b1fe72d119a78f09c42bff115d79fc8c212538581"
+      ],
+      "root": "d4f61b1e2303c35f0c89277fcfdd91e9d6631e11d5b6275e44f625f12d1648a6"
+    },
+    {
+      "name": "merkle-9",
+      "leafCount": 9,
+      "leaves": [
+        "d2dbf006f96dd05044a8f63d8f118f23925ba4cc5750f8b6c8e287fd506c8188",
+        "4140bf0e8569ed03ec838871ff2f190e9b3ea86bc083d7e9901049f75f00e855",
+        "649837ddcb7e1967086d7d35aaef7b975c513815d96fc6e70015e93a2bfe0f9a",
+        "9fde56c376760bd399b82eb8569229a2dff19219411ac71154dfeab2cf502454",
+        "697f943b9ec5f90eddda8ae7473f5eb688187e3467f312fefa8677dde255042c",
+        "fb1ec199d052a3ce6d141a28c2d706a51b99f09c2a8d61243062a046f06b68f1",
+        "add4b896cb06bf0d24fd68948f1e9f7e0084b19f7b37f3fbc0f4b5d0d58ae277",
+        "3c9bcfc57bee1ac26ef0036b1fe72d119a78f09c42bff115d79fc8c212538581",
+        "cc71da7c12c4e002e77e476d917422f04a14bfd133bf445a9450a0766fe2022a"
+      ],
+      "root": "a708bcab4ed1a8569cb23b8befd4e3ae86a28f0676d00ea64137e9809f3e210b"
+    },
+    {
+      "name": "merkle-10",
+      "leafCount": 10,
+      "leaves": [
+        "d2dbf006f96dd05044a8f63d8f118f23925ba4cc5750f8b6c8e287fd506c8188",
+        "4140bf0e8569ed03ec838871ff2f190e9b3ea86bc083d7e9901049f75f00e855",
+        "649837ddcb7e1967086d7d35aaef7b975c513815d96fc6e70015e93a2bfe0f9a",
+        "9fde56c376760bd399b82eb8569229a2dff19219411ac71154dfeab2cf502454",
+        "697f943b9ec5f90eddda8ae7473f5eb688187e3467f312fefa8677dde255042c",
+        "fb1ec199d052a3ce6d141a28c2d706a51b99f09c2a8d61243062a046f06b68f1",
+        "add4b896cb06bf0d24fd68948f1e9f7e0084b19f7b37f3fbc0f4b5d0d58ae277",
+        "3c9bcfc57bee1ac26ef0036b1fe72d119a78f09c42bff115d79fc8c212538581",
+        "cc71da7c12c4e002e77e476d917422f04a14bfd133bf445a9450a0766fe2022a",
+        "be5551be309d987e631d9b3bf97df16d4215f54f016b867e0f80cf2ca1d6b5d9"
+      ],
+      "root": "4759d002b0b9f5eacf320a692a64fbe4cb9ddbf87b39b7fbd775553749f52d88"
+    }
+  ]
+}

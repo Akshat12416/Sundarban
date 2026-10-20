@@ -1,58 +1,23 @@
-# SIH 2025 - Blue Carbon / Waste-to-Value Platform
+# Sundarban
 
-This repository contains the micro-frontend portals for the SIH 2025 Blue Carbon / CarbonVault project.
+Afforestation evidence is checked by a verifier service and, after approval, anchored on Sepolia. Firebase provides Auth and Firestore. Evidence files use `STORAGE_BACKEND=disk` in development and a private Supabase bucket in the cloud. Firebase Storage is not used.
 
-## Portals & Services
+Legacy apps under `legacy/` are read-only. Do not import them.
 
-The platform consists of 4 active applications that work together:
+## Commands
 
-| Portal | Directory | Default Port | Description |
-| :--- | :--- | :---: | :--- |
-| **Landing Page** | [`landing-page/`](./landing-page) | `3000` | Public-facing website, hero animations, interactive showcase, and login selector. |
-| **Admin Portal** | [`admin-portal/`](./admin-portal) | `5173` | Verifies submitted projects, handles approval/rejection, and oversees plantation tracking. |
-| **Contributor Portal** | [`contributor-portal/`](./contributor-portal) | `5174` | Used by contributors to submit projects with photos and location, and track project status. |
-| **Buyer Portal** | [`buyer-portal/`](./buyer-portal) | `5175` | Marketplace for corporate buyers to view approved projects, filter, and purchase credits. |
+Run each one from the repository root unless the line says otherwise.
 
----
+| Component | Command |
+|---|---|
+| Firebase emulators | `firebase emulators:start --only auth,firestore` |
+| Verifier | `cd services/verifier && .venv/bin/uvicorn app.main:app --reload` |
+| Verifier tests | `cd services/verifier && .venv/bin/pytest` |
+| Admin web | `cd apps/admin-web && npm run dev` |
+| Admin web build | `cd apps/admin-web && npm run build` |
+| Contracts tests | `cd contracts && .venv/bin/pytest` |
+| Test vectors | `cd packages/test-vectors && .venv/bin/pytest` |
 
-## Quick Start
+First-time setup for a Python component is `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt` inside that directory. Admin web is `cd apps/admin-web && npm install`. Contracts also need `cd contracts && npm install` so OpenZeppelin v5 is on disk for later Solidity imports.
 
-To run all portals concurrently, open separate terminal windows for each:
-
-```bash
-# 1. Landing Page (Port 3000)
-cd landing-page && npm run dev
-
-# 2. Admin Portal (Port 5173)
-cd admin-portal && npm run dev
-
-# 3. Contributor Portal (Port 5174)
-cd contributor-portal && npm run dev
-
-# 4. Buyer Portal (Port 5175)
-cd buyer-portal && npm run dev
-```
-
----
-
-## Configuration & Environment Variables
-
-All portals share the Firebase Realtime Database (`carbonvault-c2f6a`).
-
-To customize Firebase credentials per environment, copy `.env.example` to `.env` in the respective portal:
-
-```bash
-cp admin-portal/.env.example admin-portal/.env
-cp contributor-portal/.env.example contributor-portal/.env
-cp buyer-portal/.env.example buyer-portal/.env
-```
-
-If `.env` is omitted, the applications fallback to the built-in development credentials automatically.
-
----
-
-## Cleaned Legacy Folders
-
-The following legacy directories were scrapped and removed:
-- `forestGumps-SIH-main`: Early design export template (scrapped and migrated into `landing-page`).
-- `marketplace-portal`: Deprecated standalone portal (split into `buyer-portal` and `landing-page`).
+Copy each `.env.example` to `.env`. The service account JSON stays in `services/verifier/secrets/` and is gitignored. With the emulator variables set, the Admin SDK does not talk to production Firestore.
