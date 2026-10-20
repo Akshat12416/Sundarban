@@ -1,0 +1,14 @@
+{
+  "source": "https://ai.google.dev/gemini-api/docs/pricing",
+  "checked": "2026-10-21",
+  "note": "Free tier standard input and output are free of charge. Paid standard rates apply through 2026-12-31. The runner uses the paid rates unless GEMINI_PRICE_TIER=free.",
+  "models": {
+    "gemini-3.8-flash": {
+      "free": {"input_per_million": "0", "output_per_million": "0"},
+      "paid_standard_through_2026_12_31": {
+        "input_per_million": "0.75",
+        "output_per_million": "3.75"
+      }
+    }
+  }
+}
