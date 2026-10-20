@@ -548,7 +548,12 @@ def class_table(items: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def print_report(counts: dict[str, int], warnings: list[str], items: list[dict]) -> None:
+def print_report(
+    counts: dict[str, int],
+    warnings: list[str],
+    items: list[dict],
+    unmatched: list[str],
+) -> None:
     print(f"real_photos {counts['real']}")
     print(f"before_like {counts['before_like']}")
     print(f"after_like {counts['after_like']}")
@@ -558,7 +563,12 @@ def print_report(counts: dict[str, int], warnings: list[str], items: list[dict])
     print(f"ai_log_mismatches {counts['ai_log_mismatches']}")
     print(f"a4_items {counts['a4_items']}")
     print(f"reserved {counts['reserved']}")
+    print(f"composite_pairs {counts['composite_pairs']}")
     print(class_table(items))
+    if unmatched:
+        print("unmatched")
+        for line in unmatched:
+            print(line)
     for warning in warnings:
         print(f"warning: {warning}", file=sys.stderr)
 
@@ -597,11 +607,11 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
     root = args.root or repo_root()
     out = args.out or (root / "bench" / "data" / "manifest.jsonl")
-    items, warnings, counts = build_manifest(root, args.seed)
+    items, warnings, counts, unmatched = build_manifest(root, args.seed)
     text = dump_jsonl(items)
     out.write_text(text, encoding="utf-8")
     write_licenses(root, load_sources(root / "bench" / "data" / "raw" / "sources.csv"))
-    print_report(counts, warnings, items)
+    print_report(counts, warnings, items, unmatched)
 
 
 if __name__ == "__main__":
