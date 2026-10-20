@@ -1,5 +1,5 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-20 22:05 | by: Grok 4.7 | commit: pending this session
+Last updated (UTC): 2026-10-20 22:05 | by: Grok 4.7 | commit: 280ea07
 
 ## 1. Next step (read this first)
 The user does `docs/guides/PHASE_3_PREREQUISITES.md` before the evidence service. First action: confirm `services/verifier/secrets/firebase-admin.json`, then set `STORAGE_BACKEND=supabase` and remove the duplicate `FIREBASE_PROJECT_ID` line.
@@ -39,7 +39,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 |---|---|---|---|
 | 0 Setup and audit | done | 48ea760 | Audit, tokens, screens, and the Phase 1 prerequisite guide are written. No application code. |
 | 1 Scaffold and Firebase | done | 6858268 | Emulators, /health, Sepolia chain id, admin build, and vector tests ran on 2026-10-20. No Firebase Storage. |
-| 2a Benchmark pilot | in progress | pending this session | Manifest generator done. No LLM calls. |
+| 2a Benchmark pilot | in progress | 280ea07 | Manifest generator done. No LLM calls. |
 | 2b Benchmark full | not started | | |
 | 3 Evidence service and cache | not started | | |
 | 4a Verifiers C0-C2 and runner | not started | | |
@@ -116,7 +116,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-20 | Grok 4.7 | Deterministic manifest from the real catalogue and pre-made A4 files. Validator, licences, paper changelog, Phase 3 guide. | pending this session |
+| 2026-10-20 | Grok 4.7 | Deterministic manifest from the real catalogue and pre-made A4 files. Validator, licences, paper changelog, Phase 3 guide. | 280ea07 |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
 | 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | 48ea760 |
