@@ -18,6 +18,20 @@ def load_sources(path: Path) -> list[dict[str, str]]:
     return rows
 
 
+def load_overrides(path: Path) -> dict[str, str]:
+    if not path.is_file():
+        return {}
+    with path.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    overrides = {}
+    for row in rows:
+        filename = (row.get("filename") or "").strip()
+        kind = (row.get("class") or "").strip()
+        if filename and kind:
+            overrides[filename] = kind
+    return overrides
+
+
 def load_ai_log(path: Path) -> list[dict[str, str]]:
     if not path.is_file():
         return []

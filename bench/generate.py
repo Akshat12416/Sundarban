@@ -8,15 +8,16 @@ Run from the repository root:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import random
 import sys
 from difflib import SequenceMatcher
 from pathlib import Path
 
-from bench.catalog import a4_directory, load_ai_log, load_sources, repo_root
+from bench.catalog import a4_directory, load_ai_log, load_overrides, load_sources, repo_root
 from bench.classify import classify_notes, composite_orientation
-from bench.config import LEFTOVER_ATTACKS
+from bench.config import INJECTION_TEXT, LEFTOVER_ATTACKS
 from bench.device_captures import load_device_capture_items
 
 PHOTO_FIELDS = ("filename", "role", "origin")
@@ -351,61 +352,109 @@ def _attack_from_photo(row: dict[str, str], attack_class: str, number: int, spli
     return item
 
 
+def parcel_strings(key: str) -> tuple[str, str]:
+    digest = hashlib.sha256(key.encode("utf-8")).digest()
+    latitude = int.from_bytes(digest[:3], "big") % 180_000_000 - 90_000_000
+    longitude = int.from_bytes(digest[3:6], "big") % 360_000_000 - 180_000_000
+    return (f"{latitude / 1_000_000:.6f}", f"{longitude / 1_000_000:.6f}")
+
+
+def attach_parcel(item: dict) -> None:
+    latitude, longitude = parcel_strings(item.get("source_filename") or item["id"])
+    item["parcel_latitude"] = latitude
+    item["parcel_longitude"] = longitude
+
+
+def overlay_injection(root: Path, source_name: str, item_id: str) -> str | None:
+    from PIL import Image, ImageDraw
+
+    source = resolve_raw(root, source_name)
+    derived = root / "bench" / "data" / "derived" / source_name
+    if source is None and derived.is_file():
+        source = derived
+    if source is None:
+        return None
+    dest_dir = root / "bench" / "data" / "derived"
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    out_name = f"a11-{item_id}.jpg"
+    with Image.open(source) as image:
+        rgb = image.convert("RGB")
+        ImageDraw.Draw(rgb).text((8, 8), INJECTION_TEXT, fill=(255, 0, 0))
+        rgb.save(dest_dir / out_name, format="JPEG", quality=95)
+    return out_name
+
+
 def build_other_attacks(
+    root: Path,
     legit: list[dict],
     leftovers: list[dict[str, str]],
     splits: dict[str, str],
 ) -> list[dict]:
     attacks: list[dict] = []
-    for number, source in enumerate(sorted(legit, key=lambda item: item["id"]), start=1):
+    ordered = sorted(legit, key=lambda item: item["id"])
+    for number, source in enumerate(ordered, start=1):
         attacks.append(_attack_from_legit(source, "A1", number, None))
         attacks.append(_attack_from_legit(source, "A2", number, "resize"))
+        roles = {photo["role"] for photo in source["photos"]}
+        if "before" in roles and "after" in roles:
+            swapped = []
+            for photo in source["photos"]:
+                copy = dict(photo)
+                if copy["role"] == "before":
+                    copy["role"] = "after"
+                elif copy["role"] == "after":
+                    copy["role"] = "before"
+                swapped.append(copy)
+            swap = _item(
+                f"a5-{number:04d}",
+                "attack",
+                source["split"],
+                swapped,
+                attack_class="A5",
+                registry_context=[],
+            )
+            swap["source_item"] = source["id"]
+            attacks.append(swap)
+        document = _attack_from_legit(source, "A10", number, None)
+        document["document_text"] = INJECTION_TEXT
+        document["source_item"] = source["id"]
+        document["registry_context"] = []
+        attacks.append(document)
+        photos = [dict(photo) for photo in source["photos"]]
+        target = next((photo for photo in photos if photo["origin"] == "real"), None)
+        if target is not None:
+            overlaid = overlay_injection(root, target["filename"], f"a11-{number:04d}")
+            if overlaid is not None:
+                target["filename"] = overlaid
+                target["origin"] = "derived"
+        image_attack = _item(
+            f"a11-{number:04d}",
+            "attack",
+            source["split"],
+            photos,
+            attack_class="A11",
+            registry_context=[],
+        )
+        image_attack["overlay_text"] = INJECTION_TEXT
+        image_attack["source_item"] = source["id"]
+        attacks.append(image_attack)
+        duplicate = _attack_from_legit(source, "A12", number, None)
+        duplicate["parcel_latitude"] = source["parcel_latitude"]
+        duplicate["parcel_longitude"] = source["parcel_longitude"]
+        duplicate["registry_context"] = [source["id"]]
+        attacks.append(duplicate)
 
-    used_for_a5: set[str] = set()
     by_split: dict[str, list[dict[str, str]]] = {"dev": [], "test": []}
     for row in leftovers:
         by_split[splits[row["filename"]]].append(row)
 
-    a5_number = 0
-    for split in ("dev", "test"):
-        pool = sorted(by_split[split], key=lambda item: item["filename"])
-        # A5 needs one before-like and one after-like leftover. Class is already
-        # stored on the row by the caller as "_class".
-        befores = [row for row in pool if row["_class"] == "before_like"]
-        afters = [row for row in pool if row["_class"] == "after_like"]
-        if befores and afters:
-            a5_number += 1
-            before, after = befores[0], afters[0]
-            used_for_a5.update({before["filename"], after["filename"]})
-            attacks.append(
-                _item(
-                    f"a5-{a5_number:04d}",
-                    "attack",
-                    split,
-                    [
-                        _photo(after["filename"], "before", "real"),
-                        _photo(before["filename"], "after", "real"),
-                    ],
-                    attack_class="A5",
-                    registry_context=[],
-                )
-            )
-
     counters = {name: 0 for name in LEFTOVER_ATTACKS}
     for split in ("dev", "test"):
-        pool = [
-            row
-            for row in sorted(by_split[split], key=lambda item: item["filename"])
-            if row["filename"] not in used_for_a5
-        ]
-        legit_ids = [item["id"] for item in legit if item["split"] == split]
+        pool = sorted(by_split[split], key=lambda item: item["filename"])
         for row, attack_class in zip(pool, LEFTOVER_ATTACKS):
             counters[attack_class] += 1
-            registry: list[str] = []
-            if attack_class == "A12" and legit_ids:
-                registry = [legit_ids[0]]
             attacks.append(
-                _attack_from_photo(row, attack_class, counters[attack_class], split, registry)
+                _attack_from_photo(row, attack_class, counters[attack_class], split, [])
             )
     return attacks
 
@@ -453,7 +502,11 @@ def build_manifest(root: Path, seed: int) -> tuple[list[dict], list[str], dict[s
         for key in ("filename", "source_url", "author", "licence", "accessed_on", "notes"):
             if row.get(key) is None:
                 row[key] = ""
-    classes = {row["filename"]: classify_notes(row.get("notes") or "") for row in rows}
+    overrides = load_overrides(root / "bench" / "data" / "overrides.csv")
+    classes = {
+        row["filename"]: overrides.get(row["filename"]) or classify_notes(row.get("notes") or "")
+        for row in rows
+    }
     by_name = {row["filename"]: row for row in rows}
 
     composites, reserved, composite_warnings = build_composites(root, rows)
@@ -474,7 +527,9 @@ def build_manifest(root: Path, seed: int) -> tuple[list[dict], list[str], dict[s
     legit, leftovers = build_legit(rows, classes, reserved, splits, rng)
     for row in leftovers:
         row["_class"] = classes[row["filename"]]
-    attacks = build_other_attacks(composites + legit, leftovers, splits)
+    for item in composites + legit:
+        attach_parcel(item)
+    attacks = build_other_attacks(root, composites + legit, leftovers, splits)
 
     device_items = load_device_capture_items(root)
     items = sorted(composites + a4_items + legit + attacks + device_items, key=lambda item: item["id"])

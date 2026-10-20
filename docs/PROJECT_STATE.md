@@ -1,8 +1,8 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-20 22:05 | by: Grok 4.7 | commit: e35c883
+Last updated (UTC): 2026-10-20 22:45 | by: Grok 4.7 | commit: pending this session
 
 ## 1. Next step (read this first)
-The manifest generator is `python -m bench.generate --seed 42`. Verified after the keyword, matching, and composite patch: 41 catalogue rows, 5 composite pairs split into `bench/data/derived/`, 9 of 10 A4 files used (the remaining one clashes because its real partner is after-like). `python -m bench.validate` passed. A second generate matched the manifest byte for byte.
+The manifest generator is `python -m bench.generate --seed 42`. Verified after the override and A5/A10/A11/A12 patch: A4 is 10 of 10, composite pairs are 5, and A1–A12 each have a nonzero total. `python -m bench.validate` passed. A second generate matched the manifest byte for byte. `bench/injectors/` does not exist.
 
 The user does `docs/guides/PHASE_3_PREREQUISITES.md` before the evidence service. First action: confirm `services/verifier/secrets/firebase-admin.json`, then set `STORAGE_BACKEND=supabase` and remove the duplicate `FIREBASE_PROJECT_ID` line.
 
@@ -102,7 +102,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 - [ ] Phase 3 checks in `docs/guides/PHASE_3_PREREQUISITES.md`: set `STORAGE_BACKEND=supabase` and delete the extra `FIREBASE_PROJECT_ID` line.
 
 ## 10. Gotchas and failed approaches (newest first)
-- 2026-10-21: A4 matching uses a normalized stem, then a substring fallback. A before-fake is rejected only when the real partner is before-like, and an after-fake only when it is after-like. `After-vegetation-Uganda.jpg` still clashes because that note is after-like.
+- 2026-10-21: `bench/injectors/` does not exist. A5, A10, A11 and A12 were only attempted from leftover photos after A3 and A6–A9, so they were zero. They are now built from legitimate items. `vegetation-Uganda.jpg` is forced to before-like in `bench/data/overrides.csv`.
 - 2026-10-20: No Supabase client exists. `SUPABASE_SERVICE_KEY` is unset. The live check used `SUPABASE_SECRET_KEY` over HTTP. Public object fetch returned 400. After delete, an authenticated GET returned 400; a prefix list returned count 0.
 - 2026-10-20: Firestore emulator refused Java 17. `firebase-tools` requires Java 21. Installed `openjdk@21` with Homebrew and left it keg-only so `java` on PATH stays 17. The README command sets `JAVA_HOME` for the emulator only. Verified by "All emulators ready".
 - 2026-10-20: `npm install -g firebase-tools` failed with EACCES because `/usr/local/lib/node_modules` is owned by root. Installed with `brew install firebase-cli` (15.34.0). Then `brew unlink node` so `node` stayed v22.16.0 at `/usr/local/bin/node`. Verified by `firebase --version` outside the sandbox.
@@ -116,7 +116,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | Patched keyword lists, A4 stem matching, class gating, and composite splits. 5 composites and 9 of 10 A4 files. | e35c883 |
+| 2026-10-21 | Grok 4.7 | Override for vegetation-Uganda.jpg. A5, A10, A11 and A12 now come from legitimate items. A4 is 10 of 10. | pending this session |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
 | 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | 48ea760 |

@@ -70,10 +70,11 @@ def validate(items: list[dict]) -> list[str]:
         for item in group:
             if item["id"] == home_id:
                 continue
-            if item.get("attack_class") not in {"A1", "A2"}:
-                errors.append(f"{name} is used twice by {item['id']}")
-            elif home_id not in item.get("registry_context", []):
-                errors.append(f"{name} reuse in {item['id']} does not cite {home_id}")
+            if item.get("attack_class") in {"A1", "A2", "A12"} and home_id in item.get("registry_context", []):
+                continue
+            if item.get("attack_class") in {"A5", "A10", "A11"} and item.get("source_item") == home_id:
+                continue
+            errors.append(f"{name} is used twice by {item['id']}")
     return errors
 
 
