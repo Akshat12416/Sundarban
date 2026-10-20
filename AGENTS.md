@@ -11,9 +11,10 @@ depends on honest measurements from this codebase.
 
 STACK
 Expo (React Native, TypeScript) mobile app | FastAPI verifier service | Firebase
-(Auth, Firestore, Storage, Emulator Suite) | Gemini API | Solidity on the Sepolia
-testnet, compiled, deployed and tested from Python with no Hardhat | React + Vite
-admin web | Python bench and analysis.
+(Auth, Firestore, Emulator Suite) | Supabase Storage (private bucket) | Gemini API |
+Solidity on the Sepolia testnet, compiled, deployed and tested from Python with
+no Hardhat | React + Vite admin web | Python bench and analysis. Evidence files
+are not stored in Firebase Storage.
 
 NON-NEGOTIABLE RULES
 1. Never invent, estimate or hard-code experimental results. Result tables come
@@ -30,10 +31,21 @@ NON-NEGOTIABLE RULES
 6. Secrets live in .env files that are git-ignored. Commit only .env.example.
 7. Cross-language logic (canonical JSON, SHA-256, Merkle, signature format) must
    pass the shared vectors in packages/test-vectors in both TypeScript and Python.
+   The TypeScript implementation lives in packages/cv-crypto-ts. The mobile app
+   and the admin web import that package and do not keep a second copy.
+   Canonical JSON uses sorted keys, UTF-8, no whitespace, and no floating-point
+   numbers. Latitude and longitude are 6-decimal strings. Accuracy is a
+   one-decimal string.
 8. Use the Firebase Emulator Suite for development; never test against production.
 9. If a change alters anything the paper claims (attack classes, configurations,
    metrics, protocol), append an entry to docs/CHANGELOG-PAPER.md.
 10. Do not read from or import code in legacy/. Copy only what the audit approves.
+11. The Supabase secret key (SUPABASE_SECRET_KEY) is server-side only. Never put
+    it in the mobile app, the admin web, logs, or git. SUPABASE_URL and
+    SUPABASE_STORAGE_BUCKET are server-only as well.
+12. Benchmark: legitimate items use real photographs only. Every submission is
+    evaluated statelessly and includes a registry_context field. Dev/test splits
+    are made by pair_id. Statistics resample by pair_id.
 
 WORKING STYLE
 - Small commits, each with tests where logic exists.

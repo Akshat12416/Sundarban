@@ -28,7 +28,7 @@ Scrap
 Decided: afforestation only
 Realtime Database schema, base64 images, loose location strings, mixed UPI-or-wallet field
 Drop
-Replaced by the Firestore schema, Storage files and signed metadata
+Replaced by the Firestore schema, files in a private Supabase Storage bucket, and signed metadata
 Firebase keys in the old firebase.js files
 Never copy
 New Firebase project; lock down or delete the old one when finished
@@ -38,8 +38,9 @@ Keep as visual reference
 5. Specifications every phase shares
 5.1 Attestation protocol
 Enrolment. The app generates an EC P-256 signing key through a small local Expo native module that wraps the Android Keystore (alias cv_device_key, purpose SIGN, SHA-256, not exportable). The module needs an Expo development build, because Expo Go cannot create hardware-backed keys. The app sends the public key to the server. The server stores it with the user ID and the security level it can establish.
-Per photo. (1) App requests a single-use nonce for the project from POST /v1/nonce. (2) App captures through expo-camera only, never the image picker. (3) App computes h = SHA-256(image bytes) and builds metadata m containing latitude, longitude (6 decimals), accuracy in metres, capture time (UTC, ISO 8601), device ID, project ID and the nonce. (4) m is serialised as canonical JSON: keys sorted, UTF-8, no whitespace. (5) App signs ECDSA-SHA256 over h || SHA-256(m_canonical). (6) App uploads image, m and signature. (7) Server verifies the signature with the stored public key, the nonce (unused, unexpired, bound to the project), and that the location is within the configured radius of the declared parcel. (8) Accepted items get leaf = SHA-256(0x00 || h || SHA-256(m_canonical) || signature).
+Per photo. (1) App requests a single-use nonce for the project from POST /v1/nonce. (2) App captures through expo-camera only, never the image picker. (3) App computes h = SHA-256(image bytes) and builds metadata m containing latitude and longitude as strings with exactly 6 decimal places, accuracy in metres as a string with exactly 1 decimal place, capture time (UTC, ISO 8601), device ID, project ID and the nonce. (4) m is serialised as canonical JSON: keys sorted, UTF-8, no whitespace, and no floating-point numbers. (5) App signs ECDSA-SHA256 over h || SHA-256(m_canonical). (6) App uploads image, m and signature. The server stores the file in a private Supabase Storage bucket. (7) Server verifies the signature with the stored public key, the nonce (unused, unexpired, bound to the project), and that the location is within the configured radius of the declared parcel. (8) Accepted items get leaf = SHA-256(0x00 || h || SHA-256(m_canonical) || signature).
 Merkle tree. Leaves in capture order. Internal node = SHA-256(0x01 || left || right). If a level has an odd count, duplicate the last node. The root is stored on-chain.
+The TypeScript implementation of canonical JSON, the hashes and the Merkle tree lives in packages/cv-crypto-ts. The mobile app and the admin web import that package. They do not keep a second copy. Python uses the reference in packages/test-vectors. Both must pass those vectors.
 Stretch (S1). Request hardware key attestation at enrolment by setting the server nonce as the attestation challenge, then have the server validate the certificate chain and record the security level (software, TEE or StrongBox). If you build this, the paper's Section IV-B and the future-work text change, so log it in CHANGELOG-PAPER.md and tell me so I can update the paper.
 5.2 Firestore collections
 • users/{uid}: name, email, role (contributor or admin, set by custom claim), walletAddress.
@@ -50,7 +51,8 @@ Stretch (S1). Request hardware key attestation at enrolment by setting the serve
 • reports/{projectId}/versions/{n}: agent outputs, aggregator output, report hash, model id, prompt versions.
 • chainTx/{txHash}: projectId, state (pending, submitted, confirmed, failed), network, contract, credits.
 • transfers/{uid}/items/{id}: credit issuance history (marketplace listings are out of scope).
-Rules: contributors read and write only their own projects until submission; only admins change status; nobody except the server writes reports, nonces or leaves.
+Rules: contributors read and write only their own projects until submission, and again while the status is needs_more_evidence; only admins change status; nobody except the server writes reports, nonces or leaves.
+Evidence files live in a private Supabase Storage bucket, not in Firebase Storage. The server reads and writes them with SUPABASE_URL, SUPABASE_SECRET_KEY and SUPABASE_STORAGE_BUCKET. Those three variables are server-only. The secret key never appears in the mobile app, the admin web, logs, or git.
 5.3 Verifier API (FastAPI)
 • POST /v1/nonce: returns a single-use nonce for a project.
 • POST /v1/devices: enrol a device public key.
@@ -59,6 +61,7 @@ Rules: contributors read and write only their own projects until submission; onl
 • GET /v1/projects/{id}/report: latest report.
 • POST /v1/projects/{id}/seal: computes the Merkle root and the hashes to register on-chain.
 • POST /v1/chain/confirm: records a confirmed transaction and updates chainState.
+• GET /v1/files/{evidenceId}: admin only. Returns a short-lived signed URL for the object in the private Supabase bucket.
 5.4 Agent output schema
 Every agent returns JSON with agent, version, score (0 to 1, higher means more suspicious), decision (pass, review or flag), findings (list of objects with type, evidence reference and explanation) and confidence (0 to 1). The aggregator adds overall_risk (low, medium, high), recommendation (approve, review, reject or request_more_evidence) and the report hash. Invalid JSON is retried once, then counted as a flag and logged.
 5.5 Contract interface
@@ -105,6 +108,11 @@ Bottom navigation
 All
 Home, My Projects (replaces the shop icon), the centre New Project button, Credit history, Profile
 Left out of the designs on purpose: the shop and cart, the INR balance and bank payouts, likes, comments and sharing, and the Events and Nearby tabs. The notification bell can show a simple list of status changes if time allows.
+5.9 Benchmark
+Legitimate items use real photographs only. Do not generate or synthesise a photograph and count it as legitimate.
+Every submission is evaluated statelessly. The verifier input for each submission includes a registry_context field.
+Dev/test splits are made by pair_id, so both members of a pair stay in the same split.
+Statistics resample by pair_id.
 5.8 docs/PROJECT_STATE.md template
 The Phase 0 prompt creates this file from the template below. Every agent reads it at the start of a session and updates it after each sub-task.
 # Sundarban Project State
@@ -155,6 +163,7 @@ or the user does it.
 | Firebase project id | | | |
 | Service account file | services/verifier/secrets/ | | |
 | GEMINI_API_KEY and GEMINI_MODEL | .env files | | |
+| SUPABASE_URL, SUPABASE_SECRET_KEY, SUPABASE_STORAGE_BUCKET | services/verifier/.env | | Server only. |
 | Sepolia RPC and deployer key variables | contracts/.env | | |
 | Expo project id and app ids | | | |
 

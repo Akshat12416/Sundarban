@@ -1,8 +1,10 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-20 19:16 | by: Grok 4.7 | commit: 196f43f
+Last updated (UTC): 2026-10-20 19:50 | by: Grok 4.7 | commit: pending this session
 
 ## 1. Next step (read this first)
-Phase 1 scaffold is in the tree and was re-checked on 2026-10-20. The user still needs the openly licensed photos in `docs/guides/PHASE_2_PREREQUISITES.md`. `GEMINI_API_KEY` and `GEMINI_MODEL` are non-empty in both env files; they were not called during the inspection.
+The spec in `AGENTS.md` and `docs/PLAN-SPEC.md` now records Supabase storage, the signed-file route, the Firestore recapture rule, canonical JSON without floats, the benchmark pair rules, and `packages/cv-crypto-ts`. None of that new behaviour is implemented. The user still needs the openly licensed photos in `docs/guides/PHASE_2_PREREQUISITES.md`.
+
+`packages/cv-crypto-ts` does not exist. The current vectors store accuracy as an integer field `accuracyM`, while the spec now requires a one-decimal string. `GET /v1/files/{evidenceId}` is specified and not implemented.
 
 Evidence bytes stay off Firebase Storage. `STORAGE_BACKEND` defaults to `disk`. The cloud bucket is Supabase `evidence` in `ap-southeast-1`. Firestore region reported by the user is `us-central1`. Project id is `sundarban-a64ea`.
 
@@ -24,8 +26,11 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | 2026-10-20 | `docs/PLAN-SPEC.md` had a trailing space in the filename. Renamed to `docs/PLAN-SPEC.md`. | The handoff protocol tells every agent to read that path. |
 | 2026-10-20 | Evidence files use a private Supabase bucket `evidence`. Firebase stays Auth + Firestore on Spark. | Owner asked for a free store. Firebase Storage needs Blaze. Paper says object storage and names no vendor. Recorded in `docs/decisions.md`. |
 | 2026-10-20 | Phase 1 `STORAGE_BACKEND` default is `disk`. `supabase` is allowed. Firebase Storage is not. | Local runs must not need Blaze. See `docs/decisions.md`. |
-| 2026-10-20 | Canonical JSON rejects floats. Latitude and longitude are 6-decimal strings. | Stable bytes for the shared vectors. `packages/test-vectors/reference.py`. |
-| 2026-10-20 | Contributors may write a project in `draft`, `awaiting_after`, or `needs_more_evidence`, and cannot change status or write `leaf`. | Recapture needs a write. Status stays an admin or server field. `firestore.rules`. |
+| 2026-10-20 | Canonical JSON rejects floats. Latitude and longitude are 6-decimal strings. Accuracy is a one-decimal string. | Locked in `AGENTS.md` rule 7 and plan section 5.1. Current vectors still use integer `accuracyM`. |
+| 2026-10-20 | Contributors read and write only their own projects until submission, and again while the status is `needs_more_evidence`. They cannot change status or write `leaf`. | Plan section 5.2. The emulator rules already allow those three statuses. |
+| 2026-10-20 | `packages/cv-crypto-ts` is the TypeScript crypto package shared by the mobile app and the admin web. | Plan section 5.1 and `AGENTS.md` rule 7. Directory absent. Verified by a file search on 2026-10-20. |
+| 2026-10-20 | `GET /v1/files/{evidenceId}` is admin-only and returns a short-lived signed URL. | Plan section 5.3. Not implemented. |
+| 2026-10-20 | Legitimate benchmark items are real photographs. Evaluation is stateless and includes `registry_context`. Splits and resampling use `pair_id`. | Plan section 5.9 and `AGENTS.md` rule 12. |
 
 ## 4. Phase status
 | Phase | Status (not started / in progress / done) | Last commit | Notes |
@@ -74,11 +79,11 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | Expo project id and app ids | | no | |
 
 ## 7. Interfaces
-- API endpoints implemented: `GET /health`.
+- API endpoints implemented: `GET /health`. Specified and not implemented: `GET /v1/files/{evidenceId}` (admin only, short-lived signed URL).
 - Firestore collections and rules status: `firestore.rules` and `firestore.indexes.json` are loaded by the emulator. Project id `sundarban-a64ea`. Region `us-central1` was reported by the user and was not re-opened in the console this session.
 - Contract: not deployed. OpenZeppelin v5 is installed under `contracts/node_modules` for later imports. Old ABI stays in `legacy/` and is not used.
 - Evidence object store: verifier default `disk`. Supabase bucket `evidence` is configured in env and not called yet. Firestore field remains `storagePath`.
-- Test vectors: `packages/test-vectors/vectors.json`, Python reference and pytest. TypeScript port is not written.
+- Test vectors: `packages/test-vectors/vectors.json`, Python reference and pytest. `packages/cv-crypto-ts` is absent. Vectors use integer `accuracyM`; the spec now requires a one-decimal accuracy string.
 
 ## 8. Experiments and results
 No model id pinned, no prompt versions, nothing frozen, no runs, no files in `bench/results/`. H1 to H4 are not started.
@@ -106,10 +111,10 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-20 | Grok 4.7 | Read-only inspection of Phase 1, Supabase, Firebase, API, and bench. No application code changed. | 196f43f |
+| 2026-10-20 | Grok 4.7 | Wrote the Supabase, Firestore, canonical-JSON, benchmark, and cv-crypto-ts decisions into `AGENTS.md` and `docs/PLAN-SPEC.md`. No code. | pending this session |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
 | 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | 48ea760 |
 
 ## 12. Paper impact
-No paper claim changed. The draft says originals are stored in object storage and does not name Firebase or Supabase. `docs/CHANGELOG-PAPER.md` was not added.
+The draft says originals are stored in object storage and does not name Supabase. It also leaves room for generated legitimate after-images. The new rules require real photographs for legitimate items, stateless evaluation with `registry_context`, and `pair_id` splits and resampling. `docs/CHANGELOG-PAPER.md` was not added: this task allowed edits only in `AGENTS.md`, `docs/PLAN-SPEC.md`, and this file.
