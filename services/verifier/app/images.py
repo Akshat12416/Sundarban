@@ -19,12 +19,15 @@ class PreparedImage:
     exif: dict[str, str]
     normalized_jpeg: bytes
     content_type: str
+    gps_latitude: str | None = None
+    gps_longitude: str | None = None
 
 
 def prepare_image(original: bytes, content_type: str) -> PreparedImage:
     image = Image.open(io.BytesIO(original))
     image.load()
     exif = _read_exif(image)
+    latitude, longitude = _gps_strings(image)
     digest = hashlib.sha256(original).hexdigest()
     normalized = _normalize_jpeg(image)
     phash = dhash(Image.open(io.BytesIO(normalized)))
@@ -34,6 +37,8 @@ def prepare_image(original: bytes, content_type: str) -> PreparedImage:
         exif=exif,
         normalized_jpeg=normalized,
         content_type=content_type or "image/jpeg",
+        gps_latitude=latitude,
+        gps_longitude=longitude,
     )
 
 
@@ -57,6 +62,35 @@ def _read_exif(image: Image.Image) -> dict[str, str]:
         name = str(TAGS.get(tag, tag))
         found[name] = value if isinstance(value, str) else str(value)
     return found
+
+
+def _gps_strings(image: Image.Image) -> tuple[str | None, str | None]:
+    gps = image.getexif().get_ifd(0x8825)
+    if not gps:
+        return None, None
+    latitude = _dms_to_decimal(gps.get(2), gps.get(1))
+    longitude = _dms_to_decimal(gps.get(4), gps.get(3))
+    if latitude is None or longitude is None:
+        return None, None
+    return f"{latitude:.6f}", f"{longitude:.6f}"
+
+
+def _dms_to_decimal(dms: object, ref: object) -> float | None:
+    if not isinstance(dms, (tuple, list)) or len(dms) < 3 or not isinstance(ref, str):
+        return None
+    try:
+        degrees = _ratio(dms[0]) + _ratio(dms[1]) / 60 + _ratio(dms[2]) / 3600
+    except (TypeError, ZeroDivisionError, ValueError):
+        return None
+    if ref.upper() in {"S", "W"}:
+        degrees = -degrees
+    return degrees
+
+
+def _ratio(value: object) -> float:
+    if isinstance(value, tuple) and len(value) == 2 and value[1]:
+        return float(value[0]) / float(value[1])
+    return float(value)  # type: ignore[arg-type]
 
 
 def _normalize_jpeg(image: Image.Image) -> bytes:
