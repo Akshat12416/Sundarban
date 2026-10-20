@@ -1,5 +1,5 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-20 12:27 | by: Grok 4.7 | commit: pending this session
+Last updated (UTC): 2026-10-20 12:27 | by: Grok 4.7 | commit: 17bc4b6
 
 ## 1. Next step (read this first)
 The user finishes account setup, then the next agent starts Phase 1. Evidence bytes go to Supabase, not Firebase Storage. First action for the user: `docs/guides/SUPABASE_STORAGE.md`. Firebase items still open are Google sign-in, Firestore in production mode, `services/verifier/secrets/firebase-admin.json`, and `firebase login`, in `docs/guides/PHASE_1_PREREQUISITES.md`. Skip Blaze.
@@ -92,7 +92,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | pending this session |
+| 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
 | 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | 48ea760 |
 
 ## 12. Paper impact
