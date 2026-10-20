@@ -1,5 +1,5 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-20 13:05 | by: Grok 4.7 | commit: pending this session
+Last updated (UTC): 2026-10-20 13:05 | by: Grok 4.7 | commit: 6858268
 
 ## 1. Next step (read this first)
 Phase 1 scaffold is in the tree. The user does `docs/guides/PHASE_2_PREREQUISITES.md` before the benchmark pilot. First action: create a Gemini API key and put `GEMINI_API_KEY` in `services/verifier/.env` and `bench/.env`.
@@ -31,7 +31,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | Phase | Status (not started / in progress / done) | Last commit | Notes |
 |---|---|---|---|
 | 0 Setup and audit | done | 48ea760 | Audit, tokens, screens, and the Phase 1 prerequisite guide are written. No application code. |
-| 1 Scaffold and Firebase | done | pending this session | Emulators, /health, Sepolia chain id, admin build, and vector tests ran on 2026-10-20. No Firebase Storage. |
+| 1 Scaffold and Firebase | done | 6858268 | Emulators, /health, Sepolia chain id, admin build, and vector tests ran on 2026-10-20. No Firebase Storage. |
 | 2a Benchmark pilot | not started | | |
 | 2b Benchmark full | not started | | |
 | 3 Evidence service and cache | not started | | |
@@ -105,7 +105,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-20 | Grok 4.7 | Phase 1 scaffold: Firebase Auth and Firestore emulators, verifier /health with disk storage, admin web, contract test, attestation vectors, Phase 2 guide. | pending this session |
+| 2026-10-20 | Grok 4.7 | Phase 1 scaffold: Firebase Auth and Firestore emulators, verifier /health with disk storage, admin web, contract test, attestation vectors, Phase 2 guide. | 6858268 |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
 | 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | 48ea760 |
