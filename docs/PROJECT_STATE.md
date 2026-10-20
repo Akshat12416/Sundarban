@@ -1,5 +1,5 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-20 12:27 | by: Grok 4.7 | commit: 17bc4b6
+Last updated (UTC): 2026-10-20 12:35 | by: Grok 4.7 | commit: pending this session
 
 ## 1. Next step (read this first)
 The user finishes account setup, then the next agent starts Phase 1. Evidence bytes go to Supabase, not Firebase Storage. First action for the user: `docs/guides/SUPABASE_STORAGE.md`. Firebase items still open are Google sign-in, Firestore in production mode, `services/verifier/secrets/firebase-admin.json`, and `firebase login`, in `docs/guides/PHASE_1_PREREQUISITES.md`. Skip Blaze.
@@ -79,9 +79,11 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 - [ ] Create Firestore in production mode (`asia-south1`) and note the region.
 - [ ] Create the Supabase project and private bucket `evidence`. Follow `docs/guides/SUPABASE_STORAGE.md`.
 - [ ] Save the service account key at `services/verifier/secrets/firebase-admin.json`.
-- [ ] Install the Firebase CLI, run `firebase login`, and confirm `firebase projects:list`.
+- [x] Firebase CLI 15.34.0 is installed at `/opt/homebrew/bin/firebase`. Verified with `firebase --version` on 2026-10-20.
+- [ ] Run `firebase login`, then `firebase projects:list`. Login needs the browser.
 
 ## 10. Gotchas and failed approaches (newest first)
+- 2026-10-20: `npm install -g firebase-tools` failed with EACCES because `/usr/local/lib/node_modules` is owned by root. Installed with `brew install firebase-cli` (15.34.0). Then `brew unlink node` so `node` stayed v22.16.0 at `/usr/local/bin/node`. Verified by `firebase --version` outside the sandbox.
 - 2026-10-20: `services/verifier/secrets/firebase-web.env` had been filled by pasting the Firebase JavaScript snippet, so it was not a list of variables. Rewritten locally to `KEY=value` lines. The storage bucket line was left out on purpose.
 - 2026-10-20: Supabase free projects pause after 7 days idle, and the file quota is 1 GB. Do not store `bench/` images there.
 - 2026-10-20: `docs/PLAN-SPEC.md` was stored with a trailing space, so a normal path open failed. Renamed in this session. Verified by `git mv`.
@@ -92,6 +94,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
+| 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | pending this session |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
 | 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | 48ea760 |
 

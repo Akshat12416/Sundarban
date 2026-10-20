@@ -110,10 +110,11 @@ If that JSON is ever committed, open **Service accounts**, delete the key, gener
 
 ## 6. Install the Firebase CLI and log in
 
-1. Install Node.js if `node -v` fails.
-2. Run `npm install -g firebase-tools`.
-3. Run `firebase login`. A browser opens. Choose the same Google account that owns the new project.
-4. Run `firebase projects:list`.
+1. On this Mac, Node is the installer under `/usr/local`, owned by root. `npm install -g firebase-tools` fails with `EACCES` there. Do not use sudo.
+2. Run `brew install firebase-cli`. That puts `firebase` on your PATH at `/opt/homebrew/bin/firebase`.
+3. If `node -v` then shows a Homebrew Node instead of your existing Node, run `brew unlink node`. The CLI keeps its own Node. Your `node` and `npm` stay the ones in `/usr/local/bin`.
+4. Run `firebase login`. A browser opens. Choose the same Google account that owns the new project.
+5. Run `firebase projects:list`.
 
 Check: the command exits 0 and the new project id is in the list. `firebase login:list` shows that account.
 
