@@ -1,5 +1,5 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-20 19:50 | by: Grok 4.7 | commit: pending this session
+Last updated (UTC): 2026-10-20 19:50 | by: Grok 4.7 | commit: c5a3899
 
 ## 1. Next step (read this first)
 The spec in `AGENTS.md` and `docs/PLAN-SPEC.md` now records Supabase storage, the signed-file route, the Firestore recapture rule, canonical JSON without floats, the benchmark pair rules, and `packages/cv-crypto-ts`. None of that new behaviour is implemented. The user still needs the openly licensed photos in `docs/guides/PHASE_2_PREREQUISITES.md`.
@@ -111,7 +111,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-20 | Grok 4.7 | Wrote the Supabase, Firestore, canonical-JSON, benchmark, and cv-crypto-ts decisions into `AGENTS.md` and `docs/PLAN-SPEC.md`. No code. | pending this session |
+| 2026-10-20 | Grok 4.7 | Wrote the Supabase, Firestore, canonical-JSON, benchmark, and cv-crypto-ts decisions into `AGENTS.md` and `docs/PLAN-SPEC.md`. No code. | c5a3899 |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
 | 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | 48ea760 |
