@@ -1,0 +1,126 @@
+rules_version = '2';
+
+// Roles are custom claims: request.auth.token.role is "contributor" or "admin".
+// The Admin SDK bypasses these rules. That is the only writer for reports,
+// nonces, leaves, devices, chain rows, and transfer rows.
+// There is no Firebase Storage. Evidence bytes live on disk or in Supabase.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() && request.auth.token.role == 'admin';
+    }
+
+    function isContributor() {
+      return signedIn() && request.auth.token.role == 'contributor';
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // needs_more_evidence stays open so a contributor can recapture.
+    // They still cannot change status.
+    function contributorWritable(status) {
+      return status in ['draft', 'awaiting_after', 'needs_more_evidence'];
+    }
+
+    function serverProjectFields() {
+      return [
+        'evidenceRoot',
+        'dataHash',
+        'parcelHash',
+        'reportHash',
+        'creditsEstimated',
+        'chainState'
+      ];
+    }
+
+    match /users/{uid} {
+      allow read: if isSelf(uid) || isAdmin();
+      allow create: if isSelf(uid)
+        && request.resource.data.role == request.auth.token.role
+        && request.resource.data.role in ['contributor', 'admin'];
+      allow update: if isAdmin()
+        || (isSelf(uid) && request.resource.data.role == resource.data.role);
+      allow delete: if false;
+    }
+
+    match /devices/{deviceId} {
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.uid == request.auth.uid);
+      allow write: if false;
+    }
+
+    match /projects/{projectId} {
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.ownerUid == request.auth.uid);
+
+      allow create: if isContributor()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.status == 'draft'
+        && !request.resource.data.keys().hasAny(serverProjectFields());
+
+      allow update: if isAdmin()
+        || (
+          isContributor()
+          && resource.data.ownerUid == request.auth.uid
+          && request.resource.data.ownerUid == resource.data.ownerUid
+          && request.resource.data.status == resource.data.status
+          && contributorWritable(resource.data.status)
+          && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(serverProjectFields())
+        );
+
+      allow delete: if false;
+
+      match /evidence/{itemId} {
+        function project() {
+          return get(/databases/$(database)/documents/projects/$(projectId)).data;
+        }
+
+        allow read: if isAdmin()
+          || (signedIn() && project().ownerUid == request.auth.uid);
+
+        allow create: if isContributor()
+          && project().ownerUid == request.auth.uid
+          && contributorWritable(project().status)
+          && request.resource.data.kind in ['before', 'after', 'document']
+          && !('leaf' in request.resource.data)
+          && (
+            !('attested' in request.resource.data)
+            || request.resource.data.attested == false
+          );
+
+        allow update, delete: if false;
+      }
+    }
+
+    match /nonces/{nonce} {
+      allow read, write: if false;
+    }
+
+    match /reports/{projectId}/versions/{n} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /chainTx/{txHash} {
+      allow read: if isAdmin()
+        || (
+          signedIn()
+          && get(/databases/$(database)/documents/projects/$(resource.data.projectId))
+              .data.ownerUid == request.auth.uid
+        );
+      allow write: if false;
+    }
+
+    match /transfers/{uid}/items/{id} {
+      allow read: if isSelf(uid) || isAdmin();
+      allow write: if false;
+    }
+  }
+}

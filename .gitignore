@@ -1,6 +1,6 @@
 # Dependencies
 node_modules/
-*/node_modules/
+**/node_modules/
 
 # Production builds
 dist/
@@ -32,6 +32,34 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Python
+.venv/
+venv/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+
+# Firebase emulator and CLI logs
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+pubsub-debug.log
+*-debug.log
+
+# Solidity compiler cache
+.solcx/
+contracts/.solcx/
+
+# Local evidence files (disk backend). Cloud files live in Supabase.
+services/verifier/data/
+
+# Bench photographs. The catalogue bench/data/raw/sources.csv stays tracked.
+bench/data/raw/*
+!bench/data/raw/sources.csv
 
 # Editor & OS files
 .DS_Store
