@@ -10,7 +10,7 @@ Run each one from the repository root unless the line says otherwise.
 
 | Component | Command |
 |---|---|
-| Firebase emulators | `firebase emulators:start --only auth,firestore` |
+| Firebase emulators | `JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH="$JAVA_HOME/bin:$PATH" firebase emulators:start --only auth,firestore` |
 | Verifier | `cd services/verifier && .venv/bin/uvicorn app.main:app --reload` |
 | Verifier tests | `cd services/verifier && .venv/bin/pytest` |
 | Admin web | `cd apps/admin-web && npm run dev` |
@@ -21,3 +21,5 @@ Run each one from the repository root unless the line says otherwise.
 First-time setup for a Python component is `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt` inside that directory. Admin web is `cd apps/admin-web && npm install`. Contracts also need `cd contracts && npm install` so OpenZeppelin v5 is on disk for later Solidity imports.
 
 Copy each `.env.example` to `.env`. The service account JSON stays in `services/verifier/secrets/` and is gitignored. With the emulator variables set, the Admin SDK does not talk to production Firestore.
+
+The Firestore emulator needs Java 21. This machine has JDK 21 from Homebrew, and it is not the default `java` (that one is 17). The emulator command above puts JDK 21 on `PATH` for that process only.
