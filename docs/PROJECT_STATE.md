@@ -1,5 +1,5 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-20 07:44 | by: Grok 4.7 | commit: pending this session
+Last updated (UTC): 2026-10-20 07:44 | by: Grok 4.7 | commit: 48ea760
 
 ## 1. Next step (read this first)
 The user does the click-by-click setup in `docs/guides/PHASE_1_PREREQUISITES.md`. First action: create a new Firebase project. Do not reuse project id `carbonvault-c2f6a`.
@@ -24,7 +24,7 @@ After that, the next agent starts Phase 1 (scaffold and Firebase). Do not copy `
 ## 4. Phase status
 | Phase | Status (not started / in progress / done) | Last commit | Notes |
 |---|---|---|---|
-| 0 Setup and audit | done | pending this session | Audit, tokens, screens, and the Phase 1 prerequisite guide are written. No application code. |
+| 0 Setup and audit | done | 48ea760 | Audit, tokens, screens, and the Phase 1 prerequisite guide are written. No application code. |
 | 1 Scaffold and Firebase | not started | | Blocked on the user finishing `docs/guides/PHASE_1_PREREQUISITES.md`. |
 | 2a Benchmark pilot | not started | | |
 | 2b Benchmark full | not started | | |
@@ -86,7 +86,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | pending this session |
+| 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | 48ea760 |
 
 ## 12. Paper impact
 No paper claim changed. `docs/CHANGELOG-PAPER.md` does not exist yet and was not required.
