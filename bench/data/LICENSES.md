@@ -3,7 +3,11 @@
 Summarised from `bench/data/raw/sources.csv`. One row in that file is one real photo.
 Raw image files stay out of git. This list is the catalogue.
 
-Photos: 40.
+Photos: 41.
+
+## (none) (1)
+
+- `forest top view -01.jpg` — (author not recorded) — (no url)
 
 ## CC BY 4.0 (2)
 

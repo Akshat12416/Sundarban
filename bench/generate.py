@@ -178,14 +178,17 @@ def resolve_raw(root: Path, filename: str) -> Path | None:
             return candidate
     target = filename.casefold()
     stem_target = stem.casefold()
-    if not raw.is_dir():
-        return None
-    for path in sorted(raw.iterdir()):
-        if not path.is_file() or path.name.startswith("."):
-            continue
+    files = [
+        path for path in raw.iterdir()
+        if path.is_file() and not path.name.startswith(".") and path.name != "sources.csv"
+    ]
+    for path in files:
         if path.name.casefold() == target or path.stem.casefold() == stem_target:
             return path
-    return None
+    matched, _suggestion = match_catalogue(filename, [path.name for path in files])
+    if matched is None:
+        return None
+    return raw / matched
 
 
 def split_composite(source: Path, dest_dir: Path, orientation: str) -> tuple[str, str]:
@@ -471,7 +474,7 @@ def build_manifest(root: Path, seed: int) -> tuple[list[dict], list[str], dict[s
     legit, leftovers = build_legit(rows, classes, reserved, splits, rng)
     for row in leftovers:
         row["_class"] = classes[row["filename"]]
-    attacks = build_other_attacks(legit, leftovers, splits)
+    attacks = build_other_attacks(composites + legit, leftovers, splits)
 
     device_items = load_device_capture_items(root)
     items = sorted(composites + a4_items + legit + attacks + device_items, key=lambda item: item["id"])
