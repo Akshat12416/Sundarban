@@ -21,3 +21,14 @@ The verifier setting `STORAGE_BACKEND` defaults to `disk`. Allowed values are `d
 ## 2026-10-20 — Who may write a project
 
 Firestore rules allow a contributor to create and update only their own project, and only while its status is `draft`, `awaiting_after`, or `needs_more_evidence`. They cannot change `status`, `ownerUid`, or the server fields (`evidenceRoot`, `dataHash`, `parcelHash`, `reportHash`, `creditsEstimated`, `chainState`). Evidence creates are allowed in those same statuses and must not include `leaf`. `needs_more_evidence` stays writable because the recapture screen adds photos without letting the contributor set the decision. Reports, nonces, leaves, devices, chain rows, and transfer rows are server writes. The Admin SDK bypasses these rules. Role is the custom claim `role`.
+
+## 2026-10-21 — Evidence layer
+
+The verifier stores original bytes through `STORAGE_BACKEND` (`disk` or `supabase`). SHA-256 is of those original bytes. The perceptual hash is a 64-bit difference hash of the JPEG whose long edge is 1600 pixels. Firestore records keep the path and the hashes, plus the capture metadata, signature, and leaf. EXIF is read before that resize and is not copied into Firestore.
+
+`packages/test-vectors` still uses an integer field named `accuracyM`. New uploads require `latitude` and `longitude` as 6-decimal strings and `accuracy` as a one-decimal string. The canonical encoder rejects floats and still accepts the integer fields in the vectors.
+
+The duplicate index takes the registry as an argument. It does not keep a process-wide registry, because a bench run builds `registry_context` per submission.
+
+The analysis cache key is the concatenation `sha256(evidence) + agent id + prompt version + model id`. Pytest uses in-memory nonce, device, and evidence stores. A normal server process uses Firestore when the Admin SDK is ready. Bench runs use SQLite through `bench/analysis_cache.py`. Signed URLs last `SIGNED_URL_TTL_SECONDS` (120).
+

@@ -17,6 +17,8 @@ Run each one from the repository root unless the line says otherwise.
 | Admin web build | `cd apps/admin-web && npm run build` |
 | Contracts tests | `cd contracts && .venv/bin/pytest` |
 | Test vectors | `cd packages/test-vectors && .venv/bin/pytest` |
+| Shared TypeScript crypto | `cd packages/cv-crypto-ts && npm test` |
+| Admin claim | `python3 scripts/set_admin_claim.py --email you@example.com` |
 
 First-time setup for a Python component is `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt` inside that directory. Admin web is `cd apps/admin-web && npm install`. Contracts also need `cd contracts && npm install` so OpenZeppelin v5 is on disk for later Solidity imports.
 

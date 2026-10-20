@@ -40,7 +40,7 @@ def prepare_image(original: bytes, content_type: str) -> PreparedImage:
 def dhash(image: Image.Image) -> str:
     """64-bit difference hash, returned as 16 hex characters."""
     gray = image.convert("L").resize((9, 8), Image.Resampling.LANCZOS)
-    pixels = list(gray.getdata())
+    pixels = list(gray.get_flattened_data())
     bits = 0
     for y in range(8):
         row = y * 9
