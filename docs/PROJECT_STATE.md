@@ -1,5 +1,5 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-20 22:45 | by: Grok 4.7 | commit: 60221fc
+Last updated (UTC): 2026-10-20 22:55 | by: Grok 4.7 | commit: pending this session
 
 ## 1. Next step (read this first)
 The manifest generator is `python -m bench.generate --seed 42`. Verified after the override and A5/A10/A11/A12 patch: A4 is 10 of 10, composite pairs are 5, and A1–A12 each have a nonzero total. `python -m bench.validate` passed. A second generate matched the manifest byte for byte. `bench/injectors/` does not exist.
@@ -116,10 +116,10 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | Override for vegetation-Uganda.jpg. A5, A10, A11 and A12 now come from legitimate items. A4 is 10 of 10. | 60221fc |
+| 2026-10-21 | Grok 4.7 | Noted that A8 and A9 have one dev item and no test item, which is expected. | pending this session |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
 | 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | 48ea760 |
 
 ## 12. Paper impact
-`docs/CHANGELOG-PAPER.md` records category-matched legitimate pairs, the two A4 directions, and filename splits. The draft still describes same-site growth pairs, AI-generated after images only, and `pair_id` resampling.
+`docs/CHANGELOG-PAPER.md` records category-matched legitimate pairs, the two A4 directions, filename splits, composite same-site pairs, and that A8 and A9 have no test-split items.

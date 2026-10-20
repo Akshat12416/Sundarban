@@ -13,3 +13,7 @@ The catalogue also has no `pair_id`. Dev/test assignment is by real-photo filena
 ## 2026-10-21
 
 Five catalogue photos are side-by-side composites of one site. The generator cuts them into before and after halves under `bench/data/derived/` and uses those halves as legitimate same-site pairs. They take priority over category-matched pairs. The earlier entry still applies to every other legitimate pair: those remain category-matched, not same-site.
+
+## 2026-10-21
+
+A8 (species unsuitable for the region) and A9 (altered ownership document) each have only 1 item, and that item is in the dev split. The test split has 0 of each. Only one real photo in the catalogue is left for each class after the other attacks are built. Test-split metrics for A8 and A9 will be unavailable or statistically meaningless in the Phase 8 results. That is expected, not a bug. Do not treat a missing test number for those two classes as a failed run.
