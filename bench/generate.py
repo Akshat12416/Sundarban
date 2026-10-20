@@ -422,8 +422,14 @@ def unmatched_log_rows(log_rows: list[dict[str, str]], filenames: list[str]) -> 
         suggestion = suggestion_inspired or suggestion_name or "(none)"
         lines.append(f"{filename} -> {suggestion}")
     return lines
+
+
+def apply_a4_splits(items: list[dict], splits: dict[str, str]) -> None:
     for item in items:
-        if item["attack_class"] != "A4":
+        if item.get("source_filename"):
+            item["split"] = splits[item["source_filename"]]
+            continue
+        if item.get("attack_class") != "A4":
             continue
         real = _real_names(item)
         if len(real) != 1:
@@ -461,7 +467,7 @@ def build_manifest(root: Path, seed: int) -> tuple[list[dict], list[str], dict[s
 
     rng = random.Random(seed)
     splits = assign_splits([row["filename"] for row in rows], rng)
-    apply_a4_splits(a4_items, splits)
+    apply_a4_splits(composites + a4_items, splits)
     legit, leftovers = build_legit(rows, classes, reserved, splits, rng)
     for row in leftovers:
         row["_class"] = classes[row["filename"]]
@@ -483,7 +489,7 @@ def build_manifest(root: Path, seed: int) -> tuple[list[dict], list[str], dict[s
         "unclassified": sum(kind == "unclassified" for kind in classes.values()),
         "synthetic_before": len(before_files),
         "synthetic_after": len(after_files),
-        "ai_log_mismatches": len(log_mismatches(log_rows)),
+        "ai_log_mismatches": len(unmatched_log_rows(log_rows, list(by_name))),
         "a4_items": len(a4_items),
         "reserved": len(reserved),
         "composite_pairs": len(composites),
