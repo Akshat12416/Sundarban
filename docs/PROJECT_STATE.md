@@ -1,8 +1,8 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-20 13:05 | by: Grok 4.7 | commit: 6858268
+Last updated (UTC): 2026-10-20 19:16 | by: Grok 4.7 | commit: pending this session
 
 ## 1. Next step (read this first)
-Phase 1 scaffold is in the tree. The user does `docs/guides/PHASE_2_PREREQUISITES.md` before the benchmark pilot. First action: create a Gemini API key and put `GEMINI_API_KEY` in `services/verifier/.env` and `bench/.env`.
+Phase 1 scaffold is in the tree and was re-checked on 2026-10-20. The user still needs the openly licensed photos in `docs/guides/PHASE_2_PREREQUISITES.md`. `GEMINI_API_KEY` and `GEMINI_MODEL` are non-empty in both env files; they were not called during the inspection.
 
 Evidence bytes stay off Firebase Storage. `STORAGE_BACKEND` defaults to `disk`. The cloud bucket is Supabase `evidence` in `ap-southeast-1`. Firestore region reported by the user is `us-central1`. Project id is `sundarban-a64ea`.
 
@@ -55,10 +55,10 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | Tokens | `docs/design-tokens.md` | | | Written this session from CSS and PNG samples. |
 | Screens | `docs/design/SCREENS.md` | | | Verified against Figma metadata and PNG exports, file `shpkaFOkntqpC8YNVw4KEb`, 2026-10-20. |
 | Phase 1 setup guide | `docs/guides/PHASE_1_PREREQUISITES.md` | | | Billing facts checked 2026-10-20. Step 4 now skips Firebase Storage. |
-| Supabase storage guide | `docs/guides/SUPABASE_STORAGE.md` | | | Keys are present in `services/verifier/.env`. Bucket name is `evidence`. Region `ap-southeast-1` was reported by the user. Live upload was not re-run this session. |
-| Firebase emulators | repo root | `JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH="$JAVA_HOME/bin:$PATH" firebase emulators:start --only auth,firestore` | | Verified 2026-10-20: "All emulators ready", Auth `127.0.0.1:9099`, Firestore `127.0.0.1:8080`. Java 21 required. |
-| Verifier | `services/verifier` | `cd services/verifier && .venv/bin/uvicorn app.main:app --reload` | `cd services/verifier && .venv/bin/pytest` | Verified 2026-10-20: pytest passed; `curl http://127.0.0.1:8000/health` returned 200 with `storageBackend=disk` and `firebaseAdmin=ready`. |
-| Admin web | `apps/admin-web` | `cd apps/admin-web && npm run dev` | `cd apps/admin-web && npm run build` | Verified 2026-10-20: `npm run build` exited 0. Browser click-through not done. |
+| Supabase storage guide | `docs/guides/SUPABASE_STORAGE.md` | | | Env names are set. There is no upload code. A one-off HTTP check on 2026-10-20 uploaded `healthcheck/test.txt`, fetched a signed URL (200), got 400 on the public URL, deleted the object, and listed the prefix as empty. |
+| Firebase emulators | repo root | `JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH="$JAVA_HOME/bin:$PATH" firebase emulators:start --only auth,firestore` | | Verified 2026-10-20 19:16 UTC: "All emulators ready". Then stopped. |
+| Verifier | `services/verifier` | `cd services/verifier && .venv/bin/uvicorn app.main:app --reload` | `cd services/verifier && .venv/bin/pytest` | Verified 2026-10-20 19:16 UTC: pytest pass; `GET /health` 200, `storageBackend` disk, admin ready. Server then stopped. |
+| Admin web | `apps/admin-web` | `cd apps/admin-web && npm run dev` | `cd apps/admin-web && npm run build` | Verified 2026-10-20 19:16 UTC: dev server HTTP 200; build exit 0. No test script. Dev server then stopped. |
 | Contracts | `contracts` | | `cd contracts && .venv/bin/pytest` | Verified 2026-10-20: Sepolia chain id 11155111 and OpenZeppelin v5 import check passed. |
 | Test vectors | `packages/test-vectors` | `cd packages/test-vectors && .venv/bin/python generate.py` | `cd packages/test-vectors && .venv/bin/pytest` | Verified 2026-10-20: 7 tests passed. 10 cases in each of the four groups. |
 
@@ -69,7 +69,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | Service account file | `services/verifier/secrets/firebase-admin.json` | yes | Symlink to the downloaded Admin SDK JSON. Gitignored. `GOOGLE_APPLICATION_CREDENTIALS` points here. Admin init returned ready. |
 | Web Firebase config | `services/verifier/secrets/firebase-web.env` | yes | Keys present: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`. No storage bucket variable. The file had been a JS snippet; rewritten to env lines on 2026-10-20. Values not verified against the console. |
 | Supabase URL, secret, bucket | `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SUPABASE_STORAGE_BUCKET`, `SUPABASE_DB_PASSWORD` in `services/verifier/.env` | yes | Bucket value is `evidence`. Region reported by the user: `ap-southeast-1`. Not called by the verifier yet. |
-| GEMINI_API_KEY and GEMINI_MODEL | `services/verifier/.env` and `bench/.env` | no | Guide: `docs/guides/PHASE_2_PREREQUISITES.md`. |
+| GEMINI_API_KEY and GEMINI_MODEL | `services/verifier/.env` and `bench/.env` | yes | Both names are non-empty in both files. The API was not called this session. |
 | Sepolia RPC and deployer key variables | `contracts/.env` | partial | No `contracts/.env`. The placeholder test used the public default RPC and read chain id 11155111. `DEPLOYER_PRIVATE_KEY` is unset. |
 | Expo project id and app ids | | no | |
 
@@ -90,9 +90,10 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 - [x] Supabase env vars are set. Bucket name `evidence`. Region reported as `ap-southeast-1`.
 - [x] Service account path resolves and Admin SDK initialises.
 - [x] Firebase CLI is logged in. `firebase projects:list` included `sundarban-a64ea` on 2026-10-20.
-- [ ] Gemini key, model id, and 40 to 60 openly licensed photos. `docs/guides/PHASE_2_PREREQUISITES.md`.
+- [ ] 40 to 60 openly licensed photos and `sources.csv` rows. `docs/guides/PHASE_2_PREREQUISITES.md`. The Gemini variable names are already non-empty.
 
 ## 10. Gotchas and failed approaches (newest first)
+- 2026-10-20: No Supabase client exists. `SUPABASE_SERVICE_KEY` is unset. The live check used `SUPABASE_SECRET_KEY` over HTTP. Public object fetch returned 400. After delete, an authenticated GET returned 400; a prefix list returned count 0.
 - 2026-10-20: Firestore emulator refused Java 17. `firebase-tools` requires Java 21. Installed `openjdk@21` with Homebrew and left it keg-only so `java` on PATH stays 17. The README command sets `JAVA_HOME` for the emulator only. Verified by "All emulators ready".
 - 2026-10-20: `npm install -g firebase-tools` failed with EACCES because `/usr/local/lib/node_modules` is owned by root. Installed with `brew install firebase-cli` (15.34.0). Then `brew unlink node` so `node` stayed v22.16.0 at `/usr/local/bin/node`. Verified by `firebase --version` outside the sandbox.
 - 2026-10-20: `services/verifier/secrets/firebase-web.env` had been filled by pasting the Firebase JavaScript snippet, so it was not a list of variables. Rewritten locally to `KEY=value` lines. The storage bucket line was left out on purpose.
@@ -105,7 +106,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-20 | Grok 4.7 | Phase 1 scaffold: Firebase Auth and Firestore emulators, verifier /health with disk storage, admin web, contract test, attestation vectors, Phase 2 guide. | 6858268 |
+| 2026-10-20 | Grok 4.7 | Read-only inspection of Phase 1, Supabase, Firebase, API, and bench. No application code changed. | pending this session |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
 | 2026-10-20 | Grok 4.7 | Legacy audit, design tokens, Figma screen map, Phase 1 prerequisite guide, gitignore for `services/verifier/secrets/`, renamed `docs/PLAN-SPEC.md`. No application code. `legacy/` untouched. | 48ea760 |
