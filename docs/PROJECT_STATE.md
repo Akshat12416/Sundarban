@@ -1,5 +1,5 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-21 00:20 | by: Grok 4.7 | commit: 908e2a5
+Last updated (UTC): 2026-10-21 00:20 | by: Grok 4.7 | commit: 0fea73e
 
 ## 1. Next step (read this first)
 The evidence layer is in place: storage, image pipeline, duplicate index, Python and TypeScript crypto, analysis cache, nonces, ID-token role checks, and the four evidence routes. Verified on 2026-10-21: `cd services/verifier && .venv/bin/pytest` (19 passed, 1 skipped live Supabase test) and `cd packages/cv-crypto-ts && node --experimental-strip-types --test src/index.test.ts` (5 passed).
@@ -39,7 +39,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | 1 Scaffold and Firebase | done | 6858268 | Emulators, /health, Sepolia chain id, admin build, and vector tests ran on 2026-10-20. No Firebase Storage. |
 | 2a Benchmark pilot | in progress | 280ea07 | Manifest generator done. No LLM calls. |
 | 2b Benchmark full | not started | | |
-| 3 Evidence service and cache | done | 908e2a5 | Nonce, device, evidence, and admin file routes. Cache tested: a second analysis of the same evidence makes no model call. Live Supabase test is skipped unless `SUPABASE_LIVE_TEST=1`. |
+| 3 Evidence service and cache | done | 0fea73e | Nonce, device, evidence, and admin file routes. Cache tested: a second analysis of the same evidence makes no model call. Live Supabase test is skipped unless `SUPABASE_LIVE_TEST=1`. |
 | 4a Verifiers C0-C2 and runner | not started | | |
 | 4b Verifiers C3-C4 and metrics | not started | | |
 | 5a Mobile shell | not started | | Screen map is `docs/design/SCREENS.md`. |
@@ -121,7 +121,7 @@ No model id pinned, no prompt versions, nothing frozen, no runs, no files in `be
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | Evidence storage, image pipeline, duplicate index, shared crypto, cache, nonces, admin file route, and the Phase 4 guide. | 908e2a5 |
+| 2026-10-21 | Grok 4.7 | Evidence storage, image pipeline, duplicate index, shared crypto, cache, nonces, admin file route, and the Phase 4 guide. | 0fea73e |
 | 2026-10-21 | Grok 4.7 | Noted that A8 and A9 have one dev item and no test item, which is expected. | f0b37d4 |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
