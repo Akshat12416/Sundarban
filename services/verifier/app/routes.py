@@ -32,6 +32,29 @@ class ProjectBody(BaseModel):
     projectId: str = Field(min_length=1)
 
 
+_SUBMITTABLE = {"draft", "awaiting_after", "needs_more_evidence"}
+
+
+@router.post("/v1/projects/{project_id}/submit")
+def submit_project(
+    project_id: str,
+    user: Principal = Depends(get_current_user),
+    services: Services = Depends(get_services),
+) -> dict[str, str]:
+    """Contributors cannot change status in the rules, so submission is a server write."""
+    project = services.projects.get(project_id)
+    if project is None or project.get("ownerUid") != user.uid:
+        raise HTTPException(status_code=404, detail="project not found")
+    status = project.get("status")
+    if status == "submitted":
+        return {"projectId": project_id, "status": "submitted"}
+    if status not in _SUBMITTABLE:
+        raise HTTPException(status_code=400, detail="project cannot be submitted")
+    project["status"] = "submitted"
+    services.projects.put(project_id, project)
+    return {"projectId": project_id, "status": "submitted"}
+
+
 @router.post("/v1/projects")
 def create_project(
     body: ProjectBody,

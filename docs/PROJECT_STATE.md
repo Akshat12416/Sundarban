@@ -1,10 +1,10 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-21 04:47 | by: Grok 4.7 | commit: see session log
+Last updated (UTC): 2026-10-21 04:55 | by: Grok 4.7 | commit: see session log
 
 ## 1. Next step (read this first)
-Work on `main`. Phase 6 is on `main` after a fast-forward of `phase6-contracts`. `phase5-mobile` was already the same commit as the previous `main` tip, so it is included. Contract details for people are in `contracts/DEPLOYMENT.md`. The address and transaction hashes are in `packages/contract-abi/deployment.json`.
+Work on `main`. The admin review UI is in `apps/admin-web`. Start the Auth and Firestore emulators, then `cd apps/admin-web && npm run dev`. The local admin env uses `127.0.0.1:9099` and `127.0.0.1:8080`. Sign in with Google. The account needs the admin claim: `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 services/verifier/.venv/bin/python scripts/set_admin_claim.py --email you@example.com` from the repo root. The phone writes a submitted project only when the verifier is running, because contributors cannot change status themselves.
 
-The next code task is Phase 7a, the admin review panel. Read `docs/PLAN-SPEC.md` for the admin screens and status rules before editing `apps/admin-web`. Do not copy `legacy/` wholesale. The only admin files a later phase may copy, and then edit, are `legacy/admin-portal/src/components/Navbar.jsx`, `legacy/admin-portal/src/components/Footer.jsx`, and the card markup in `ApprovedProjects.jsx` and `RejectedProjects.jsx`.
+The next code task is Phase 7b, the issue flow and the public verify page. Contract details are in `contracts/DEPLOYMENT.md`. Do not copy `legacy/` wholesale.
 
 The C3 and C4 dev demos both finished on 2026-10-21. Logs end with `wrote` for `bench/results/demo/C3-dev-ollama.jsonl` and `bench/results/demo/C4-dev-ollama.jsonl`. Metrics from `python -m bench.metrics` on those files: C3 completed 68, skipped 12, ASR 0.288, FRR 0.667, F1 0.785. C4 completed 68, skipped 12, ASR 0.169, FRR 0.556, F1 0.867. Both are `ollama/qwen2.5vl:3b` demo output. Do not put them in a paper table. Do not start another bench run. Do not pass `--split test`.
 
@@ -47,7 +47,7 @@ The Android development build is still waiting on the user. Do not start it unle
 | 5b Attestation and capture | in progress | c6a4892 | EAS development profile and `cv-keystore` are written. Cloud build not started. Phone checks of accept, replay, and modified image are not done. |
 | 5c Mobile status and polish | not started | | |
 | 6 Contracts | done | 448c2de | Sepolia `CarbonRegistry` at `0xFC1F37fB7449619917Dd78431bB827A18E11C480`. Issuer role checked on that address. Gas in `bench/results/gas.json` is from a separate test deployment. |
-| 7a Admin review | not started | | |
+| 7a Admin review | in progress | see session log | Queue, project page, and Google admin gate are in `apps/admin-web`. Browser check on 2026-10-21 used the Auth emulator. Phone publish was not run on a device. |
 | 7b Issue flow and verify page | not started | | |
 | 8 Experiments | not started | | |
 | 9 Paper and report | not started | | |
@@ -65,7 +65,7 @@ The Android development build is still waiting on the user. Do not start it unle
 | Phase 4 setup guide | `docs/guides/PHASE_4_PREREQUISITES.md` | | | Written 2026-10-21. Local model check printed `same_id True` and `flash_class True` for `gemini-3.8-flash`. AI Studio was not opened. The cost cap is not set. |
 | Firebase emulators | repo root | `JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH="$JAVA_HOME/bin:$PATH" firebase emulators:start --only auth,firestore` | | Verified 2026-10-20 19:16 UTC: "All emulators ready". Then stopped. |
 | Verifier | `services/verifier` | `cd services/verifier && .venv/bin/uvicorn app.main:app --reload` | `cd services/verifier && .venv/bin/pytest` | Verified 2026-10-21: 19 passed, 1 skipped (`SUPABASE_LIVE_TEST` unset). `GET /health` still returns disk. |
-| Admin web | `apps/admin-web` | `cd apps/admin-web && npm run dev` | `cd apps/admin-web && npm run build` | Verified 2026-10-20 19:16 UTC: dev server HTTP 200; build exit 0. No test script. Dev server then stopped. |
+| Admin web | `apps/admin-web` | `cd apps/admin-web && npm run dev` | `cd apps/admin-web && npm run build` | Verified 2026-10-21: build exit 0. Browser: Google gate rejects a missing admin claim, queue filters, project page shows the report and attested badge, and request-more-evidence wrote `needs_more_evidence` in the emulator. |
 | Contracts | `contracts` | `cd contracts && .venv/bin/python scripts/compile.py` then `.venv/bin/python -m scripts.deploy` | `cd contracts && .venv/bin/pytest tests/test_sepolia.py` | Verified 2026-10-21: `pytest tests/test_registry.py` passed on Sepolia (1 passed). Deployed `0xFC1F37fB7449619917Dd78431bB827A18E11C480`. `name` Carbon Credit, symbol CC, 18 decimals. `ISSUER_ROLE` and `DEFAULT_ADMIN_ROLE` are true for `0xe7b5680c7eA21F9fFa2989D7E459608f22b716Fa`. Etherscan skipped: no `ETHERSCAN_API_KEY`. |
 | Test vectors | `packages/test-vectors` | `cd packages/test-vectors && .venv/bin/python generate.py` | `cd packages/test-vectors && .venv/bin/pytest` | Python reference unchanged. Service and TypeScript libraries matched `vectors.json` on 2026-10-21. |
 | TypeScript crypto | `packages/cv-crypto-ts` | | `cd packages/cv-crypto-ts && node --experimental-strip-types --test src/index.test.ts` | Verified 2026-10-21: 5 passed, including Merkle proofs. Node v22.16.0. |
@@ -118,6 +118,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 - [ ] Phase 4 checks: `GEMINI_RUN_COST_CAP_USD` is 5 and `GEMINI_PRICE_TIER` is `paid` in both env files. The loaded key still receives the free-tier daily quota of 20. A billed-project key is still required before the C1 pilot.
 
 ## 10. Gotchas and failed approaches (newest first)
+- 2026-10-21: `docs/guides/PHASE_7_PREREQUISITES.md` is not in the repo. The embedded browser blocks `signInWithPopup`, so the admin page falls back to `signInWithRedirect`. A Google account without `role=admin` is signed out. Contributors cannot set `submitted` in the rules; the verifier endpoint does that.
 - 2026-10-21: `docs/guides/PHASE_6_PREREQUISITES.md` is not in the repo. solc 0.8.20 with `--base-path` and an absolute OpenZeppelin remapping reported the imports missing. Compilation uses a relative remapping from `contracts/`. Slither 0.11.6 reported 0 findings. Its install downgraded `web3` to 7.16.0; `web3` 8.0.0 was installed again afterwards. Re-running Slither needs `web3` 7.
 - 2026-10-21: Signed-in accounts were all reading one shared sample list. Sample data stays on the sample button. A Firebase account now keeps its own projects and profile on the phone.
 - 2026-10-21: The 3B model often returns `pass` from the aggregator while a specialist returned `flag`. aggregate-v1 keeps the more severe decision, so the report still rejects. The prompts were not rewritten after seeing that. C4 also keeps the C0 tool decision, which flagged `exact_duplicate` on all three probe rows.
@@ -139,6 +140,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
+| 2026-10-21 | Grok 4.7 | Admin review queue, project page, and phone submit hand-off. | see following commit |
 | 2026-10-21 | Grok 4.7 | C3 and C4 dev demos finished. Metrics recorded from the demo JSONL files. Not paper results. | this state commit |
 | 2026-10-21 | Grok 4.7 | Saved the Sepolia deployment in `contracts/DEPLOYMENT.md` and fast-forwarded `main` to `phase6-contracts`. | fa485b9 |
 | 2026-10-21 | Grok 4.7 | CarbonRegistry on Sepolia, Python compile and deploy, gas from test receipts, Slither 0 findings. | 448c2de |

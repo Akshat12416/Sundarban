@@ -123,3 +123,35 @@ def test_evidence_flow_and_admin_file_gate(tmp_path, monkeypatch) -> None:
         assert opened.json()["expiresIn"] == services.signed_url_ttl_seconds
         assert opened.json()["url"].startswith("file://")
         assert services.storage.__dict__.get("_secret_key", "supabase") not in opened.json()["url"]
+
+
+def test_owner_submit_sets_status(monkeypatch) -> None:
+    tokens = {
+        "user": {"uid": "user-1", "role": "contributor"},
+        "other": {"uid": "user-2", "role": "contributor"},
+    }
+
+    def verify(token: str) -> dict:
+        if token not in tokens:
+            raise ValueError("bad token")
+        return tokens[token]
+
+    monkeypatch.setattr("app.auth.verify_id_token", verify)
+    with TestClient(app) as client:
+        services = app.state.services
+        services.projects.rows["plot"] = {
+            "ownerUid": "user-1",
+            "status": "awaiting_after",
+            "species": "mangrove",
+        }
+        refused = client.post("/v1/projects/plot/submit", headers={"Authorization": "Bearer other"})
+        assert refused.status_code == 404
+        submitted = client.post("/v1/projects/plot/submit", headers={"Authorization": "Bearer user"})
+        assert submitted.status_code == 200
+        assert services.projects.rows["plot"]["status"] == "submitted"
+        assert services.projects.rows["plot"]["species"] == "mangrove"
+        again = client.post("/v1/projects/plot/submit", headers={"Authorization": "Bearer user"})
+        assert again.status_code == 200
+        services.projects.rows["plot"]["status"] = "approved"
+        closed = client.post("/v1/projects/plot/submit", headers={"Authorization": "Bearer user"})
+        assert closed.status_code == 400

@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { overlayProject, publishProject } from "./publish";
 import type { CreditRow, DataSource, Profile, Project } from "./types";
 
 type AccountFile = {
@@ -48,11 +49,16 @@ export function accountSource(uid: string, email: string): DataSource {
 
   return {
     async listProjects() {
-      return (await load()).projects.map((item) => ({ ...item }));
+      const projects = (await load()).projects.map((item) => ({ ...item }));
+      const overlaid = await Promise.all(projects.map((item) => overlayProject(item).catch(() => item)));
+      return overlaid;
     },
     async getProject(id) {
       const found = (await load()).projects.find((item) => item.id === id);
-      return found ? { ...found } : null;
+      if (!found) {
+        return null;
+      }
+      return overlayProject({ ...found }).catch(() => ({ ...found }));
     },
     async saveProject(project) {
       const file = await load();
@@ -65,7 +71,14 @@ export function accountSource(uid: string, email: string): DataSource {
         projects.unshift(next);
       }
       await save({ ...file, projects });
-      return { ...next };
+      try {
+        const published = await publishProject(uid, next);
+        projects[index >= 0 ? index : 0] = published;
+        await save({ ...file, projects });
+        return { ...published };
+      } catch {
+        return { ...next };
+      }
     },
     async listCredits() {
       return (await load()).credits.map((item) => ({ ...item }));

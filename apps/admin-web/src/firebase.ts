@@ -1,6 +1,6 @@
 import { initializeApp, type FirebaseApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
+import { connectAuthEmulator, getAuth, type Auth } from "firebase/auth";
+import { connectFirestoreEmulator, getFirestore, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -21,3 +21,19 @@ export const firebaseApp: FirebaseApp | null = firebaseConfigured
 export const auth: Auth | null = firebaseApp ? getAuth(firebaseApp) : null;
 
 export const db: Firestore | null = firebaseApp ? getFirestore(firebaseApp) : null;
+
+function emulatorUrl(host: string): string {
+  return host.startsWith("http") ? host : `http://${host}`;
+}
+
+const authHost = import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_HOST;
+if (auth && authHost) {
+  connectAuthEmulator(auth, emulatorUrl(authHost), { disableWarnings: true });
+}
+
+const firestoreHost = import.meta.env.VITE_FIREBASE_FIRESTORE_EMULATOR_HOST;
+if (db && firestoreHost) {
+  const bare = firestoreHost.replace(/^https?:\/\//, "");
+  const [name, port] = bare.split(":");
+  connectFirestoreEmulator(db, name, Number(port || "8080"));
+}

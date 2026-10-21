@@ -70,6 +70,10 @@ aggregate-v1, frozen before the dev probe: the report decision is the more sever
 
 `--limit` requires `--output`, so a three-item probe cannot replace a split file. Paper tables read `bench/results/{config}-{split}.jsonl` and `{config}A-{split}.jsonl` only. Demo files are excluded unless `--include-demo` is passed.
 
+## 2026-10-21 — Admin review reads Firestore and does not copy the old portal
+
+The review queue uses the approved card layout with the mint tokens. It does not copy the stock logo, phone and email lines, marketplace links, or GSAP. A contributor cannot change `status` under the Firestore rules, so the phone asks `POST /v1/projects/{id}/submit` and the verifier writes `submitted`. Approve, reject, and request-more-evidence are admin writes of `status` and `adminNote`. Reports stay server-written at `reports/{projectId}/versions/{n}`. The admin page shows that document when it exists and does not invent one. `docs/guides/PHASE_7_PREREQUISITES.md` is not in the repo.
+
 ## 2026-10-21 — CarbonRegistry issuer is the deployer
 
 `contracts/.env` has `DEPLOYER_PRIVATE_KEY` and no `ISSUER_ADDRESS`. `deploy.py` grants `ISSUER_ROLE` to `ISSUER_ADDRESS` when that variable is set, and to the deployer otherwise. The Sepolia deployment did the latter. There is no Hardhat or Foundry project. Compilation uses `py-solc-x` with a relative OpenZeppelin remapping, because `--base-path` plus an absolute remapping made solc 0.8.20 miss the imports. `docs/guides/PHASE_6_PREREQUISITES.md` is not in the repo. Etherscan verification is skipped when `ETHERSCAN_API_KEY` is empty.
