@@ -8,12 +8,14 @@ Run from the repository root:
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import random
 import sys
 from difflib import SequenceMatcher
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 from bench.catalog import a4_directory, load_ai_log, load_overrides, load_sources, repo_root
 from bench.classify import classify_notes, composite_orientation
@@ -186,10 +188,41 @@ def resolve_raw(root: Path, filename: str) -> Path | None:
     for path in files:
         if path.name.casefold() == target or path.stem.casefold() == stem_target:
             return path
+    alias = _download_alias(root, filename, files)
+    if alias is not None:
+        return alias
     matched, _suggestion = match_catalogue(filename, [path.name for path in files])
     if matched is None:
         return None
     return raw / matched
+
+
+def _download_alias(root: Path, filename: str, files: list[Path]) -> Path | None:
+    """Catalogue rows use short names. Downloads keep the Wikimedia file name.
+
+    Thumbnail URLs start with 960px-. The file on disk does not.
+    """
+    catalogue = root / "bench" / "data" / "raw" / "sources.csv"
+    if not catalogue.is_file():
+        return None
+    wanted = filename.strip()
+    download = ""
+    with catalogue.open(newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            if (row.get("filename") or "").strip() != wanted:
+                continue
+            base = Path(unquote(urlparse(row.get("source_url") or "").path)).name
+            if base.lower().startswith("960px-"):
+                base = base[6:]
+            download = base
+            break
+    if not download:
+        return None
+    folded = download.casefold()
+    for path in files:
+        if path.name.casefold() == folded:
+            return path
+    return None
 
 
 def split_composite(source: Path, dest_dir: Path, orientation: str) -> tuple[str, str]:

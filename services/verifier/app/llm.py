@@ -16,6 +16,8 @@ from app.schema import AgentOutput, Judgment, flag_judgment, judgment_schema, st
 logger = logging.getLogger("sundarban.llm")
 
 MAX_OUTPUT_TOKENS = 1024
+# gemini-3.8-flash rejects thinking level "minimal". "low" is the lowest level it accepts.
+THINKING_LEVEL = "low"
 
 
 class LlmError(RuntimeError):
@@ -67,42 +69,49 @@ class GeminiGenerator:
         temperature: float,
         max_output_tokens: int,
     ) -> tuple[str, int]:
-        try:
-            response = self._client.post(
-                f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-                params={"key": self._api_key},
-                json={
-                    "contents": [{"role": "user", "parts": parts}],
-                    "generationConfig": {
-                        "temperature": temperature,
-                        "maxOutputTokens": max_output_tokens,
-                        "responseMimeType": "application/json",
-                        "responseSchema": schema,
-                        "thinkingConfig": {"thinkingLevel": "minimal"},
-                    },
+        response = self._post(
+            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+            {
+                "contents": [{"role": "user", "parts": parts}],
+                "generationConfig": {
+                    "temperature": temperature,
+                    "maxOutputTokens": max_output_tokens,
+                    "responseMimeType": "application/json",
+                    "responseSchema": schema,
+                    "thinkingConfig": {"thinkingLevel": THINKING_LEVEL},
                 },
-            )
-        except httpx.HTTPError as exc:
-            raise LlmError(f"gemini transport {type(exc).__name__}") from None
-        if response.status_code >= 400:
-            raise LlmError(f"gemini status {response.status_code}")
+            },
+        )
         body = response.json()
         text = _response_text(body)
         tokens = int((body.get("usageMetadata") or {}).get("totalTokenCount") or 0)
         return text, tokens
 
     def count_tokens(self, model: str, parts: list[dict[str, Any]]) -> int:
-        try:
-            response = self._client.post(
-                f"https://generativelanguage.googleapis.com/v1beta/models/{model}:countTokens",
-                params={"key": self._api_key},
-                json={"contents": [{"parts": parts}]},
-            )
-        except httpx.HTTPError as exc:
-            raise LlmError(f"countTokens transport {type(exc).__name__}") from None
-        if response.status_code >= 400:
-            raise LlmError(f"countTokens status {response.status_code}")
+        response = self._post(
+            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:countTokens",
+            {"contents": [{"parts": parts}]},
+        )
         return int(response.json().get("totalTokens") or 0)
+
+    def _post(self, url: str, payload: dict[str, Any]) -> httpx.Response:
+        delay = 2.0
+        last_status = 0
+        for _attempt in range(7):
+            try:
+                response = self._client.post(url, params={"key": self._api_key}, json=payload)
+            except httpx.HTTPError as exc:
+                raise LlmError(f"gemini transport {type(exc).__name__}") from None
+            if response.status_code in {429, 503}:
+                last_status = response.status_code
+                time.sleep(delay)
+                delay = min(delay * 2, 30)
+                continue
+            if response.status_code >= 400:
+                message = _error_message(response).replace(self._api_key, "[redacted]")
+                raise LlmError(f"gemini status {response.status_code} {message}".strip())
+            return response
+        raise LlmError(f"gemini status {last_status}")
 
 
 class ModelWrapper:
@@ -183,6 +192,14 @@ class ModelWrapper:
             logger.info("llm_invalid agent=%s model=%s retried=true", agent_id, self.model_id)
             return stamp(flag_judgment(last_invalid), agent_id, prompt_version), total_tokens
         raise LlmError(last_http or "model call failed")
+
+
+def _error_message(response: httpx.Response) -> str:
+    try:
+        message = str((response.json().get("error") or {}).get("message") or "")
+    except ValueError:
+        message = ""
+    return message[:200]
 
 
 def _strip_fence(text: str) -> str:

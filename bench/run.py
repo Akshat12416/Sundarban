@@ -9,6 +9,7 @@ import argparse
 import json
 import os
 import sys
+import time
 from decimal import Decimal
 from pathlib import Path
 
@@ -93,8 +94,15 @@ def _estimate(config: str, ready: list[tuple[dict, object]], runs: int) -> tuple
         return Decimal(0), {"input_tokens": 0, "output_tokens": 0, "tier": tier, "model": model}
     if not model:
         raise SystemExit("GEMINI_MODEL is not set")
-    input_tokens = _count_input_tokens(model, config, ready) * runs
     output_tokens = cold_output_tokens(config, len(ready), runs)
+    if input_rate == 0 and output_rate == 0:
+        return Decimal(0), {
+            "input_tokens": "not_counted",
+            "output_tokens": output_tokens,
+            "tier": tier,
+            "model": model,
+        }
+    input_tokens = _count_input_tokens(model, config, ready) * runs
     return estimate_usd(input_tokens, output_tokens, input_rate, output_rate), {
         "input_tokens": input_tokens,
         "output_tokens": output_tokens,
@@ -141,15 +149,19 @@ def _write(output: Path, args: argparse.Namespace, ready: list, skipped: list) -
         for run in range(1, args.runs + 1):
             for row, reason in skipped:
                 handle.write(json.dumps(_skipped_line(args, run, row, reason), sort_keys=True) + "\n")
-            for row, submission in ready:
+            for index, (row, submission) in enumerate(ready, start=1):
+                if args.config != "C0" and index > 1:
+                    time.sleep(4)
                 try:
                     report = verifier.verify(submission)
                 except LlmError as exc:
+                    print(f"skip {row['id']} {exc}", flush=True)
                     handle.write(
                         json.dumps(_skipped_line(args, run, row, str(exc)), sort_keys=True) + "\n"
                     )
                     handle.flush()
                     continue
+                print(f"done {row['id']} {report.recommendation}", flush=True)
                 handle.write(json.dumps(_line(args, run, row, report), sort_keys=True) + "\n")
                 handle.flush()
     if wrapper is not None:
