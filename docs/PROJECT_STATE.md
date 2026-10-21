@@ -42,7 +42,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | 3 Evidence service and cache | done | 0fea73e | Nonce, device, evidence, and admin file routes. Cache tested: a second analysis of the same evidence makes no model call. Live Supabase test is skipped unless `SUPABASE_LIVE_TEST=1`. |
 | 4a Verifiers C0-C2 and runner | in progress (demo done) | 4326bb4 | C0 dev re-run: 68 completed. C1 ran on dev with local `qwen2.5vl:3b` (demo, `bench/results/demo/`). Gemini C1 and C2 paper runs still need a billed key. No test split. |
 | 4b Verifiers C3-C4 and metrics | in progress | 8aa346b | C3, C4, and +A are tested. Full dev demo started 2026-10-21: C3 log `bench/results/C3-dev.log`, then C4. Output is under `bench/results/demo/`. No test split. |
-| 5a Mobile shell | in progress | pending | Expo SDK 58 shell in `apps/mobile`. Web checked 2026-10-21 at localhost:8081. Phone Expo Go not confirmed. |
+| 5a Mobile shell | in progress | 197d4cc | Expo SDK 58 shell in `apps/mobile`. Web checked 2026-10-21 at localhost:8081. Phone Expo Go not confirmed. |
 | 5b Attestation and capture | not started | | |
 | 5c Mobile status and polish | not started | | |
 | 6 Contracts | not started | | |
@@ -136,7 +136,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | Contributor Expo shell: email/password auth, sample data, wizard, projects, credits, profile. Web checked. | pending |
+| 2026-10-21 | Grok 4.7 | Contributor Expo shell: email/password auth, sample data, wizard, projects, credits, profile. Web checked. | 197d4cc |
 | 2026-10-21 | Grok 4.7 | C3, C4, +A switch, paper tables, Phase 5 guide. Three-item Ollama probe only. | 7e11467, 8aa346b, 5e24d95 |
 | 2026-10-21 | Claude Opus | Local Ollama provider in the LLM wrapper (demo only), C1 dev demo run, C0 dev re-run (68 completed), decision recorded. | 43b0324, 4326bb4, e1b8985 |
 | 2026-10-21 | Grok 4.7 | Set the run cap to 5 and recorded that the loaded Gemini key is still on the free-tier daily quota. C1 pilot not started. | 972a03b |
