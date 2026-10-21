@@ -47,7 +47,7 @@ The Android development build is still waiting on the user. Do not start it unle
 | 5b Attestation and capture | in progress | c6a4892 | EAS development profile and `cv-keystore` are written. Cloud build not started. Phone checks of accept, replay, and modified image are not done. |
 | 5c Mobile status and polish | not started | | |
 | 6 Contracts | done | 448c2de | Sepolia `CarbonRegistry` at `0xFC1F37fB7449619917Dd78431bB827A18E11C480`. Issuer role checked on that address. Gas in `bench/results/gas.json` is from a separate test deployment. |
-| 7a Admin review | in progress | see session log | Queue, project page, and Google admin gate are in `apps/admin-web`. Browser check on 2026-10-21 used the Auth emulator. Phone publish was not run on a device. |
+| 7a Admin review | in progress | 4a92488 | Queue, project page, and Google admin gate are in `apps/admin-web`. Browser check on 2026-10-21 used the Auth emulator. Phone publish was not run on a device. |
 | 7b Issue flow and verify page | not started | | |
 | 8 Experiments | not started | | |
 | 9 Paper and report | not started | | |
@@ -140,7 +140,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | Admin review queue, project page, and phone submit hand-off. | see following commit |
+| 2026-10-21 | Grok 4.7 | Admin review queue, project page, and phone submit hand-off. | 4a92488 |
 | 2026-10-21 | Grok 4.7 | C3 and C4 dev demos finished. Metrics recorded from the demo JSONL files. Not paper results. | this state commit |
 | 2026-10-21 | Grok 4.7 | Saved the Sepolia deployment in `contracts/DEPLOYMENT.md` and fast-forwarded `main` to `phase6-contracts`. | fa485b9 |
 | 2026-10-21 | Grok 4.7 | CarbonRegistry on Sepolia, Python compile and deploy, gas from test receipts, Slither 0 findings. | 448c2de |
