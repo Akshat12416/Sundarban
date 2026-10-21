@@ -22,6 +22,8 @@ Run each one from the repository root unless the line says otherwise.
 | Verifier pilot | `services/verifier/.venv/bin/python -m bench.run --config C0 --split dev --runs 3` |
 | Cost estimate | `services/verifier/.venv/bin/python -m bench.estimate_cost --config C1 --split dev --runs 1` |
 | Metrics | `services/verifier/.venv/bin/python -m bench.metrics --input bench/results/C0-dev.jsonl` |
+| Local model server (demo) | `brew install ollama && ollama serve` then `ollama pull qwen2.5vl:3b` |
+| C1 demo run, local model | `LLM_PROVIDER=ollama OLLAMA_MODEL=qwen2.5vl:3b services/verifier/.venv/bin/python -m bench.run --config C1 --split dev --runs 1` (writes `bench/results/demo/`, not a paper result) |
 
 First-time setup for a Python component is `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt` inside that directory. Admin web is `cd apps/admin-web && npm install`. Contracts also need `cd contracts && npm install` so OpenZeppelin v5 is on disk for later Solidity imports.
 

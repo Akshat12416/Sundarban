@@ -1,10 +1,14 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-21 05:40 | by: Grok 4.7 | commit: 2ad7a88
+Last updated (UTC): 2026-10-21 02:45 | by: Claude Opus | commit: see session log
 
 ## 1. Next step (read this first)
-The C1 dev pilot did not start. On 2026-10-21 the key loaded from `bench/.env` (prefix `AQ.Ab8RN6Jm2`, length 53, same prefix in `services/verifier/.env`) still hit the free-tier daily quota: `generate_content_free_tier_requests` limit 20 for `gemini-3.8-flash`. One test `generateContent` returned 429 and said to retry in about 5 hours 14 minutes. `GEMINI_RUN_COST_CAP_USD` is 5 and `GEMINI_PRICE_TIER` is `paid` in both env files. Replace the key with one created in the billed project, confirm a single test call is not a 429, then run `services/verifier/.venv/bin/python -m bench.run --config C1 --split dev --runs 1`. Do not pass `--split test`.
+For the presentation, C1 ran end to end on a local open-weight model (demo only). `bench/.env` now has `LLM_PROVIDER=ollama` and `OLLAMA_MODEL=qwen2.5vl:3b`. Before any paper C1 or C2 run, set `LLM_PROVIDER=gemini` in `bench/.env` (or delete the line; gemini is the default) and use a key from the billed project. The key in both env files (prefix `AQ.Ab8RN6Jm2`, length 53) still hit `generate_content_free_tier_requests` limit 20 on 2026-10-21. Then confirm one test call is not a 429 and run `services/verifier/.venv/bin/python -m bench.run --config C1 --split dev --runs 1`. Do not pass `--split test`.
 
-C0 dev metrics remain in `bench/results/C0-dev.jsonl`: completed 44, skipped 36, ASR 0.385, FRR 0.000, precision 1.000, recall 0.615, F1 0.762. Do not tune prompts from the test split.
+Demo run, verified 2026-10-21 with `python -m bench.metrics --input bench/results/demo/C1-dev-ollama.jsonl`: 68 completed, 12 skipped, every item `pass`/`approve`, so ASR 1.000, FRR 0.000, recall 0.000, median latency 13.5 s per uncached call, $0. The 3B model does not detect any attack class. This file is demo output, not a paper result. A larger local model (`qwen2.5vl:7b`, about 6 GB) did not fit: 3.2 GiB disk free after the 3B pull.
+
+C0 dev re-run after the filename alias fix, verified with `python -m bench.metrics --input bench/results/C0-dev.jsonl`: completed 68, skipped 12, ASR 0.322, FRR 0.000, precision 1.000, recall 0.678, F1 0.808, agreement 1.000. Do not tune prompts from the test split.
+
+Ollama must be running for a local run: `OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q8_0 /opt/homebrew/opt/ollama/bin/ollama serve` (or `brew services start ollama`).
 
 Do not copy `legacy/` into the new apps. The only admin files a later phase may copy, and then edit, are `legacy/admin-portal/src/components/Navbar.jsx`, `legacy/admin-portal/src/components/Footer.jsx`, and the card markup in `ApprovedProjects.jsx` and `RejectedProjects.jsx`.
 
@@ -38,7 +42,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | 2a Benchmark pilot | in progress | 280ea07 | Manifest generator done. No LLM calls. |
 | 2b Benchmark full | not started | | |
 | 3 Evidence service and cache | done | 0fea73e | Nonce, device, evidence, and admin file routes. Cache tested: a second analysis of the same evidence makes no model call. Live Supabase test is skipped unless `SUPABASE_LIVE_TEST=1`. |
-| 4a Verifiers C0-C2 and runner | in progress | 2ad7a88 | C0 dev run is in `bench/results/C0-dev.jsonl`. C1 and C2 code is tested with a fake model. Paid dry-runs exited 2 under the cap. No test split. |
+| 4a Verifiers C0-C2 and runner | in progress (demo done) | 4326bb4 | C0 dev re-run: 68 completed. C1 ran on dev with local `qwen2.5vl:3b` (demo, `bench/results/demo/`). Gemini C1 and C2 paper runs still need a billed key. No test split. |
 | 4b Verifiers C3-C4 and metrics | not started | | |
 | 5a Mobile shell | not started | | Screen map is `docs/design/SCREENS.md`. |
 | 5b Attestation and capture | not started | | |
@@ -67,7 +71,8 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | Test vectors | `packages/test-vectors` | `cd packages/test-vectors && .venv/bin/python generate.py` | `cd packages/test-vectors && .venv/bin/pytest` | Python reference unchanged. Service and TypeScript libraries matched `vectors.json` on 2026-10-21. |
 | TypeScript crypto | `packages/cv-crypto-ts` | | `cd packages/cv-crypto-ts && node --experimental-strip-types --test src/index.test.ts` | Verified 2026-10-21: 5 passed, including Merkle proofs. Node v22.16.0. |
 | Benchmark manifest | `bench/data/manifest.jsonl` | `python -m bench.generate --seed 42` | `python -m bench.validate` | Verified 2026-10-20: validate pass; second generate byte-identical. |
-| C0 pilot | `bench/results/C0-dev.jsonl` | `services/verifier/.venv/bin/python -m bench.run --config C0 --split dev --runs 3` | `services/verifier/.venv/bin/python -m bench.metrics --input bench/results/C0-dev.jsonl` | Verified 2026-10-21: metrics command printed ASR 0.385, FRR 0.000, 44 completed, 36 skipped. |
+| C0 pilot | `bench/results/C0-dev.jsonl` | `services/verifier/.venv/bin/python -m bench.run --config C0 --split dev --runs 3` | `services/verifier/.venv/bin/python -m bench.metrics --input bench/results/C0-dev.jsonl` | Verified 2026-10-21 after the alias fix: ASR 0.322, FRR 0.000, 68 completed, 12 skipped. |
+| C1 demo (local model) | `bench/results/demo/C1-dev-ollama.jsonl` | `ollama serve`, then `services/verifier/.venv/bin/python -m bench.run --config C1 --split dev --runs 1` with `LLM_PROVIDER=ollama` | `services/verifier/.venv/bin/python -m bench.metrics --input bench/results/demo/C1-dev-ollama.jsonl` | Verified 2026-10-21: 68 completed, all approve. Tests: `cd services/verifier && .venv/bin/pytest tests/test_verifiers.py` 11 passed. Not a paper result. |
 
 ## 6. Environment and accounts (names only, never values)
 | Item | Where it lives | Set up? | Notes |
@@ -77,6 +82,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | Web Firebase config | `services/verifier/secrets/firebase-web.env` | yes | Keys present: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`. No storage bucket variable. The file had been a JS snippet; rewritten to env lines on 2026-10-20. Values not verified against the console. |
 | Supabase URL, secret, bucket | `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SUPABASE_STORAGE_BUCKET`, `SUPABASE_DB_PASSWORD` in `services/verifier/.env` | yes | Bucket value is `evidence`. Region reported by the user: `ap-southeast-1`. `STORAGE_BACKEND` is still `disk`, so the service does not call Supabase until that is changed. |
 | GEMINI_API_KEY and GEMINI_MODEL | `services/verifier/.env` and `bench/.env` | yes | Model id `gemini-3.8-flash` in both files. `countTokens` was called for the C1 and C2 dry-runs. `generateContent` was not called. |
+| LLM provider (demo) | `LLM_PROVIDER`, `OLLAMA_MODEL`, `OLLAMA_HOST` in `bench/.env` | yes | Set to `ollama`, `qwen2.5vl:3b`, `http://127.0.0.1:11434` on 2026-10-21. Ollama 0.40.6 installed with Homebrew; model in `~/.ollama/models` (3.2 GB). Switch to `gemini` for paper runs. |
 | Sepolia RPC and deployer key variables | `contracts/.env` | partial | No `contracts/.env`. The placeholder test used the public default RPC and read chain id 11155111. `DEPLOYER_PRIVATE_KEY` is unset. |
 | Expo project id and app ids | | no | |
 
@@ -92,7 +98,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 - Admin claim script: `scripts/set_admin_claim.py`. Unit-tested with a fake Admin SDK. Not run against the emulator or the live project this session.
 
 ## 8. Experiments and results
-Model id in both env files: `gemini-3.8-flash`. Prompt version `c1-v1` in `services/verifier/prompts/c1_v1.txt`. Rules version `c0-v1`. No test-split run. No C1 or C2 generation. The only result file is `bench/results/C0-dev.jsonl`, written by `bench.run` on 2026-10-21. H1 to H4 are not started.
+Model id in both env files: `gemini-3.8-flash`. Prompt version `c1-v1` in `services/verifier/prompts/c1_v1.txt`. Rules version `c0-v1`. No test-split run. No complete Gemini C1 or C2 run. Paper-eligible result file: `bench/results/C0-dev.jsonl`. `bench/results/C1-dev.jsonl` and `C1-probe.jsonl` (committed by the owner in 8e8f0ea) are partial Gemini attempts, mostly skipped rows. `bench/results/demo/C1-dev-ollama.jsonl` is demo output from `ollama/qwen2.5vl:3b` and must not be used in the paper. H1 to H4 are not started.
 
 ## 9. Waiting on the user
 - [x] Firebase project id is in `services/verifier/.env` and is not the old project. Console visit not re-checked this session.
@@ -103,9 +109,11 @@ Model id in both env files: `gemini-3.8-flash`. Prompt version `c1-v1` in `servi
 - [x] Firebase CLI is logged in. `firebase projects:list` included `sundarban-a64ea` on 2026-10-20.
 - [x] 40 catalogue rows are in `bench/data/raw/sources.csv`. Raw image files are gitignored.
 - [ ] Phase 3 checks in `docs/guides/PHASE_3_PREREQUISITES.md`: set `STORAGE_BACKEND=supabase` and delete the extra `FIREBASE_PROJECT_ID` line. Not re-checked this session. `STORAGE_BACKEND` was still `disk`.
+- [ ] Before paper runs: set `LLM_PROVIDER=gemini` in `bench/.env`.
 - [ ] Phase 4 checks: `GEMINI_RUN_COST_CAP_USD` is 5 and `GEMINI_PRICE_TIER` is `paid` in both env files. The loaded key still receives the free-tier daily quota of 20. A billed-project key is still required before the C1 pilot.
 
 ## 10. Gotchas and failed approaches (newest first)
+- 2026-10-21: With `LLM_PROVIDER=ollama`, the first runner change also sent C0 output to `bench/results/demo/`. Fixed in 4326bb4: C0 ignores the provider. `qwen2.5vl:3b` approved all 68 dev items; the prompt was not tuned. Photos are shrunk to 896 px for the local model only.
 - 2026-10-21: Billing was reported active, but the key in both `.env` files (prefix `AQ.Ab8RN6Jm2`, length 53) still returned `generate_content_free_tier_requests` limit 20. A test call was 429 with retry in about 5 hours 14 minutes. The C1 dev pilot was not started.
 - 2026-10-21: 13 catalogue filenames are not on disk, so 36 dev submissions were skipped. The C0 rates are not rates over all 80 dev rows. C1 and C2 `generateContent` did not run: the paid estimates were above `GEMINI_RUN_COST_CAP_USD`. `--force` was not used.
 - 2026-10-21: Pytest forces in-memory nonce, device, and evidence stores because `PYTEST_CURRENT_TEST` is set. A normal `uvicorn` process uses Firestore when the Admin SDK is ready. `scripts/set_admin_claim.py` loads `services/verifier/.env`, so `FIREBASE_AUTH_EMULATOR_HOST` sends it to the emulator. Unset that variable before setting a claim on the real project.
@@ -123,7 +131,8 @@ Model id in both env files: `gemini-3.8-flash`. Prompt version `c1-v1` in `servi
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | Set the run cap to 5 and recorded that the loaded Gemini key is still on the free-tier daily quota. C1 pilot not started. | pending |
+| 2026-10-21 | Claude Opus | Local Ollama provider in the LLM wrapper (demo only), C1 dev demo run, C0 dev re-run (68 completed), decision recorded. | 43b0324, 4326bb4, this state commit |
+| 2026-10-21 | Grok 4.7 | Set the run cap to 5 and recorded that the loaded Gemini key is still on the free-tier daily quota. C1 pilot not started. | 972a03b |
 | 2026-10-21 | Grok 4.7 | Noted that A8 and A9 have one dev item and no test item, which is expected. | f0b37d4 |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
