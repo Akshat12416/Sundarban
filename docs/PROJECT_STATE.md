@@ -117,6 +117,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 - [ ] Phase 4 checks: `GEMINI_RUN_COST_CAP_USD` is 5 and `GEMINI_PRICE_TIER` is `paid` in both env files. The loaded key still receives the free-tier daily quota of 20. A billed-project key is still required before the C1 pilot.
 
 ## 10. Gotchas and failed approaches (newest first)
+- 2026-10-21: Phone sign-in `auth/invalid-email` is a badly formatted address. The app now strips spaces and hidden characters and asks for `name@gmail.com`. A Google-only Firebase user still cannot sign in with a password until Create account, or Email/Password is enabled in the console.
 - 2026-10-21: The 3B model often returns `pass` from the aggregator while a specialist returned `flag`. aggregate-v1 keeps the more severe decision, so the report still rejects. The prompts were not rewritten after seeing that. C4 also keeps the C0 tool decision, which flagged `exact_duplicate` on all three probe rows.
 - 2026-10-21: With `LLM_PROVIDER=ollama`, the first runner change also sent C0 output to `bench/results/demo/`. Fixed in 4326bb4: C0 ignores the provider. `qwen2.5vl:3b` approved all 68 dev items; the prompt was not tuned. Photos are shrunk to 896 px for the local model only.
 - 2026-10-21: Billing was reported active, but the key in both `.env` files (prefix `AQ.Ab8RN6Jm2`, length 53) still returned `generate_content_free_tier_requests` limit 20. A test call was 429 with retry in about 5 hours 14 minutes. The C1 dev pilot was not started.

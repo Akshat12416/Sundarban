@@ -26,6 +26,37 @@ type AuthValue = {
 
 const AuthContext = createContext<AuthValue | null>(null);
 
+function normalizeEmail(value: string): string {
+  return value
+    .replace(/[\u200B-\u200D\uFEFF\u00A0]/g, "")
+    .replace(/\s+/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+export function readableAuthError(caught: unknown): string {
+  const code =
+    typeof caught === "object" && caught !== null && "code" in caught
+      ? String((caught as { code: unknown }).code)
+      : "";
+  if (code === "auth/invalid-email") {
+    return "Enter a full email address, such as name@gmail.com, with no spaces.";
+  }
+  if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
+    return "That email and password do not match an account. Use Create account if this is the first time.";
+  }
+  if (code === "auth/email-already-in-use") {
+    return "That email already has an account. Use Sign in.";
+  }
+  if (code === "auth/weak-password") {
+    return "Use a password of at least 6 characters.";
+  }
+  if (code === "auth/operation-not-allowed") {
+    return "Email and password sign-in is turned off in the Firebase console.";
+  }
+  return caught instanceof Error ? caught.message : "Sign-in failed";
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(!firebaseConfigured);
   const [session, setSession] = useState<Session | null>(null);
@@ -51,14 +82,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!auth) {
           throw new Error("Add the Firebase web keys to apps/mobile/.env, or use sample data.");
         }
-        await signInWithEmailAndPassword(auth, email.trim(), password);
+        await signInWithEmailAndPassword(auth, requireEmail(email), password);
       },
       async signUp(email, password) {
         const auth = getFirebaseAuth();
         if (!auth) {
           throw new Error("Add the Firebase web keys to apps/mobile/.env, or use sample data.");
         }
-        await createUserWithEmailAndPassword(auth, email.trim(), password);
+        await createUserWithEmailAndPassword(auth, requireEmail(email), password);
       },
       useSample() {
         setSession({ email: "sample@sundarban.local", sample: true });
@@ -76,6 +107,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+function requireEmail(value: string): string {
+  const email = normalizeEmail(value);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error("Enter a full email address, such as name@gmail.com, with no spaces.");
+  }
+  return email;
 }
 
 export function useSession() {

@@ -66,10 +66,7 @@ export function PillButton({
   );
 }
 
-export function Field({
-  label,
-  ...input
-}: { label: string } & TextInputProps) {
+export function Field({ label, ...input }: { label: string } & TextInputProps) {
   return (
     <View style={styles.fieldWrap}>
       <Text style={styles.fieldLabel}>{label}</Text>

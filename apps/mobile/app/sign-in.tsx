@@ -1,9 +1,9 @@
 import { router } from "expo-router";
-import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { useRef, useState } from "react";
+import { ScrollView, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useSession } from "../src/auth/AuthProvider";
+import { useSession, readableAuthError } from "../src/auth/AuthProvider";
 import { Field, PhoneColumn, PillButton } from "../src/components/ui";
 import { colors } from "../src/theme/tokens";
 
@@ -13,19 +13,23 @@ export default function SignInScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const emailRef = useRef("");
+  const passwordRef = useRef("");
 
   async function run(action: "in" | "up") {
+    const address = emailRef.current;
+    const secret = passwordRef.current;
     setBusy(true);
     setError("");
     try {
       if (action === "in") {
-        await signIn(email, password);
+        await signIn(address, secret);
       } else {
-        await signUp(email, password);
+        await signUp(address, secret);
       }
       router.replace("/home");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Sign-in failed");
+      setError(readableAuthError(caught));
     } finally {
       setBusy(false);
     }
@@ -41,8 +45,33 @@ export default function SignInScreen() {
           <Text style={{ fontFamily: "Inter", fontSize: 16, lineHeight: 24, color: colors.muted }}>
             Photos are captured in this app. Email and password sign-in works here. Google sign-in and the device signing key come in the next build.
           </Text>
-          <Field label="Email" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
-          <Field label="Password" secureTextEntry value={password} onChangeText={setPassword} />
+          <Field
+            label="Email"
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="email"
+            textContentType="emailAddress"
+            keyboardType="email-address"
+            inputMode="email"
+            value={email}
+            onChangeText={(value) => {
+              emailRef.current = value;
+              setEmail(value);
+            }}
+          />
+          <Field
+            label="Password"
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="password"
+            textContentType="password"
+            secureTextEntry
+            value={password}
+            onChangeText={(value) => {
+              passwordRef.current = value;
+              setPassword(value);
+            }}
+          />
           {error ? <Text style={{ color: colors.danger, fontFamily: "Inter" }}>{error}</Text> : null}
           <PillButton label={busy ? "Please wait" : "Sign in"} onPress={() => void run("in")} disabled={busy} />
           <PillButton label="Create account" tone="green" onPress={() => void run("up")} disabled={busy} />
