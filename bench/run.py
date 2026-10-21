@@ -73,7 +73,9 @@ def main(argv: list[str] | None = None) -> int:
         else:
             ready.append((row, submission))
     provider, model_id = provider_settings(dict(os.environ))
-    print(f"provider {provider}")
+    if CALLS[args.config] == 0:
+        provider = "gemini"
+    print(f"provider {provider if CALLS[args.config] else 'none'}")
     if provider == "gemini":
         estimate, detail = _estimate(args.config, ready, args.runs)
     else:
