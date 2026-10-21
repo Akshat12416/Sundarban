@@ -1,8 +1,12 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-21 04:31 | by: Grok 4.7 | commit: see session log
+Last updated (UTC): 2026-10-21 04:35 | by: Grok 4.7 | commit: see session log
 
 ## 1. Next step (read this first)
-Phase 6 is done. The next code task is Phase 7a, the admin review panel. Read `docs/PLAN-SPEC.md` for the admin screens and status rules before editing `apps/admin-web`. The contract address, network, and deployment transaction are in `packages/contract-abi/deployment.json`. Do not copy `legacy/` wholesale. The only admin files a later phase may copy, and then edit, are `legacy/admin-portal/src/components/Navbar.jsx`, `legacy/admin-portal/src/components/Footer.jsx`, and the card markup in `ApprovedProjects.jsx` and `RejectedProjects.jsx`.
+Work on `main`. Phase 6 is on `main` after a fast-forward of `phase6-contracts`. `phase5-mobile` was already the same commit as the previous `main` tip, so it is included. Contract details for people are in `contracts/DEPLOYMENT.md`. The address and transaction hashes are in `packages/contract-abi/deployment.json`.
+
+The next code task is Phase 7a, the admin review panel. Read `docs/PLAN-SPEC.md` for the admin screens and status rules before editing `apps/admin-web`. Do not copy `legacy/` wholesale. The only admin files a later phase may copy, and then edit, are `legacy/admin-portal/src/components/Navbar.jsx`, `legacy/admin-portal/src/components/Footer.jsx`, and the card markup in `ApprovedProjects.jsx` and `RejectedProjects.jsx`.
+
+The C4 dev demo (process 50827, `python -m bench.run --config C4 --split dev --runs 1`) was still writing `bench/results/demo/C4-dev-ollama.jsonl` at 04:34 UTC. C3 had already finished. Do not start a second bench run. Do not pass `--split test`. Do not commit that demo jsonl as a paper result.
 
 The Android development build is still waiting on the user. Do not start it unless they ask. From `apps/mobile`, after `eas login`: `npx eas-cli@latest build --profile development --platform android`. Expo Go cannot create the key. Device checks after install (accepted photo, replayed nonce, modified image) are not done.
 
@@ -137,6 +141,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
+| 2026-10-21 | Grok 4.7 | Saved the Sepolia deployment in `contracts/DEPLOYMENT.md` and fast-forwarded `main` to `phase6-contracts`. | see following commit |
 | 2026-10-21 | Grok 4.7 | CarbonRegistry on Sepolia, Python compile and deploy, gas from test receipts, Slither 0 findings. | 448c2de |
 | 2026-10-21 | Grok 4.7 | Android keystore module, attested capture, EAS development profile. Cloud build not started. | c6a4892 |
 | 2026-10-21 | Grok 4.7 | C3, C4, +A switch, paper tables, Phase 5 guide. Three-item Ollama probe only. | 7e11467, 8aa346b, 5e24d95 |
