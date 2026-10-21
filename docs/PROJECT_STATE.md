@@ -1,16 +1,14 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-21 04:35 | by: Grok 4.7 | commit: see session log
+Last updated (UTC): 2026-10-21 04:47 | by: Grok 4.7 | commit: see session log
 
 ## 1. Next step (read this first)
 Work on `main`. Phase 6 is on `main` after a fast-forward of `phase6-contracts`. `phase5-mobile` was already the same commit as the previous `main` tip, so it is included. Contract details for people are in `contracts/DEPLOYMENT.md`. The address and transaction hashes are in `packages/contract-abi/deployment.json`.
 
 The next code task is Phase 7a, the admin review panel. Read `docs/PLAN-SPEC.md` for the admin screens and status rules before editing `apps/admin-web`. Do not copy `legacy/` wholesale. The only admin files a later phase may copy, and then edit, are `legacy/admin-portal/src/components/Navbar.jsx`, `legacy/admin-portal/src/components/Footer.jsx`, and the card markup in `ApprovedProjects.jsx` and `RejectedProjects.jsx`.
 
-The C4 dev demo (process 50827, `python -m bench.run --config C4 --split dev --runs 1`) was still writing `bench/results/demo/C4-dev-ollama.jsonl` at 04:34 UTC. C3 had already finished. Do not start a second bench run. Do not pass `--split test`. Do not commit that demo jsonl as a paper result.
+The C3 and C4 dev demos both finished on 2026-10-21. Logs end with `wrote` for `bench/results/demo/C3-dev-ollama.jsonl` and `bench/results/demo/C4-dev-ollama.jsonl`. Metrics from `python -m bench.metrics` on those files: C3 completed 68, skipped 12, ASR 0.288, FRR 0.667, F1 0.785. C4 completed 68, skipped 12, ASR 0.169, FRR 0.556, F1 0.867. Both are `ollama/qwen2.5vl:3b` demo output. Do not put them in a paper table. Do not start another bench run. Do not pass `--split test`.
 
 The Android development build is still waiting on the user. Do not start it unless they ask. From `apps/mobile`, after `eas login`: `npx eas-cli@latest build --profile development --platform android`. Expo Go cannot create the key. Device checks after install (accepted photo, replayed nonce, modified image) are not done.
-
-Do not start a second bench run. Do not pass `--split test`.
 
 ## 2. Project in brief
 - What: citizen-submitted afforestation evidence verified by LLM agents and tools, anchored on-chain, with capture-time attestation.
@@ -44,7 +42,7 @@ Do not start a second bench run. Do not pass `--split test`.
 | 2b Benchmark full | not started | | |
 | 3 Evidence service and cache | done | 0fea73e | Nonce, device, evidence, and admin file routes. Cache tested: a second analysis of the same evidence makes no model call. Live Supabase test is skipped unless `SUPABASE_LIVE_TEST=1`. |
 | 4a Verifiers C0-C2 and runner | in progress (demo done) | 4326bb4 | C0 dev re-run: 68 completed. C1 ran on dev with local `qwen2.5vl:3b` (demo, `bench/results/demo/`). Gemini C1 and C2 paper runs still need a billed key. No test split. |
-| 4b Verifiers C3-C4 and metrics | in progress | 8aa346b | C3, C4, and +A are tested. Full dev demo started 2026-10-21: C3 log `bench/results/C3-dev.log`, then C4. Output is under `bench/results/demo/`. No test split. |
+| 4b Verifiers C3-C4 and metrics | demo done | 8aa346b | C3 and C4 dev demos finished 2026-10-21 under `bench/results/demo/`. Not paper results. No test split. |
 | 5a Mobile shell | in progress | 197d4cc | Expo SDK 58 shell in `apps/mobile`. Web checked 2026-10-21 at localhost:8081. Phone Expo Go not confirmed. |
 | 5b Attestation and capture | in progress | c6a4892 | EAS development profile and `cv-keystore` are written. Cloud build not started. Phone checks of accept, replay, and modified image are not done. |
 | 5c Mobile status and polish | not started | | |
@@ -75,7 +73,7 @@ Do not start a second bench run. Do not pass `--split test`.
 | Contributor app | `apps/mobile` | `cd apps/mobile && npx expo start` | `cd apps/mobile && npx tsc --noEmit` | Web verified 2026-10-21: sign-in, sample home, wizard type step, credit history. Typecheck passed. Expo Go on the phone not confirmed. |
 | C0 pilot | `bench/results/C0-dev.jsonl` | `services/verifier/.venv/bin/python -m bench.run --config C0 --split dev --runs 3` | `services/verifier/.venv/bin/python -m bench.metrics --input bench/results/C0-dev.jsonl` | Verified 2026-10-21 after the alias fix: ASR 0.322, FRR 0.000, 68 completed, 12 skipped. |
 | C1 demo (local model) | `bench/results/demo/C1-dev-ollama.jsonl` | `ollama serve`, then `services/verifier/.venv/bin/python -m bench.run --config C1 --split dev --runs 1` with `LLM_PROVIDER=ollama` | `services/verifier/.venv/bin/python -m bench.metrics --input bench/results/demo/C1-dev-ollama.jsonl` | Verified 2026-10-21: 68 completed, all approve. Not a paper result. |
-| C3 and C4 | `services/verifier/app/verifiers/specialists.py` | `services/verifier/.venv/bin/python -m bench.run --config C3 --split dev --runs 1` | `cd services/verifier && .venv/bin/pytest` | Verified 2026-10-21: 34 passed, 1 skipped. Three-item probe wrote `bench/results/demo/C3-probe.jsonl` and `C4-probe.jsonl`. Full dev not started. |
+| C3 and C4 demo | `bench/results/demo/C3-dev-ollama.jsonl` | already run | `services/verifier/.venv/bin/python -m bench.metrics --input bench/results/demo/C3-dev-ollama.jsonl` | Verified 2026-10-21: C3 ASR 0.288 FRR 0.667; C4 ASR 0.169 FRR 0.556. 68 completed, 12 skipped. Demo only. |
 | Paper tables | `bench/metrics.py` | `services/verifier/.venv/bin/python -m bench.metrics --tables --results bench/results --split dev` | covered by `tests/test_phase4b.py` | Verified 2026-10-21: C0 filled from `C0-dev.jsonl`. C2, C3, C4, and every +A row print `no result file`. |
 | Phase 5 prerequisites | `docs/guides/PHASE_5_PREREQUISITES.md` | the user follows the guide | | Written 2026-10-21. Expo Go, EAS, Android Studio, and the phone health check were not run. |
 
@@ -114,7 +112,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 - [x] Firebase CLI is logged in. `firebase projects:list` included `sundarban-a64ea` on 2026-10-20.
 - [x] 40 catalogue rows are in `bench/data/raw/sources.csv`. Raw image files are gitignored.
 - [ ] Phase 3 checks in `docs/guides/PHASE_3_PREREQUISITES.md`: set `STORAGE_BACKEND=supabase` and delete the extra `FIREBASE_PROJECT_ID` line. Not re-checked this session. `STORAGE_BACKEND` was still `disk`.
-- [ ] The C3 then C4 dev demo is already running. Do not start another one. Read `bench/results/C3-dev.log`.
+- [x] C3 and C4 dev demos finished. Files are under `bench/results/demo/`. Not for the paper.
 - [ ] Phase 5: follow `docs/guides/PHASE_5_PREREQUISITES.md`. Choose EAS or Android Studio. Fill `apps/mobile/.env` and do not commit it.
 - [ ] Before paper runs: set `LLM_PROVIDER=gemini` in `bench/.env`.
 - [ ] Phase 4 checks: `GEMINI_RUN_COST_CAP_USD` is 5 and `GEMINI_PRICE_TIER` is `paid` in both env files. The loaded key still receives the free-tier daily quota of 20. A billed-project key is still required before the C1 pilot.
@@ -141,6 +139,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
+| 2026-10-21 | Grok 4.7 | C3 and C4 dev demos finished. Metrics recorded from the demo JSONL files. Not paper results. | this state commit |
 | 2026-10-21 | Grok 4.7 | Saved the Sepolia deployment in `contracts/DEPLOYMENT.md` and fast-forwarded `main` to `phase6-contracts`. | fa485b9 |
 | 2026-10-21 | Grok 4.7 | CarbonRegistry on Sepolia, Python compile and deploy, gas from test receipts, Slither 0 findings. | 448c2de |
 | 2026-10-21 | Grok 4.7 | Android keystore module, attested capture, EAS development profile. Cloud build not started. | c6a4892 |
