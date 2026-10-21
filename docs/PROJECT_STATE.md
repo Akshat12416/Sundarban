@@ -2,15 +2,9 @@
 Last updated (UTC): 2026-10-21 05:40 | by: Grok 4.7 | commit: 2ad7a88
 
 ## 1. Next step (read this first)
-C0, C1, and C2 share `verify(submission) -> Report`. The rules pilot is written. The model pilot did not generate.
+The C1 dev pilot did not start. On 2026-10-21 the key loaded from `bench/.env` (prefix `AQ.Ab8RN6Jm2`, length 53, same prefix in `services/verifier/.env`) still hit the free-tier daily quota: `generate_content_free_tier_requests` limit 20 for `gemini-3.8-flash`. One test `generateContent` returned 429 and said to retry in about 5 hours 14 minutes. `GEMINI_RUN_COST_CAP_USD` is 5 and `GEMINI_PRICE_TIER` is `paid` in both env files. Replace the key with one created in the billed project, confirm a single test call is not a 429, then run `services/verifier/.venv/bin/python -m bench.run --config C1 --split dev --runs 1`. Do not pass `--split test`.
 
-`services/verifier/.venv/bin/python -m bench.run --config C0 --split dev --runs 3` wrote `bench/results/C0-dev.jsonl`. `python -m bench.metrics --input bench/results/C0-dev.jsonl` printed the table below. 36 of 80 dev rows were skipped because the photo file is not on disk. Rates use the 44 completed rows. Do not tune the prompt or the rules from the test split. The test split was not run.
-
-Paid dry-runs on 2026-10-21, one run, dev split, no `generateContent`: C1 estimate `0.2506185` USD (108878 input tokens, output ceiling 45056). C2 estimate `0.7522515` USD (327162 input tokens, output ceiling 135168). Both exited 2 because `GEMINI_RUN_COST_CAP_USD` is below those estimates. `MAX_RUN_COST` is unset, so the runner used that cap.
-
-User action before a C1 generation run: confirm the key is still the free-tier Flash model, then either set `GEMINI_PRICE_TIER=free` in `bench/.env` or raise the cap above the C1 estimate. Then run `services/verifier/.venv/bin/python -m bench.run --config C1 --split dev --runs 1` and `python -m bench.metrics --input bench/results/C1-dev.jsonl`. Do not pass `--force` unless you mean to ignore the cap. Do not pass `--split test`.
-
-C0 dev metrics from that command: completed 44, skipped 36, attacks 39, legit 5, ASR 0.385, FRR 0.000, precision 1.000, recall 0.615, F1 0.762, agreement 1.000. Detected counts: A1 5/5, A2 5/5, A6 1/1, A7 1/1, A8 1/1, A9 1/1, A10 5/5, A12 5/5, A3 0/1, A4 0/5, A5 0/4, A11 0/5, legit 0/5.
+C0 dev metrics remain in `bench/results/C0-dev.jsonl`: completed 44, skipped 36, ASR 0.385, FRR 0.000, precision 1.000, recall 0.615, F1 0.762. Do not tune prompts from the test split.
 
 Do not copy `legacy/` into the new apps. The only admin files a later phase may copy, and then edit, are `legacy/admin-portal/src/components/Navbar.jsx`, `legacy/admin-portal/src/components/Footer.jsx`, and the card markup in `ApprovedProjects.jsx` and `RejectedProjects.jsx`.
 
@@ -109,9 +103,10 @@ Model id in both env files: `gemini-3.8-flash`. Prompt version `c1-v1` in `servi
 - [x] Firebase CLI is logged in. `firebase projects:list` included `sundarban-a64ea` on 2026-10-20.
 - [x] 40 catalogue rows are in `bench/data/raw/sources.csv`. Raw image files are gitignored.
 - [ ] Phase 3 checks in `docs/guides/PHASE_3_PREREQUISITES.md`: set `STORAGE_BACKEND=supabase` and delete the extra `FIREBASE_PROJECT_ID` line. Not re-checked this session. `STORAGE_BACKEND` was still `disk`.
-- [ ] Phase 4 checks in `docs/guides/PHASE_4_PREREQUISITES.md`: confirm the Flash model in AI Studio, and set a billing alert if a card is linked. Local files agree on `gemini-3.8-flash`. `GEMINI_RUN_COST_CAP_USD` is set and is below the paid C1 estimate, so generation did not start. AI Studio was not opened.
+- [ ] Phase 4 checks: `GEMINI_RUN_COST_CAP_USD` is 5 and `GEMINI_PRICE_TIER` is `paid` in both env files. The loaded key still receives the free-tier daily quota of 20. A billed-project key is still required before the C1 pilot.
 
 ## 10. Gotchas and failed approaches (newest first)
+- 2026-10-21: Billing was reported active, but the key in both `.env` files (prefix `AQ.Ab8RN6Jm2`, length 53) still returned `generate_content_free_tier_requests` limit 20. A test call was 429 with retry in about 5 hours 14 minutes. The C1 dev pilot was not started.
 - 2026-10-21: 13 catalogue filenames are not on disk, so 36 dev submissions were skipped. The C0 rates are not rates over all 80 dev rows. C1 and C2 `generateContent` did not run: the paid estimates were above `GEMINI_RUN_COST_CAP_USD`. `--force` was not used.
 - 2026-10-21: Pytest forces in-memory nonce, device, and evidence stores because `PYTEST_CURRENT_TEST` is set. A normal `uvicorn` process uses Firestore when the Admin SDK is ready. `scripts/set_admin_claim.py` loads `services/verifier/.env`, so `FIREBASE_AUTH_EMULATOR_HOST` sends it to the emulator. Unset that variable before setting a claim on the real project.
 - 2026-10-21: `bench/injectors/` does not exist. A5, A10, A11 and A12 are built from legitimate items. `vegetation-Uganda.jpg` is forced to before-like in `bench/data/overrides.csv`.
@@ -128,7 +123,7 @@ Model id in both env files: `gemini-3.8-flash`. Prompt version `c1-v1` in `servi
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | C0, C1, and C2 verifiers, the cost-gated runner, and the C0 dev metrics. C1 and C2 generation refused by the cap. | 2ad7a88 |
+| 2026-10-21 | Grok 4.7 | Set the run cap to 5 and recorded that the loaded Gemini key is still on the free-tier daily quota. C1 pilot not started. | pending |
 | 2026-10-21 | Grok 4.7 | Noted that A8 and A9 have one dev item and no test item, which is expected. | f0b37d4 |
 | 2026-10-20 | Grok 4.7 | Firebase CLI installed with Homebrew after global npm hit EACCES. Guide step 6 updated. | cbdb97f |
 | 2026-10-20 | Grok 4.7 | Evidence files decided as Supabase Storage. Added `docs/guides/SUPABASE_STORAGE.md` and `docs/decisions.md`. Firebase guide no longer asks for Blaze. | 17bc4b6 |
