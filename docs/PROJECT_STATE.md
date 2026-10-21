@@ -1,19 +1,12 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-21 02:55 | by: Grok 4.7 | commit: see session log
+Last updated (UTC): 2026-10-21 02:53 | by: Grok 4.7 | commit: see session log
 
 ## 1. Next step (read this first)
-C3 and C4 are implemented. The full dev split has not been started. Wait for the user to say go. Ollama is the provider in `bench/.env` (`LLM_PROVIDER=ollama`, `OLLAMA_MODEL=qwen2.5vl:3b`), so the full run is a demo and writes under `bench/results/demo/`. Do not run C3 and C4 at the same time: one local model. When the user says go, start C3 in the background, and start C4 only after C3 has printed 80 `done` or `skip` lines.
+The user said go on 2026-10-21. The full dev demo is running in the background: C3 first, then C4 only if C3 exits 0. Provider is `LLM_PROVIDER=ollama`, model `qwen2.5vl:3b`. Do not start a second bench run. Do not pass `--split test`.
 
-Measured on the first 3 dev rows (`a1-0001`, `a1-0002`, `a1-0003`), sequential, 2026-10-21: C3 wall 56.4 s, 47.2 s, 77.7 s (mean 60.4 s). C4 wall 37.9 s, 43.2 s, 51.7 s (mean 44.3 s). Dev has 68 rows with photos and 12 missing-file skips. C3 full dev split at ~60s/item ≈ 68 minutes total; C4 ≈ 50 minutes total. The skips add almost no time.
+C3 log: `bench/results/C3-dev.log`. JSONL: `bench/results/demo/C3-dev-ollama.jsonl`. Check with `tail -f bench/results/C3-dev.log` and `grep -Ec '^(done|skip) ' bench/results/C3-dev.log` against 80. The first three rows were cache hits at 0.0 s. About 65 items still call the model, near 60 s each, so C3 has about an hour left. C4 then writes `bench/results/C4-dev.log` and `bench/results/demo/C4-dev-ollama.jsonl`, about 50 minutes. Both files are demo output, not paper results.
 
-```
-cd /Users/akshat12/Documents/SIH_2025
-services/verifier/.venv/bin/python -m bench.run --config C3 --split dev --runs 1 > bench/results/C3-dev.log 2>&1
-```
-
-Progress: `tail -f bench/results/C3-dev.log` and `grep -Ec '^(done|skip) ' bench/results/C3-dev.log` against 80. The JSONL is `bench/results/demo/C3-dev-ollama.jsonl`. Then the same command with `--config C4` and `bench/results/C4-dev.log`. Do not pass `--split test`. `ollama serve` must already be running.
-
-Prompts `c3_*_v1` and `c4_*_v1` are frozen. The 3-item probe returned valid JSON, and the prompts were not edited after that output.
+When both logs have 80 `done` or `skip` lines, run `services/verifier/.venv/bin/python -m bench.metrics --input bench/results/demo/C3-dev-ollama.jsonl` and the same for C4. Paper tables stay on `bench/results/` unless `--include-demo` is passed. Do not tune prompts from this run. Prompts `c3_*_v1` and `c4_*_v1` stay frozen.
 
 Demo run, verified 2026-10-21 with `python -m bench.metrics --input bench/results/demo/C1-dev-ollama.jsonl`: 68 completed, 12 skipped, every item `pass`/`approve`, so ASR 1.000, FRR 0.000, recall 0.000, median latency 13.5 s per uncached call, $0. The 3B model does not detect any attack class. This file is demo output, not a paper result. A larger local model (`qwen2.5vl:7b`, about 6 GB) did not fit: 3.2 GiB disk free after the 3B pull.
 
@@ -54,7 +47,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | 2b Benchmark full | not started | | |
 | 3 Evidence service and cache | done | 0fea73e | Nonce, device, evidence, and admin file routes. Cache tested: a second analysis of the same evidence makes no model call. Live Supabase test is skipped unless `SUPABASE_LIVE_TEST=1`. |
 | 4a Verifiers C0-C2 and runner | in progress (demo done) | 4326bb4 | C0 dev re-run: 68 completed. C1 ran on dev with local `qwen2.5vl:3b` (demo, `bench/results/demo/`). Gemini C1 and C2 paper runs still need a billed key. No test split. |
-| 4b Verifiers C3-C4 and metrics | in progress | 8aa346b | C3, C4, and +A are tested. Three-item demo probe is in `bench/results/demo/`. Full dev run is waiting for the user. Paper tables print from real files only. No test split. |
+| 4b Verifiers C3-C4 and metrics | in progress | 8aa346b | C3, C4, and +A are tested. Full dev demo started 2026-10-21: C3 log `bench/results/C3-dev.log`, then C4. Output is under `bench/results/demo/`. No test split. |
 | 5a Mobile shell | not started | | Screen map is `docs/design/SCREENS.md`. |
 | 5b Attestation and capture | not started | | |
 | 5c Mobile status and polish | not started | | |
@@ -123,7 +116,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 - [x] Firebase CLI is logged in. `firebase projects:list` included `sundarban-a64ea` on 2026-10-20.
 - [x] 40 catalogue rows are in `bench/data/raw/sources.csv`. Raw image files are gitignored.
 - [ ] Phase 3 checks in `docs/guides/PHASE_3_PREREQUISITES.md`: set `STORAGE_BACKEND=supabase` and delete the extra `FIREBASE_PROJECT_ID` line. Not re-checked this session. `STORAGE_BACKEND` was still `disk`.
-- [ ] Say go before the full C3 dev run, then C4 after it. Do not run them together on Ollama.
+- [ ] The C3 then C4 dev demo is already running. Do not start another one. Read `bench/results/C3-dev.log`.
 - [ ] Phase 5: follow `docs/guides/PHASE_5_PREREQUISITES.md`. Choose EAS or Android Studio. Fill `apps/mobile/.env` and do not commit it.
 - [ ] Before paper runs: set `LLM_PROVIDER=gemini` in `bench/.env`.
 - [ ] Phase 4 checks: `GEMINI_RUN_COST_CAP_USD` is 5 and `GEMINI_PRICE_TIER` is `paid` in both env files. The loaded key still receives the free-tier daily quota of 20. A billed-project key is still required before the C1 pilot.
@@ -148,7 +141,8 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | C3, C4, +A switch, paper tables, Phase 5 guide. Three-item Ollama probe only. Full dev run not started. | 7e11467, 8aa346b, this state commit |
+| 2026-10-21 | Grok 4.7 | Started the full C3 dev demo in the background, with C4 chained after it. | this state commit |
+| 2026-10-21 | Grok 4.7 | C3, C4, +A switch, paper tables, Phase 5 guide. Three-item Ollama probe only. | 7e11467, 8aa346b, 5e24d95 |
 | 2026-10-21 | Claude Opus | Local Ollama provider in the LLM wrapper (demo only), C1 dev demo run, C0 dev re-run (68 completed), decision recorded. | 43b0324, 4326bb4, e1b8985 |
 | 2026-10-21 | Grok 4.7 | Set the run cap to 5 and recorded that the loaded Gemini key is still on the free-tier daily quota. C1 pilot not started. | 972a03b |
 | 2026-10-21 | Grok 4.7 | Noted that A8 and A9 have one dev item and no test item, which is expected. | f0b37d4 |
