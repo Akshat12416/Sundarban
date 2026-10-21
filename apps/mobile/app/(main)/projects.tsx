@@ -1,5 +1,5 @@
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { ScrollView, Text } from "react-native";
 
 import { ProjectCard, Screen, TopBar } from "../../src/components/ui";
@@ -11,9 +11,11 @@ export default function ProjectsScreen() {
   const data = useData();
   const [projects, setProjects] = useState<Project[]>([]);
 
-  useEffect(() => {
-    void data.listProjects().then(setProjects);
-  }, [data]);
+  useFocusEffect(
+    useCallback(() => {
+      void data.listProjects().then(setProjects);
+    }, [data]),
+  );
 
   return (
     <Screen>

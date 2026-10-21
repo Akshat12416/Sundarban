@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { Linking, Pressable, ScrollView, Text, View } from "react-native";
 
 import { Screen, TopBar } from "../../src/components/ui";
@@ -11,10 +12,12 @@ export default function HistoryScreen() {
   const [rows, setRows] = useState<CreditRow[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
 
-  useEffect(() => {
-    void data.listCredits().then(setRows);
-    void data.listProjects().then(setProjects);
-  }, [data]);
+  useFocusEffect(
+    useCallback(() => {
+      void data.listCredits().then(setRows);
+      void data.listProjects().then(setProjects);
+    }, [data]),
+  );
 
   const credited = rows.reduce((sum, row) => sum + Number(row.credits), 0);
   const pending = projects.filter((item) => item.status === "approved").length;

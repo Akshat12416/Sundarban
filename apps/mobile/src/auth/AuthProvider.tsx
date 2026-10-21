@@ -10,6 +10,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { firebaseConfigured, getFirebaseAuth } from "../firebase";
 
 type Session = {
+  uid: string;
   email: string;
   sample: boolean;
 };
@@ -67,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     return onAuthStateChanged(auth, (user: User | null) => {
-      setSession(user?.email ? { email: user.email, sample: false } : null);
+      setSession(user ? { uid: user.uid, email: user.email ?? "", sample: false } : null);
       setReady(true);
     });
   }, []);
@@ -92,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await createUserWithEmailAndPassword(auth, requireEmail(email), password);
       },
       useSample() {
-        setSession({ email: "sample@sundarban.local", sample: true });
+        setSession({ uid: "sample", email: "sample@sundarban.local", sample: true });
         setReady(true);
       },
       async signOut() {

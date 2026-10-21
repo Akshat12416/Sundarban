@@ -1,5 +1,5 @@
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { useSession } from "../../src/auth/AuthProvider";
@@ -15,10 +15,12 @@ export default function ProfileScreen() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [tab, setTab] = useState<"projects" | "drafts">("projects");
 
-  useEffect(() => {
-    void data.getProfile().then(setProfile);
-    void data.listProjects().then(setProjects);
-  }, [data]);
+  useFocusEffect(
+    useCallback(() => {
+      void data.getProfile().then(setProfile);
+      void data.listProjects().then(setProjects);
+    }, [data]),
+  );
 
   const visible = tab === "drafts" ? projects.filter((item) => item.status === "draft") : projects;
 

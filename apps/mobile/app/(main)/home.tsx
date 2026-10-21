@@ -1,5 +1,5 @@
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { apiBase, fetchHealth } from "../../src/api/client";
@@ -17,16 +17,19 @@ export default function HomeScreen() {
   const [health, setHealth] = useState("Verifier not configured");
   const [notices, setNotices] = useState(false);
 
-  useEffect(() => {
-    void data.listProjects().then(setProjects);
-    const base = apiBase();
-    if (!base) {
-      return;
-    }
-    void fetchHealth()
-      .then((body) => setHealth(body ? `Verifier ${body.status}` : "Verifier not configured"))
-      .catch(() => setHealth("Verifier unreachable"));
-  }, [data]);
+  useFocusEffect(
+    useCallback(() => {
+      void data.listProjects().then(setProjects);
+      const base = apiBase();
+      if (!base) {
+        setHealth("Verifier not configured");
+        return;
+      }
+      void fetchHealth()
+        .then((body) => setHealth(body ? `Verifier ${body.status}` : "Verifier not configured"))
+        .catch(() => setHealth("Verifier unreachable"));
+    }, [data]),
+  );
 
   const visible = tab === "credits" ? projects.filter((item) => item.status === "credited") : projects;
   const total = projects.filter((item) => item.status === "credited").length * 50;
@@ -58,6 +61,9 @@ export default function HomeScreen() {
         <Tab label="Credits" selected={tab === "credits"} onPress={() => setTab("credits")} />
       </View>
       <ScrollView>
+        {visible.length === 0 ? (
+          <Text style={{ fontFamily: "Inter", color: colors.muted }}>No projects yet. Use + New to start one.</Text>
+        ) : null}
         {visible.map((item) => (
           <ProjectCard
             key={item.id}
