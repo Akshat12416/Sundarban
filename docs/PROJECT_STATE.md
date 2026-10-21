@@ -1,8 +1,8 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-21 05:59 | by: Grok 4.7 | commit: see session log
+Last updated (UTC): 2026-10-21 06:12 | by: Grok 4.7 | commit: see session log
 
 ## 1. Next step (read this first)
-Work on `main`. Phase 7b is in. The public page is http://127.0.0.1:5173/verify. Issuance steps are in `docs/DEMO.md`. Before Phase 8, follow `docs/guides/PHASE_8_PREREQUISITES.md` yourself: A13 screen recaptures, A14 mock-location captures, the experiment log, frozen model and prompts, and a cost budget. Do not start a paper run, and do not pass `--split test`.
+Work on `main`. For the talk, read `docs/PRESENTATION.md`. Figures and tables are listed in `paper/ASSETS.md`. C3 and C4 charts are local demos, not paper results. Before Phase 8, follow `docs/guides/PHASE_8_PREREQUISITES.md`. Do not start a paper run, and do not pass `--split test`.
 
 The C3 and C4 dev demos both finished on 2026-10-21. Logs end with `wrote` for `bench/results/demo/C3-dev-ollama.jsonl` and `bench/results/demo/C4-dev-ollama.jsonl`. Metrics from `python -m bench.metrics` on those files: C3 completed 68, skipped 12, ASR 0.288, FRR 0.667, F1 0.785. C4 completed 68, skipped 12, ASR 0.169, FRR 0.556, F1 0.867. Both are `ollama/qwen2.5vl:3b` demo output. Do not put them in a paper table. Do not start another bench run. Do not pass `--split test`.
 
@@ -140,6 +140,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
+| 2026-10-21 | Grok 4.7 | Paper tables, charts, diagrams, and the presentation guide. Numbers copied from bench/results. | see following commit |
 | 2026-10-21 | Grok 4.7 | Seal, confirm, reconcile, public verify page, demo script, Phase 8 guide. | a63013f |
 | 2026-10-21 | Grok 4.7 | Admin review queue, project page, and phone submit hand-off. | 4a92488 |
 | 2026-10-21 | Grok 4.7 | C3 and C4 dev demos finished. Metrics recorded from the demo JSONL files. Not paper results. | this state commit |

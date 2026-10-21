@@ -1,0 +1,27 @@
+% Cells are copied from bench.metrics.render_tables. Do not edit the numbers.
+
+\begin{tabular}{lllllll}
+\hline
+Configuration & ASR (\%) & FRR (\%) & F1 & Agreement (\%) & Calls / project & Latency (s) \\
+C0 rules only & 32.2 $\pm$ 0.0 & 0.0 $\pm$ 0.0 & 0.808 $\pm$ 0.000 & 100.0 $\pm$ n/a & 0.000 $\pm$ 0.000 & 0.000 $\pm$ 0.000 \\
+C1 single prompt & 0.0 $\pm$ n/a & n/a & 1.000 $\pm$ n/a & 100.0 $\pm$ n/a & n/a & 0.000 $\pm$ n/a \\
+C2 consensus (k=3) & no result file & no result file & no result file & no result file & no result file & no result file \\
+C3 specialist agents & no result file & no result file & no result file & no result file & no result file & no result file \\
+C4 specialist + tools & no result file & no result file & no result file & no result file & no result file & no result file \\
+C1 + A & no result file & no result file & no result file & no result file & no result file & no result file \\
+C2 + A & no result file & no result file & no result file & no result file & no result file & no result file \\
+C4 + A & no result file & no result file & no result file & no result file & no result file & no result file \\
+\hline
+\end{tabular}
+
+\begin{tabular}{lllllll}
+\hline
+Class & C0 & C1 & C2 & C3 & C4 & C4 + A \\
+A1–A4 provenance & 25.0 $\pm$ 0.0 & 0.0 $\pm$ n/a & no result file & no result file & no result file & no result file \\
+A5–A8 consistency and semantics & 57.1 $\pm$ 0.0 & n/a & no result file & no result file & no result file & no result file \\
+A9 document alteration & 0.0 $\pm$ 0.0 & n/a & no result file & no result file & no result file & no result file \\
+A10–A11 prompt injection & 50.0 $\pm$ 0.0 & n/a & no result file & no result file & no result file & no result file \\
+A12 duplicate parcel & 0.0 $\pm$ 0.0 & n/a & no result file & no result file & no result file & no result file \\
+A13–A14 survives attestation & n/a & n/a & no result file & no result file & no result file & no result file \\
+\hline
+\end{tabular}

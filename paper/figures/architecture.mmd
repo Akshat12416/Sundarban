@@ -1,0 +1,16 @@
+flowchart LR
+  phone["Phone app<br/>apps/mobile"]
+  admin["Admin web<br/>apps/admin-web"]
+  verifier["Verifier<br/>services/verifier"]
+  auth["Firebase Auth and Firestore"]
+  files["Private file store<br/>disk or Supabase"]
+  chain["CarbonRegistry<br/>Sepolia"]
+  bench["Benchmark runner<br/>bench/"]
+
+  phone -->|"signed photo and form"| verifier
+  admin -->|"decision, seal, confirm"| verifier
+  admin -->|"registerProject from MetaMask"| chain
+  verifier -->|"hashes and status"| auth
+  verifier -->|"photo bytes"| files
+  verifier -->|"read the receipt"| chain
+  bench -->|"same verifiers, writes JSONL"| verifier

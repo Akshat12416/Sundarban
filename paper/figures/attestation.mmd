@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant Phone
+  participant Verifier
+  participant Store as Private file store
+
+  Phone->>Verifier: POST /v1/nonce
+  Verifier-->>Phone: one-time nonce
+  Note over Phone: Camera only. h = SHA-256 of the photo.<br/>m = canonical metadata. Sign h || SHA-256(m).
+  Phone->>Verifier: POST /v1/projects/{id}/evidence
+  Verifier->>Verifier: Check signature, nonce, and parcel radius
+  Verifier->>Store: Save the original bytes
+  Verifier->>Verifier: leaf = SHA-256 of 0x00, h, hash of m, signature
+  Verifier-->>Phone: accepted, or the rejection reason
+  Note over Verifier: Seal later builds the Merkle root from the leaves.<br/>Only that root goes on the chain.
