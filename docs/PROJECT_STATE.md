@@ -140,7 +140,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | Paper tables, charts, diagrams, and the presentation guide. Numbers copied from bench/results. | see following commit |
+| 2026-10-21 | Grok 4.7 | Paper tables, charts, diagrams, and the presentation guide. Numbers copied from bench/results. | 84077e0 |
 | 2026-10-21 | Grok 4.7 | Seal, confirm, reconcile, public verify page, demo script, Phase 8 guide. | a63013f |
 | 2026-10-21 | Grok 4.7 | Admin review queue, project page, and phone submit hand-off. | 4a92488 |
 | 2026-10-21 | Grok 4.7 | C3 and C4 dev demos finished. Metrics recorded from the demo JSONL files. Not paper results. | this state commit |
