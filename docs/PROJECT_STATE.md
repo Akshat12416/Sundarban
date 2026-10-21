@@ -1,20 +1,12 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-21 09:40 | by: Grok 4.7 | commit: see session log
+Last updated (UTC): 2026-10-21 04:31 | by: Grok 4.7 | commit: see session log
 
 ## 1. Next step (read this first)
-The Android keystore module and the EAS development profile are in `apps/mobile`. Do not run a local Android build. The user runs the cloud build from `apps/mobile` after `eas login`:
+Phase 6 is done. The next code task is Phase 7a, the admin review panel. Read `docs/PLAN-SPEC.md` for the admin screens and status rules before editing `apps/admin-web`. The contract address, network, and deployment transaction are in `packages/contract-abi/deployment.json`. Do not copy `legacy/` wholesale. The only admin files a later phase may copy, and then edit, are `legacy/admin-portal/src/components/Navbar.jsx`, `legacy/admin-portal/src/components/Footer.jsx`, and the card markup in `ApprovedProjects.jsx` and `RejectedProjects.jsx`.
 
-`npx eas-cli@latest build --profile development --platform android`
-
-That is the first time to run it. It asks to create or link an Expo project if this app has none. A small Android development build is typically 15 to 30 minutes, longer when the free queue is busy. The installable APK link appears on the Expo build page when the status is finished. Install that APK, then `cd apps/mobile && npx expo start --dev-client`. Expo Go cannot create the key.
-
-Before the build, create the Google OAuth clients described in the reply for this session, and put the web client id in `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`. The Android client needs the SHA-1 from `npx eas-cli credentials -p android` after the first build, so Google sign-in may need a second build.
-
-Device checks after install: one captured photo accepted, the same nonce rejected on replay, and a modified image rejected. Those three are not done yet.
+The Android development build is still waiting on the user. Do not start it unless they ask. From `apps/mobile`, after `eas login`: `npx eas-cli@latest build --profile development --platform android`. Expo Go cannot create the key. Device checks after install (accepted photo, replayed nonce, modified image) are not done.
 
 Do not start a second bench run. Do not pass `--split test`.
-
-Do not copy `legacy/` into the new apps. The only admin files a later phase may copy, and then edit, are `legacy/admin-portal/src/components/Navbar.jsx`, `legacy/admin-portal/src/components/Footer.jsx`, and the card markup in `ApprovedProjects.jsx` and `RejectedProjects.jsx`.
 
 ## 2. Project in brief
 - What: citizen-submitted afforestation evidence verified by LLM agents and tools, anchored on-chain, with capture-time attestation.
@@ -37,6 +29,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | 2026-10-21 | `packages/cv-crypto-ts` is the TypeScript crypto package. Python lives in `services/verifier/cv_crypto`. | Plan section 5.1. Both passed `packages/test-vectors/vectors.json` on 2026-10-21. |
 | 2026-10-21 | `GET /v1/files/{evidenceId}` is admin-only and returns a short-lived signed URL. | Plan section 5.3. Verified by `tests/test_evidence_api.py`: a contributor token gets 403. |
 | 2026-10-20 | Legitimate benchmark items are real photographs. Evaluation is stateless and includes `registry_context`. The catalogue has no `pair_id`, so this generator splits by real-photo filename. | Plan section 5.9 still says `pair_id`. The deviation is in `docs/CHANGELOG-PAPER.md`. |
+| 2026-10-21 | `ISSUER_ROLE` on the Sepolia `CarbonRegistry` is the deployer, because `ISSUER_ADDRESS` was empty. | `contracts/.env` has only the deployer key. Recorded in `docs/decisions.md`. |
 
 ## 4. Phase status
 | Phase | Status (not started / in progress / done) | Last commit | Notes |
@@ -51,7 +44,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | 5a Mobile shell | in progress | 197d4cc | Expo SDK 58 shell in `apps/mobile`. Web checked 2026-10-21 at localhost:8081. Phone Expo Go not confirmed. |
 | 5b Attestation and capture | in progress | c6a4892 | EAS development profile and `cv-keystore` are written. Cloud build not started. Phone checks of accept, replay, and modified image are not done. |
 | 5c Mobile status and polish | not started | | |
-| 6 Contracts | not started | | |
+| 6 Contracts | done | see session log | Sepolia `CarbonRegistry` at `0xFC1F37fB7449619917Dd78431bB827A18E11C480`. Issuer role checked on that address. Gas in `bench/results/gas.json` is from a separate test deployment. |
 | 7a Admin review | not started | | |
 | 7b Issue flow and verify page | not started | | |
 | 8 Experiments | not started | | |
@@ -71,7 +64,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | Firebase emulators | repo root | `JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH="$JAVA_HOME/bin:$PATH" firebase emulators:start --only auth,firestore` | | Verified 2026-10-20 19:16 UTC: "All emulators ready". Then stopped. |
 | Verifier | `services/verifier` | `cd services/verifier && .venv/bin/uvicorn app.main:app --reload` | `cd services/verifier && .venv/bin/pytest` | Verified 2026-10-21: 19 passed, 1 skipped (`SUPABASE_LIVE_TEST` unset). `GET /health` still returns disk. |
 | Admin web | `apps/admin-web` | `cd apps/admin-web && npm run dev` | `cd apps/admin-web && npm run build` | Verified 2026-10-20 19:16 UTC: dev server HTTP 200; build exit 0. No test script. Dev server then stopped. |
-| Contracts | `contracts` | | `cd contracts && .venv/bin/pytest` | Verified 2026-10-20: Sepolia chain id 11155111 and OpenZeppelin v5 import check passed. |
+| Contracts | `contracts` | `cd contracts && .venv/bin/python scripts/compile.py` then `.venv/bin/python -m scripts.deploy` | `cd contracts && .venv/bin/pytest tests/test_sepolia.py` | Verified 2026-10-21: `pytest tests/test_registry.py` passed on Sepolia (1 passed). Deployed `0xFC1F37fB7449619917Dd78431bB827A18E11C480`. `name` Carbon Credit, symbol CC, 18 decimals. `ISSUER_ROLE` and `DEFAULT_ADMIN_ROLE` are true for `0xe7b5680c7eA21F9fFa2989D7E459608f22b716Fa`. Etherscan skipped: no `ETHERSCAN_API_KEY`. |
 | Test vectors | `packages/test-vectors` | `cd packages/test-vectors && .venv/bin/python generate.py` | `cd packages/test-vectors && .venv/bin/pytest` | Python reference unchanged. Service and TypeScript libraries matched `vectors.json` on 2026-10-21. |
 | TypeScript crypto | `packages/cv-crypto-ts` | | `cd packages/cv-crypto-ts && node --experimental-strip-types --test src/index.test.ts` | Verified 2026-10-21: 5 passed, including Merkle proofs. Node v22.16.0. |
 | Benchmark generator | `bench/data/manifest.jsonl` | `python -m bench.generate --seed 42` | `python -m bench.validate` | Verified 2026-10-20: validate pass. |
@@ -123,6 +116,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 - [ ] Phase 4 checks: `GEMINI_RUN_COST_CAP_USD` is 5 and `GEMINI_PRICE_TIER` is `paid` in both env files. The loaded key still receives the free-tier daily quota of 20. A billed-project key is still required before the C1 pilot.
 
 ## 10. Gotchas and failed approaches (newest first)
+- 2026-10-21: `docs/guides/PHASE_6_PREREQUISITES.md` is not in the repo. solc 0.8.20 with `--base-path` and an absolute OpenZeppelin remapping reported the imports missing. Compilation uses a relative remapping from `contracts/`. Slither 0.11.6 reported 0 findings. Its install downgraded `web3` to 7.16.0; `web3` 8.0.0 was installed again afterwards. Re-running Slither needs `web3` 7.
 - 2026-10-21: Signed-in accounts were all reading one shared sample list. Sample data stays on the sample button. A Firebase account now keeps its own projects and profile on the phone.
 - 2026-10-21: The 3B model often returns `pass` from the aggregator while a specialist returned `flag`. aggregate-v1 keeps the more severe decision, so the report still rejects. The prompts were not rewritten after seeing that. C4 also keeps the C0 tool decision, which flagged `exact_duplicate` on all three probe rows.
 - 2026-10-21: With `LLM_PROVIDER=ollama`, the first runner change also sent C0 output to `bench/results/demo/`. Fixed in 4326bb4: C0 ignores the provider. `qwen2.5vl:3b` approved all 68 dev items; the prompt was not tuned. Photos are shrunk to 896 px for the local model only.
@@ -143,6 +137,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
+| 2026-10-21 | Grok 4.7 | CarbonRegistry on Sepolia, Python compile and deploy, gas from test receipts, Slither 0 findings. | see following commit |
 | 2026-10-21 | Grok 4.7 | Android keystore module, attested capture, EAS development profile. Cloud build not started. | c6a4892 |
 | 2026-10-21 | Grok 4.7 | C3, C4, +A switch, paper tables, Phase 5 guide. Three-item Ollama probe only. | 7e11467, 8aa346b, 5e24d95 |
 | 2026-10-21 | Claude Opus | Local Ollama provider in the LLM wrapper (demo only), C1 dev demo run, C0 dev re-run (68 completed), decision recorded. | 43b0324, 4326bb4, e1b8985 |

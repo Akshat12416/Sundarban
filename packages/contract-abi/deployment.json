@@ -1,0 +1,9 @@
+{
+  "address": "0xFC1F37fB7449619917Dd78431bB827A18E11C480",
+  "network": "sepolia",
+  "chainId": 11155111,
+  "deploymentTransactionHash": "0x6d089ca8982a1f687ee078367862767bc3ea98ae2b961c596f04a49a15da5e5e",
+  "issuerGrantTransactionHash": "0x7cb28593b9a9dc4051c294424cf686e3315ed37fc37d29a3c3bda7615982c53e",
+  "admin": "0xe7b5680c7eA21F9fFa2989D7E459608f22b716Fa",
+  "issuer": "0xe7b5680c7eA21F9fFa2989D7E459608f22b716Fa"
+}

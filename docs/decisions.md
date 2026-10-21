@@ -69,3 +69,7 @@ aggregate-v1, frozen before the dev probe: the report decision is the more sever
 +A is `--attest` on C1–C4. It is not a C0 mode. The manifest field `attestation` stands in for Phase 5. `unattested` and `invalid` (and any other value) become a flag with no model call. `valid` continues into the verifier. A1–A4 are `unattested`. Other generated rows are `valid`.
 
 `--limit` requires `--output`, so a three-item probe cannot replace a split file. Paper tables read `bench/results/{config}-{split}.jsonl` and `{config}A-{split}.jsonl` only. Demo files are excluded unless `--include-demo` is passed.
+
+## 2026-10-21 — CarbonRegistry issuer is the deployer
+
+`contracts/.env` has `DEPLOYER_PRIVATE_KEY` and no `ISSUER_ADDRESS`. `deploy.py` grants `ISSUER_ROLE` to `ISSUER_ADDRESS` when that variable is set, and to the deployer otherwise. The Sepolia deployment did the latter. There is no Hardhat or Foundry project. Compilation uses `py-solc-x` with a relative OpenZeppelin remapping, because `--base-path` plus an absolute remapping made solc 0.8.20 miss the imports. `docs/guides/PHASE_6_PREREQUISITES.md` is not in the repo. Etherscan verification is skipped when `ETHERSCAN_API_KEY` is empty.

@@ -1,0 +1,29 @@
+{
+  "network": "sepolia",
+  "source": "contracts/tests/test_registry.py",
+  "contract": "0x2a28C1C86704F7f7Ae1724564f3E70417C5ee330",
+  "register": {
+    "runs": [
+      1252352,
+      1056512,
+      1056512,
+      1056512,
+      1056512
+    ],
+    "mean": 1095680.0,
+    "min": 1056512,
+    "max": 1252352
+  },
+  "retire": {
+    "runs": [
+      47721,
+      47721,
+      47721,
+      47721,
+      47721
+    ],
+    "mean": 47721.0,
+    "min": 47721,
+    "max": 47721
+  }
+}
