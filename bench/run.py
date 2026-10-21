@@ -19,9 +19,8 @@ if str(_VERIFIER) not in sys.path:
 
 from app.cache import SqliteCache
 from app.llm import GeminiGenerator, LlmError, ModelWrapper, build_generator, provider_settings
-from app.prompts import load_prompt
 from app.verifiers import build_verifier
-from app.verifiers.c1 import parts_for
+from app.verifiers.specialists import parallel_from_env, part_lists
 from bench.catalog import repo_root
 from bench.cost import (
     CALLS,
@@ -34,7 +33,7 @@ from bench.cost import (
 )
 from bench.items import build_submission, load_manifest
 
-CONFIGS = ("C0", "C1", "C2")
+CONFIGS = ("C0", "C1", "C2", "C3", "C4")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -47,6 +46,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--manifest", type=Path, default=None)
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--ids", default="", help="Comma-separated submission ids to run.")
+    parser.add_argument("--attest", action="store_true", help="Reject unattested or invalid evidence before the model.")
+    parser.add_argument("--limit", type=int, default=0, help="Run only the first N rows. Requires --output.")
     return parser
 
 
@@ -56,6 +57,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.runs < 1:
         print("runs must be at least 1")
         return 2
+    if args.attest and args.config == "C0":
+        print("+A applies to C1, C2, C3, and C4")
+        return 2
+    if args.limit and args.output is None:
+        print("--limit needs --output so a short run does not replace the split file")
+        return 2
     root = repo_root()
     manifest = args.manifest or root / "bench" / "data" / "manifest.jsonl"
     rows = [row for row in load_manifest(manifest) if row.get("split") == args.split]
@@ -63,6 +70,8 @@ def main(argv: list[str] | None = None) -> int:
         wanted = [item.strip() for item in args.ids.split(",") if item.strip()]
         by_id = {row["id"]: row for row in rows}
         rows = [by_id[item] for item in wanted if item in by_id]
+    if args.limit:
+        rows = rows[: args.limit]
     by_id = {row["id"]: row for row in load_manifest(manifest)}
     ready = []
     skipped = []
@@ -75,7 +84,12 @@ def main(argv: list[str] | None = None) -> int:
     provider, model_id = provider_settings(dict(os.environ))
     if CALLS[args.config] == 0:
         provider = "gemini"
+    parallel = parallel_from_env() if args.config in {"C3", "C4"} else False
     print(f"provider {provider if CALLS[args.config] else 'none'}")
+    if args.config in {"C3", "C4"}:
+        print(f"specialists {'parallel' if parallel else 'sequential'}")
+    if args.attest:
+        print("attest on")
     if provider == "gemini":
         estimate, detail = _estimate(args.config, ready, args.runs)
     else:
@@ -99,11 +113,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.output:
         output = args.output
     elif provider == "gemini":
-        output = root / "bench" / "results" / f"{args.config}-{args.split}.jsonl"
+        output = root / "bench" / "results" / f"{_file_config(args)}-{args.split}.jsonl"
     else:
-        output = root / "bench" / "results" / "demo" / f"{args.config}-{args.split}-{provider}.jsonl"
+        output = root / "bench" / "results" / "demo" / f"{_file_config(args)}-{args.split}-{provider}.jsonl"
     output.parent.mkdir(parents=True, exist_ok=True)
-    _write(output, args, ready, skipped, provider, model_id)
+    _write(output, args, ready, skipped, provider, model_id, parallel)
     print(f"wrote {output}")
     return 0
 
@@ -136,14 +150,11 @@ def _estimate(config: str, ready: list[tuple[dict, object]], runs: int) -> tuple
 def _count_input_tokens(model: str, config: str, ready: list[tuple[dict, object]]) -> int:
     key = os.environ.get("GEMINI_API_KEY", "")
     generator = GeminiGenerator(key)
-    version, prompt = load_prompt("c1_v1")
-    del version
     total = 0
-    votes = ("c1",) if config == "C1" else ("c2-1", "c2-2", "c2-3")
     try:
         for _row, submission in ready:
-            for agent_id in votes:
-                total += generator.count_tokens(model, parts_for(prompt, agent_id, submission))  # type: ignore[arg-type]
+            for parts in part_lists(config, submission):  # type: ignore[arg-type]
+                total += generator.count_tokens(model, parts)
     finally:
         generator.close()
     return total
@@ -167,12 +178,13 @@ def _write(
     skipped: list,
     provider: str,
     model_id: str,
+    parallel: bool,
 ) -> None:
     wrapper = None
     if args.config != "C0":
         cache = SqliteCache(output.parent / "analysis-cache.sqlite")
         wrapper = ModelWrapper(build_generator(provider, dict(os.environ)), cache, model_id)
-    verifier = build_verifier(args.config, wrapper)
+    verifier = build_verifier(args.config, wrapper, attest=args.attest, parallel=parallel)
     extra = {} if provider == "gemini" else {"provider": provider, "model_id": model_id}
     with output.open("w", encoding="utf-8") as handle:
         for run in range(1, args.runs + 1):
@@ -182,6 +194,7 @@ def _write(
             for index, (row, submission) in enumerate(ready, start=1):
                 if args.config != "C0" and provider == "gemini" and index > 1:
                     time.sleep(15)
+                started = time.perf_counter()
                 try:
                     report = verifier.verify(submission)
                 except LlmError as exc:
@@ -190,7 +203,10 @@ def _write(
                     handle.write(json.dumps(line, sort_keys=True) + "\n")
                     handle.flush()
                     continue
-                print(f"done {row['id']} {report.recommendation}", flush=True)
+                wall_s = time.perf_counter() - started
+                print(f"done {row['id']} {report.recommendation} wall_s {wall_s:.1f}", flush=True)
+                if args.limit:
+                    print(json.dumps(report.model_dump(), sort_keys=True, indent=2), flush=True)
                 line = _line(args, run, row, report) | extra
                 handle.write(json.dumps(line, sort_keys=True) + "\n")
                 handle.flush()
@@ -201,9 +217,11 @@ def _write(
 def _line(args: argparse.Namespace, run: int, row: dict, report) -> dict:
     return {
         "attack_class": row.get("attack_class"),
+        "attest": bool(args.attest),
         "cache_hit": report.cache_hit,
-        "config": args.config,
-        "decision": report.agent_outputs[0].decision if args.config != "C2" else _report_decision(report),
+        "calls": _model_calls(report),
+        "config": _result_config(args),
+        "decision": report.agent_outputs[0].decision if args.config not in {"C2", "C3", "C4"} else _outcome_decision(report),
         "label": row.get("label"),
         "latency_ms": report.latency_ms,
         "recommendation": report.recommendation,
@@ -217,21 +235,36 @@ def _line(args: argparse.Namespace, run: int, row: dict, report) -> dict:
     }
 
 
-def _report_decision(report) -> str:
-    counts: dict[str, int] = {}
-    for item in report.agent_outputs:
-        counts[item.decision] = counts.get(item.decision, 0) + 1
-    for name, count in counts.items():
-        if count > len(report.agent_outputs) / 2:
-            return name
+def _outcome_decision(report) -> str:
+    if report.recommendation == "approve":
+        return "pass"
+    if report.recommendation == "reject":
+        return "flag"
     return "review"
+
+
+def _model_calls(report) -> int:
+    if report.agent_outputs and report.agent_outputs[0].agent == "c0":
+        return 0
+    skipped = {"attestation", "c4-tools"}
+    return sum(item.agent not in skipped for item in report.agent_outputs)
+
+
+def _file_config(args: argparse.Namespace) -> str:
+    return args.config + ("A" if args.attest else "")
+
+
+def _result_config(args: argparse.Namespace) -> str:
+    return args.config + ("+A" if args.attest else "")
 
 
 def _skipped_line(args: argparse.Namespace, run: int, row: dict, reason: str) -> dict:
     return {
         "attack_class": row.get("attack_class"),
+        "attest": bool(args.attest),
         "cache_hit": False,
-        "config": args.config,
+        "calls": 0,
+        "config": _result_config(args),
         "decision": None,
         "label": row.get("label"),
         "latency_ms": 0,

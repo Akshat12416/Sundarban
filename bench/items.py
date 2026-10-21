@@ -93,6 +93,7 @@ def build_submission(row: dict, by_id: dict[str, dict], root: Path | None = None
             region=row.get("region"),
             document_text=row.get("document_text"),
             form_fields=form,
+            attestation=row.get("attestation") or "valid",
         ),
         None,
     )

@@ -15,7 +15,7 @@ if str(_VERIFIER) not in sys.path:
 from app.llm import MAX_OUTPUT_TOKENS
 
 _PRICES = Path(__file__).resolve().parent / "prices.json"
-CALLS = {"C0": 0, "C1": 1, "C2": 3}
+CALLS = {"C0": 0, "C1": 1, "C2": 3, "C3": 5, "C4": 5}
 
 
 class CostError(RuntimeError):

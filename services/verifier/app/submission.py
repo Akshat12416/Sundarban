@@ -43,10 +43,12 @@ class Submission:
     region: str | None = None
     document_text: str | None = None
     form_fields: dict[str, str] | None = None
+    attestation: str = "valid"
 
     def evidence_sha256(self) -> str:
         payload = {
             "area_ha": self.area_ha,
+            "attestation": self.attestation,
             "document_text": self.document_text,
             "form_fields": self.form_fields or {},
             "id": self.submission_id,

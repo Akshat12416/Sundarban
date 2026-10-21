@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
@@ -44,7 +45,8 @@ class MemoryCache:
 class SqliteCache:
     def __init__(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        self._conn = sqlite3.connect(path)
+        self._lock = threading.Lock()
+        self._conn = sqlite3.connect(path, check_same_thread=False)
         self._conn.execute(
             "create table if not exists analysis_cache ("
             "cache_key text primary key, payload text not null)"
@@ -52,20 +54,23 @@ class SqliteCache:
         self._conn.commit()
 
     def get(self, key: str) -> CacheHit | None:
-        row = self._conn.execute(
-            "select payload from analysis_cache where cache_key = ?",
-            (key,),
-        ).fetchone()
+        with self._lock:
+            row = self._conn.execute(
+                "select payload from analysis_cache where cache_key = ?",
+                (key,),
+            ).fetchone()
         if row is None:
             return None
         return CacheHit(json.loads(row[0]))
 
     def put(self, key: str, value: Any) -> None:
-        self._conn.execute(
-            "insert or replace into analysis_cache (cache_key, payload) values (?, ?)",
-            (key, json.dumps(value, sort_keys=True, separators=(",", ":"))),
-        )
-        self._conn.commit()
+        payload = json.dumps(value, sort_keys=True, separators=(",", ":"))
+        with self._lock:
+            self._conn.execute(
+                "insert or replace into analysis_cache (cache_key, payload) values (?, ?)",
+                (key, payload),
+            )
+            self._conn.commit()
 
     def close(self) -> None:
         self._conn.close()

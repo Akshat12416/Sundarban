@@ -95,6 +95,16 @@ def _item(
     }
 
 
+# Table 1: attestation blocks A1–A4. A13 and A14 pass the attested path, so they stay valid.
+_UNATTESTED = frozenset({"A1", "A2", "A3", "A4"})
+
+
+def apply_attestation(items: list[dict]) -> None:
+    """Set the simulated attestation field. Phase 5 replaces this with a signature check."""
+    for item in items:
+        item["attestation"] = "unattested" if item.get("attack_class") in _UNATTESTED else "valid"
+
+
 def _real_names(item: dict) -> list[str]:
     return [photo["filename"] for photo in item["photos"] if photo["origin"] == "real"]
 
@@ -566,6 +576,7 @@ def build_manifest(root: Path, seed: int) -> tuple[list[dict], list[str], dict[s
 
     device_items = load_device_capture_items(root)
     items = sorted(composites + a4_items + legit + attacks + device_items, key=lambda item: item["id"])
+    apply_attestation(items)
 
     before_files = [
         path for path in files if strip_role_prefix(path.name)[0] == "before"
