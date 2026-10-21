@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import time
 from dataclasses import dataclass
@@ -21,7 +22,9 @@ THINKING_LEVEL = "low"
 
 
 class LlmError(RuntimeError):
-    pass
+    def __init__(self, message: str, status_code: int | None = None) -> None:
+        super().__init__(message)
+        self.status_code = status_code
 
 
 @dataclass(frozen=True)
@@ -95,23 +98,29 @@ class GeminiGenerator:
         return int(response.json().get("totalTokens") or 0)
 
     def _post(self, url: str, payload: dict[str, Any]) -> httpx.Response:
-        delay = 2.0
-        last_status = 0
-        for _attempt in range(7):
+        delay = 45.0
+        last_body = ""
+        for _attempt in range(5):
             try:
                 response = self._client.post(url, params={"key": self._api_key}, json=payload)
             except httpx.HTTPError as exc:
                 raise LlmError(f"gemini transport {type(exc).__name__}") from None
-            if response.status_code in {429, 503}:
-                last_status = response.status_code
-                time.sleep(delay)
-                delay = min(delay * 2, 30)
-                continue
-            if response.status_code >= 400:
-                message = _error_message(response).replace(self._api_key, "[redacted]")
-                raise LlmError(f"gemini status {response.status_code} {message}".strip())
-            return response
-        raise LlmError(f"gemini status {last_status}")
+            if response.status_code < 400:
+                return response
+            body = response.text.replace(self._api_key, "[redacted]")
+            print(f"gemini call failed status {response.status_code}\n{body}", flush=True)
+            if response.status_code != 429:
+                raise LlmError(
+                    f"gemini status {response.status_code}\n{body}",
+                    status_code=response.status_code,
+                )
+            wait = _retry_after_seconds(body)
+            if wait is not None and wait > 120:
+                raise LlmError(f"gemini status 429\n{body}", status_code=429)
+            last_body = body
+            time.sleep(delay)
+            delay = min(delay * 2, 90)
+        raise LlmError(f"gemini status 429\n{last_body}", status_code=429)
 
 
 class ModelWrapper:
@@ -178,9 +187,8 @@ class ModelWrapper:
                     temperature=0,
                     max_output_tokens=MAX_OUTPUT_TOKENS,
                 )
-            except LlmError as exc:
-                last_http = str(exc)
-                continue
+            except LlmError:
+                raise
             total_tokens += tokens
             try:
                 judgment = Judgment.model_validate_json(_strip_fence(text))
@@ -194,12 +202,19 @@ class ModelWrapper:
         raise LlmError(last_http or "model call failed")
 
 
-def _error_message(response: httpx.Response) -> str:
+def _retry_after_seconds(body: str) -> float | None:
     try:
-        message = str((response.json().get("error") or {}).get("message") or "")
-    except ValueError:
-        message = ""
-    return message[:200]
+        payload = json.loads(body)
+    except json.JSONDecodeError:
+        return None
+    for detail in ((payload.get("error") or {}).get("details") or []):
+        delay = detail.get("retryDelay") if isinstance(detail, dict) else None
+        if isinstance(delay, str) and delay.endswith("s"):
+            try:
+                return float(delay[:-1])
+            except ValueError:
+                return None
+    return None
 
 
 def _strip_fence(text: str) -> str:

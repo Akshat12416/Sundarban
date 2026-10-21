@@ -46,6 +46,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--manifest", type=Path, default=None)
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument("--ids", default="", help="Comma-separated submission ids to run.")
     return parser
 
 
@@ -58,6 +59,10 @@ def main(argv: list[str] | None = None) -> int:
     root = repo_root()
     manifest = args.manifest or root / "bench" / "data" / "manifest.jsonl"
     rows = [row for row in load_manifest(manifest) if row.get("split") == args.split]
+    if args.ids:
+        wanted = [item.strip() for item in args.ids.split(",") if item.strip()]
+        by_id = {row["id"]: row for row in rows}
+        rows = [by_id[item] for item in wanted if item in by_id]
     by_id = {row["id"]: row for row in load_manifest(manifest)}
     ready = []
     skipped = []
@@ -151,7 +156,7 @@ def _write(output: Path, args: argparse.Namespace, ready: list, skipped: list) -
                 handle.write(json.dumps(_skipped_line(args, run, row, reason), sort_keys=True) + "\n")
             for index, (row, submission) in enumerate(ready, start=1):
                 if args.config != "C0" and index > 1:
-                    time.sleep(4)
+                    time.sleep(15)
                 try:
                     report = verifier.verify(submission)
                 except LlmError as exc:
