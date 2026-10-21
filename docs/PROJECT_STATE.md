@@ -141,7 +141,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | Saved the Sepolia deployment in `contracts/DEPLOYMENT.md` and fast-forwarded `main` to `phase6-contracts`. | see following commit |
+| 2026-10-21 | Grok 4.7 | Saved the Sepolia deployment in `contracts/DEPLOYMENT.md` and fast-forwarded `main` to `phase6-contracts`. | fa485b9 |
 | 2026-10-21 | Grok 4.7 | CarbonRegistry on Sepolia, Python compile and deploy, gas from test receipts, Slither 0 findings. | 448c2de |
 | 2026-10-21 | Grok 4.7 | Android keystore module, attested capture, EAS development profile. Cloud build not started. | c6a4892 |
 | 2026-10-21 | Grok 4.7 | C3, C4, +A switch, paper tables, Phase 5 guide. Three-item Ollama probe only. | 7e11467, 8aa346b, 5e24d95 |
