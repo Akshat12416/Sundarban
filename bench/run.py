@@ -17,10 +17,10 @@ if str(_VERIFIER) not in sys.path:
     sys.path.insert(0, str(_VERIFIER))
 
 from app.cache import SqliteCache
-from app.llm import GeminiGenerator, ModelWrapper
+from app.llm import GeminiGenerator, LlmError, ModelWrapper
+from app.prompts import load_prompt
 from app.verifiers import build_verifier
 from app.verifiers.c1 import parts_for
-from app.prompts import load_prompt
 from bench.catalog import repo_root
 from bench.cost import (
     CALLS,
@@ -142,8 +142,16 @@ def _write(output: Path, args: argparse.Namespace, ready: list, skipped: list) -
             for row, reason in skipped:
                 handle.write(json.dumps(_skipped_line(args, run, row, reason), sort_keys=True) + "\n")
             for row, submission in ready:
-                report = verifier.verify(submission)
+                try:
+                    report = verifier.verify(submission)
+                except LlmError as exc:
+                    handle.write(
+                        json.dumps(_skipped_line(args, run, row, str(exc)), sort_keys=True) + "\n"
+                    )
+                    handle.flush()
+                    continue
                 handle.write(json.dumps(_line(args, run, row, report), sort_keys=True) + "\n")
+                handle.flush()
     if wrapper is not None:
         wrapper.generator.close()  # type: ignore[attr-defined]
 

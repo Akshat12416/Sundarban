@@ -158,7 +158,8 @@ class ModelWrapper:
     ) -> tuple[AgentOutput, int]:
         schema = judgment_schema()
         total_tokens = 0
-        last_error = "response was not valid JSON"
+        last_invalid = ""
+        last_http = ""
         for _attempt in range(2):
             try:
                 text, tokens = self.generator.generate(
@@ -169,18 +170,19 @@ class ModelWrapper:
                     max_output_tokens=MAX_OUTPUT_TOKENS,
                 )
             except LlmError as exc:
-                last_error = str(exc)
-                total_tokens += 0
+                last_http = str(exc)
                 continue
             total_tokens += tokens
             try:
                 judgment = Judgment.model_validate_json(_strip_fence(text))
             except (ValidationError, ValueError) as exc:
-                last_error = str(exc).splitlines()[0]
+                last_invalid = str(exc).splitlines()[0]
                 continue
             return stamp(judgment, agent_id, prompt_version), total_tokens
-        logger.info("llm_invalid agent=%s model=%s retried=true", agent_id, self.model_id)
-        return stamp(flag_judgment(last_error), agent_id, prompt_version), total_tokens
+        if last_invalid and not last_http:
+            logger.info("llm_invalid agent=%s model=%s retried=true", agent_id, self.model_id)
+            return stamp(flag_judgment(last_invalid), agent_id, prompt_version), total_tokens
+        raise LlmError(last_http or "model call failed")
 
 
 def _strip_fence(text: str) -> str:

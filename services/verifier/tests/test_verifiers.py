@@ -135,11 +135,40 @@ def test_wrapper_retries_invalid_json_once_then_uses_the_cache() -> None:
     assert fake.calls == 2
 
 
-def test_wrapper_flags_after_one_retry() -> None:
+def test_http_error_is_not_cached_as_a_flag() -> None:
+    class Fake:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def generate(self, *, model, parts, schema, temperature, max_output_tokens):
+            del model, parts, schema, temperature, max_output_tokens
+            self.calls += 1
+            raise LlmError("gemini status 429")
+
+    fake = Fake()
+    wrapper = ModelWrapper(fake, MemoryCache(), "gemini-3.8-flash")
+    with pytest.raises(LlmError, match="429"):
+        wrapper.complete(
+            evidence_sha256="abc",
+            agent_id="c1",
+            prompt_version="c1-v1",
+            parts=[],
+        )
+    with pytest.raises(LlmError, match="429"):
+        wrapper.complete(
+            evidence_sha256="abc",
+            agent_id="c1",
+            prompt_version="c1-v1",
+            parts=[],
+        )
+    assert fake.calls == 4
+
+
+def test_invalid_json_twice_is_a_flag() -> None:
     class Fake:
         def generate(self, *, model, parts, schema, temperature, max_output_tokens):
             del model, parts, schema, temperature, max_output_tokens
-            raise LlmError("gemini status 500")
+            return "not-json", 2
 
     wrapper = ModelWrapper(Fake(), MemoryCache(), "gemini-3.8-flash")
     call = wrapper.complete(
