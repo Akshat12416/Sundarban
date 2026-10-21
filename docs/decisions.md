@@ -70,6 +70,10 @@ aggregate-v1, frozen before the dev probe: the report decision is the more sever
 
 `--limit` requires `--output`, so a three-item probe cannot replace a split file. Paper tables read `bench/results/{config}-{split}.jsonl` and `{config}A-{split}.jsonl` only. Demo files are excluded unless `--include-demo` is passed.
 
+## 2026-10-21 — Issuance is seal, then MetaMask, then confirm
+
+`POST /v1/projects/{id}/seal` writes the Merkle root, the data hash, the parcel hash, the report hash, and a simplified credit string. The admin wallet sends `registerProject` with `parseUnits(credits, 18)`. `POST /v1/chain/confirm` records `submitted` before it updates the project. If that update dies, `POST /v1/chain/reconcile` reads the receipt again and finishes `confirmed`. The public proof returns hashes and the Merkle path only. Credit factors are in `services/verifier/credits.json` and are labelled simplified and uncertified.
+
 ## 2026-10-21 — Admin review reads Firestore and does not copy the old portal
 
 The review queue uses the approved card layout with the mint tokens. It does not copy the stock logo, phone and email lines, marketplace links, or GSAP. A contributor cannot change `status` under the Firestore rules, so the phone asks `POST /v1/projects/{id}/submit` and the verifier writes `submitted`. Approve, reject, and request-more-evidence are admin writes of `status` and `adminNote`. Reports stay server-written at `reports/{projectId}/versions/{n}`. The admin page shows that document when it exists and does not invent one. `docs/guides/PHASE_7_PREREQUISITES.md` is not in the repo.

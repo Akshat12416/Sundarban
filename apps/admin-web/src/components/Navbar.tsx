@@ -2,7 +2,10 @@ import { Link, useLocation } from "react-router-dom";
 
 import { useSession } from "../auth";
 
-const links = [{ label: "Review", path: "/" }];
+const links = [
+  { label: "Review", path: "/" },
+  { label: "Verify", path: "/verify" },
+];
 
 export default function Navbar() {
   const { pathname } = useLocation();

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 from app.auth import Principal, get_current_user, require_admin
 from app.evidence import AcceptedEvidence, EvidenceError, accept_evidence, enrol_device, register_project
+from app.issue import IssueError, SepoliaGateway, confirm_transaction, public_proof, reconcile_submitted, seal_project, sepolia_rpc
 from app.wiring import Services
 
 router = APIRouter()
@@ -30,6 +31,15 @@ def get_services(request: Request) -> Services:
 
 class ProjectBody(BaseModel):
     projectId: str = Field(min_length=1)
+
+
+class SealBody(BaseModel):
+    owner: str = Field(min_length=42, max_length=42)
+
+
+class ConfirmBody(BaseModel):
+    projectId: str = Field(min_length=1)
+    txHash: str = Field(min_length=66, max_length=66)
 
 
 _SUBMITTABLE = {"draft", "awaiting_after", "needs_more_evidence"}
@@ -153,6 +163,64 @@ def file_url(
         raise HTTPException(status_code=404, detail="evidence not found")
     url = services.storage.signed_url(path, services.signed_url_ttl_seconds)
     return {"url": url, "expiresIn": services.signed_url_ttl_seconds}
+
+
+@router.post("/v1/projects/{project_id}/seal")
+def seal(
+    project_id: str,
+    body: SealBody,
+    user: Principal = Depends(require_admin),
+    services: Services = Depends(get_services),
+) -> dict[str, Any]:
+    del user
+    try:
+        return seal_project(services.projects, services.evidence, project_id, body.owner)
+    except IssueError as exc:
+        status = 404 if str(exc) == "project not found" else 400
+        raise HTTPException(status_code=status, detail=str(exc)) from exc
+
+
+@router.post("/v1/chain/confirm")
+def confirm(
+    body: ConfirmBody,
+    user: Principal = Depends(require_admin),
+    services: Services = Depends(get_services),
+) -> dict[str, str]:
+    del user
+    try:
+        return confirm_transaction(
+            services.projects,
+            services.chain,
+            body.projectId,
+            body.txHash,
+            SepoliaGateway(sepolia_rpc()),
+        )
+    except IssueError as exc:
+        status = 404 if "not" in str(exc) else 400
+        raise HTTPException(status_code=status, detail=str(exc)) from exc
+
+
+@router.post("/v1/chain/reconcile")
+def reconcile(
+    user: Principal = Depends(require_admin),
+    services: Services = Depends(get_services),
+) -> dict[str, Any]:
+    del user
+    repaired = reconcile_submitted(services.projects, services.chain, SepoliaGateway(sepolia_rpc()))
+    return {"repaired": repaired}
+
+
+@router.get("/v1/public/projects/{project_id}/proof")
+def proof(
+    project_id: str,
+    sha256: str | None = None,
+    services: Services = Depends(get_services),
+) -> dict[str, Any]:
+    try:
+        return public_proof(services.projects, services.evidence, project_id, sha256)
+    except IssueError as exc:
+        status = 404 if str(exc) in {"project not found", "photo not found"} else 400
+        raise HTTPException(status_code=status, detail=str(exc)) from exc
 
 
 def _accepted(accepted: AcceptedEvidence) -> dict[str, Any]:

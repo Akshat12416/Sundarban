@@ -28,5 +28,7 @@ The +A condition is simulated until the phone signs evidence. Each manifest row 
 
 C3 runs four specialists (image, vegetation, geospatial, document) and then an aggregator. On local hardware they run one after another, so latency is the sum of the calls. `VERIFIER_PARALLEL=1` is the parallel schedule in Section IV-D. C4 adds the C0 checks as tools. The geospatial tool reads the curated region table and does not call a live geocoder. Sentinel-2 stays off unless `SENTINEL2_ENABLED` is set, and that flag still does not call a live service. The aggregate-v1 rule takes the more severe of the aggregator decision, the specialist decisions, and, for C4, the tool decision.
 
+C0 now flags a document whose text contains "ignore previous instructions" or "ignore all previous" as `prompt_injection`. Result files written before this change do not include that rule. Do not mix those files with a later C0 run.
+
 Table 2 and Table 3 in the metrics script use the draft's ASR: attacks whose recommendation is `approve`, divided by attacks. The pilot summary above still uses "not reject". FRR in the tables is legitimate items rejected or marked high risk. A cell is printed only when a result file for that configuration exists.
 

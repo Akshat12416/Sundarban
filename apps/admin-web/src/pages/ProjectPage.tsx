@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { evidenceUrl } from "../api";
+import { evidenceUrl, verifierBase } from "../api";
+import { useSession } from "../auth";
 import { latestReport, listEvidence, listProjects, recordDecision } from "../projects";
 import { statusLabel, type EvidenceItem, type ProjectStatus, type ReviewProject, type RiskReport } from "../types";
 
@@ -116,6 +117,10 @@ export default function ProjectPage() {
         {report ? <ReportView report={report} /> : <p className="text-sm text-black/50">No report has been written for this project.</p>}
       </section>
 
+      {project.status === "approved" || project.status === "credited" ? (
+        <IssuePanel projectId={project.id} />
+      ) : null}
+
       <section className="rounded-lg bg-white p-4 shadow-xl">
         <h2 className="mb-3 text-base font-bold">Decision</h2>
         <label className="mb-3 block text-sm text-black/70">
@@ -207,6 +212,121 @@ function ReportView({ report }: { report: RiskReport }) {
         </article>
       ))}
     </div>
+  );
+}
+
+type SealPayload = {
+  owner: string;
+  dataHash: string;
+  evidenceRoot: string;
+  parcelHash: string;
+  reportHash: string;
+  credits: string;
+  contract: string;
+};
+
+function IssuePanel({ projectId }: { projectId: string }) {
+  const { user } = useSession();
+  const [owner, setOwner] = useState("");
+  const [seal, setSeal] = useState<SealPayload | null>(null);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  async function token(): Promise<string> {
+    if (!user) {
+      throw new Error("Sign in as an admin first");
+    }
+    return user.getIdToken();
+  }
+
+  async function sealProject() {
+    setError("");
+    const response = await fetch(`${verifierBase()}/v1/projects/${projectId}/seal`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${await token()}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ owner }),
+    });
+    const body = (await response.json()) as SealPayload & { detail?: string };
+    if (!response.ok) {
+      throw new Error(body.detail || "Seal failed");
+    }
+    setSeal(body);
+    setMessage(`Sealed. Credits ${body.credits}`);
+  }
+
+  async function register() {
+    if (!seal) {
+      return;
+    }
+    const ethereum = (window as Window & { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+    if (!ethereum) {
+      throw new Error("MetaMask is not available");
+    }
+    const { BrowserProvider, Contract, parseUnits } = await import("ethers");
+    const abi = (await import("../../../../packages/contract-abi/CarbonRegistry.abi.json")).default;
+    const provider = new BrowserProvider(ethereum);
+    await provider.send("eth_requestAccounts", []);
+    const signer = await provider.getSigner();
+    const contract = new Contract(seal.contract, abi, signer);
+    const tx = await contract.registerProject(
+      seal.owner,
+      seal.dataHash,
+      seal.evidenceRoot,
+      seal.parcelHash,
+      seal.reportHash,
+      parseUnits(seal.credits, 18),
+    );
+    setMessage(`Submitted ${tx.hash}`);
+    const receipt = await tx.wait();
+    const response = await fetch(`${verifierBase()}/v1/chain/confirm`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${await token()}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ projectId, txHash: receipt?.hash || tx.hash }),
+    });
+    const body = (await response.json()) as { chainState?: string; detail?: string };
+    if (!response.ok) {
+      throw new Error(body.detail || "Confirm failed");
+    }
+    setMessage(`Chain state ${body.chainState} · ${receipt?.hash || tx.hash}`);
+  }
+
+  return (
+    <section className="rounded-lg bg-white p-4 shadow-xl">
+      <h2 className="mb-3 text-base font-bold">Issue on Sepolia</h2>
+      <label className="mb-3 block text-sm text-black/70">
+        Owner address
+        <input
+          value={owner}
+          onChange={(event) => setOwner(event.target.value.trim())}
+          className="mt-1 w-full rounded-xl border border-[#1DBF73] p-3 font-mono text-sm"
+          placeholder="0x"
+        />
+      </label>
+      {error ? <p className="mb-3 text-sm text-[#E6453A]">{error}</p> : null}
+      {message ? <p className="mb-3 text-sm text-black/70">{message}</p> : null}
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          className="rounded-full bg-[#1DBF73] px-4 py-2 text-sm font-medium text-white"
+          onClick={() => {
+            sealProject().catch((caught: unknown) => setError(caught instanceof Error ? caught.message : "Seal failed"));
+          }}
+        >
+          Seal
+        </button>
+        <button
+          type="button"
+          disabled={!seal}
+          className="rounded-full bg-[#1DBF73] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          onClick={() => {
+            setError("");
+            register().catch((caught: unknown) => setError(caught instanceof Error ? caught.message : "Register failed"));
+          }}
+        >
+          Register with MetaMask
+        </button>
+      </div>
+    </section>
   );
 }
 

@@ -1,3 +1,4 @@
+import { type ReactNode } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { SessionProvider, useSession } from "./auth";
@@ -6,6 +7,7 @@ import Navbar from "./components/Navbar";
 import { firebaseConfigured } from "./firebase";
 import ProjectPage from "./pages/ProjectPage";
 import Queue from "./pages/Queue";
+import VerifyPage from "./pages/VerifyPage";
 
 export default function App() {
   return (
@@ -14,7 +16,11 @@ export default function App() {
         <div className="flex min-h-screen flex-col bg-[#EDFCF3] text-black">
           <Navbar />
           <main className="flex-1">
-            {firebaseConfigured ? <SignedInRoutes /> : <MissingConfig />}
+            <Routes>
+              <Route path="/verify" element={<VerifyPage />} />
+              <Route path="/" element={<AdminGate><Queue /></AdminGate>} />
+              <Route path="/projects/:projectId" element={<AdminGate><ProjectPage /></AdminGate>} />
+            </Routes>
           </main>
           <Footer />
         </div>
@@ -23,8 +29,11 @@ export default function App() {
   );
 }
 
-function SignedInRoutes() {
+function AdminGate({ children }: { children: ReactNode }) {
   const { user, ready, error, signIn } = useSession();
+  if (!firebaseConfigured) {
+    return <MissingConfig />;
+  }
   if (!ready) {
     return <p className="px-6 py-16 text-black/50">Checking the admin session</p>;
   }
@@ -44,12 +53,7 @@ function SignedInRoutes() {
       </section>
     );
   }
-  return (
-    <Routes>
-      <Route path="/" element={<Queue />} />
-      <Route path="/projects/:projectId" element={<ProjectPage />} />
-    </Routes>
-  );
+  return children;
 }
 
 function MissingConfig() {

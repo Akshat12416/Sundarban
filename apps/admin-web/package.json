@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@sundarban/cv-crypto": "file:../../packages/cv-crypto-ts",
+    "ethers": "^6.17.0",
     "firebase": "^12.4.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

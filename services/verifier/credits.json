@@ -1,0 +1,11 @@
+{
+  "label": "simplified and uncertified",
+  "sourceNote": "IPCC-style factors for a demo estimate, not a certification. Survival, growth, carbon fraction, uncertainty and buffer are stated here so the number can be reproduced.",
+  "survivalRate": "0.80",
+  "speciesGrowthFactorTonnesPerYear": "0.02",
+  "years": "1",
+  "carbonFraction": "0.47",
+  "co2ePerCarbon": "3.67",
+  "uncertaintyDiscount": "0.20",
+  "bufferShare": "0.10"
+}

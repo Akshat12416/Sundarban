@@ -39,6 +39,7 @@ def verify(submission: Submission) -> Report:
     findings.extend(_exif(submission))
     findings.extend(_density(submission))
     findings.extend(_species(submission))
+    findings.extend(_injection(submission))
     findings.extend(_document(submission))
     output = _output(findings)
     return finish_report(
@@ -227,6 +228,25 @@ def _species(submission: Submission) -> list[tuple[Finding, Decimal]]:
                 type="species_region",
                 evidence="species",
                 explanation=f"{submission.species} is not in the table for region {submission.region}",
+            ),
+            Decimal("1"),
+        )
+    ]
+
+
+_INJECTION_PHRASES = ("ignore previous instructions", "ignore all previous")
+
+
+def _injection(submission: Submission) -> list[tuple[Finding, Decimal]]:
+    text = (submission.document_text or "").casefold()
+    if not any(phrase in text for phrase in _INJECTION_PHRASES):
+        return []
+    return [
+        (
+            Finding(
+                type="prompt_injection",
+                evidence="document_text",
+                explanation="The document contains instruction text and is treated as data",
             ),
             Decimal("1"),
         )

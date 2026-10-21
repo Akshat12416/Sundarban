@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from app.cache import AnalysisCache, FirestoreCache, MemoryCache
+from app.issue import ChainStore, FirestoreChainStore, MemoryChainStore
 from app.evidence import (
     DeviceStore,
     EvidenceStore,
@@ -33,6 +34,7 @@ class Services:
     nonces: NonceService
     storage: DiskStorage | SupabaseStorage
     cache: AnalysisCache
+    chain: ChainStore
     signed_url_ttl_seconds: int
 
 
@@ -48,6 +50,7 @@ def build_services(settings: Settings, firebase_ready: bool) -> Services:
         evidence: EvidenceStore = InMemoryEvidenceStore()
         nonce_store = InMemoryNonceStore()
         cache_store = MemoryCache()
+        chain: ChainStore = MemoryChainStore()
     else:
         from firebase_admin import firestore
 
@@ -57,6 +60,7 @@ def build_services(settings: Settings, firebase_ready: bool) -> Services:
         evidence = FirestoreEvidenceStore(client)
         nonce_store = FirestoreNonceStore(client)
         cache_store = FirestoreCache(client)
+        chain = FirestoreChainStore(client)
     root = Path(settings.disk_storage_dir)
     if not root.is_absolute():
         root = _REPO_ROOT / root
@@ -75,5 +79,6 @@ def build_services(settings: Settings, firebase_ready: bool) -> Services:
         nonces=NonceService(nonce_store, settings.nonce_ttl_seconds),
         storage=storage,
         cache=AnalysisCache(cache_store),
+        chain=chain,
         signed_url_ttl_seconds=settings.signed_url_ttl_seconds,
     )

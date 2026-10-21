@@ -1,10 +1,8 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-21 04:55 | by: Grok 4.7 | commit: see session log
+Last updated (UTC): 2026-10-21 05:59 | by: Grok 4.7 | commit: see session log
 
 ## 1. Next step (read this first)
-Work on `main`. The admin review UI is in `apps/admin-web`. Start the Auth and Firestore emulators, then `cd apps/admin-web && npm run dev`. The local admin env uses `127.0.0.1:9099` and `127.0.0.1:8080`. Sign in with Google. The account needs the admin claim: `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 services/verifier/.venv/bin/python scripts/set_admin_claim.py --email you@example.com` from the repo root. The phone writes a submitted project only when the verifier is running, because contributors cannot change status themselves.
-
-The next code task is Phase 7b, the issue flow and the public verify page. Contract details are in `contracts/DEPLOYMENT.md`. Do not copy `legacy/` wholesale.
+Work on `main`. Phase 7b is in. The public page is http://127.0.0.1:5173/verify. Issuance steps are in `docs/DEMO.md`. Before Phase 8, follow `docs/guides/PHASE_8_PREREQUISITES.md` yourself: A13 screen recaptures, A14 mock-location captures, the experiment log, frozen model and prompts, and a cost budget. Do not start a paper run, and do not pass `--split test`.
 
 The C3 and C4 dev demos both finished on 2026-10-21. Logs end with `wrote` for `bench/results/demo/C3-dev-ollama.jsonl` and `bench/results/demo/C4-dev-ollama.jsonl`. Metrics from `python -m bench.metrics` on those files: C3 completed 68, skipped 12, ASR 0.288, FRR 0.667, F1 0.785. C4 completed 68, skipped 12, ASR 0.169, FRR 0.556, F1 0.867. Both are `ollama/qwen2.5vl:3b` demo output. Do not put them in a paper table. Do not start another bench run. Do not pass `--split test`.
 
@@ -48,7 +46,7 @@ The Android development build is still waiting on the user. Do not start it unle
 | 5c Mobile status and polish | not started | | |
 | 6 Contracts | done | 448c2de | Sepolia `CarbonRegistry` at `0xFC1F37fB7449619917Dd78431bB827A18E11C480`. Issuer role checked on that address. Gas in `bench/results/gas.json` is from a separate test deployment. |
 | 7a Admin review | in progress | 4a92488 | Queue, project page, and Google admin gate are in `apps/admin-web`. Browser check on 2026-10-21 used the Auth emulator. Phone publish was not run on a device. |
-| 7b Issue flow and verify page | not started | | |
+| 7b Issue flow and verify page | done | see session log | Seal, confirm, reconcile, and `/verify`. Demo project `demo-issue` confirmed on Sepolia. Browser accepted `scripts/demo-photo.jpg` and rejected the modified file. |
 | 8 Experiments | not started | | |
 | 9 Paper and report | not started | | |
 
@@ -118,6 +116,8 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 - [ ] Phase 4 checks: `GEMINI_RUN_COST_CAP_USD` is 5 and `GEMINI_PRICE_TIER` is `paid` in both env files. The loaded key still receives the free-tier daily quota of 20. A billed-project key is still required before the C1 pilot.
 
 ## 10. Gotchas and failed approaches (newest first)
+- 2026-10-21: `services/verifier/.env` contains two `FIREBASE_PROJECT_ID` lines. The first is shorter than `sundarban-a64ea`. `scripts/demo_issue.py` forces `sundarban-a64ea` after loading that file. Delete the short line by hand so every tool uses one id.
+- 2026-10-21: The verifier allows browser calls from `127.0.0.1` and `localhost` only. A page on another origin cannot call it until that regex changes.
 - 2026-10-21: `docs/guides/PHASE_7_PREREQUISITES.md` is not in the repo. The embedded browser blocks `signInWithPopup`, so the admin page falls back to `signInWithRedirect`. A Google account without `role=admin` is signed out. Contributors cannot set `submitted` in the rules; the verifier endpoint does that.
 - 2026-10-21: `docs/guides/PHASE_6_PREREQUISITES.md` is not in the repo. solc 0.8.20 with `--base-path` and an absolute OpenZeppelin remapping reported the imports missing. Compilation uses a relative remapping from `contracts/`. Slither 0.11.6 reported 0 findings. Its install downgraded `web3` to 7.16.0; `web3` 8.0.0 was installed again afterwards. Re-running Slither needs `web3` 7.
 - 2026-10-21: Signed-in accounts were all reading one shared sample list. Sample data stays on the sample button. A Firebase account now keeps its own projects and profile on the phone.
@@ -140,6 +140,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
+| 2026-10-21 | Grok 4.7 | Seal, confirm, reconcile, public verify page, demo script, Phase 8 guide. | see following commit |
 | 2026-10-21 | Grok 4.7 | Admin review queue, project page, and phone submit hand-off. | 4a92488 |
 | 2026-10-21 | Grok 4.7 | C3 and C4 dev demos finished. Metrics recorded from the demo JSONL files. Not paper results. | this state commit |
 | 2026-10-21 | Grok 4.7 | Saved the Sepolia deployment in `contracts/DEPLOYMENT.md` and fast-forwarded `main` to `phase6-contracts`. | fa485b9 |

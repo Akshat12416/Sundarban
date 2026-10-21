@@ -44,6 +44,8 @@ class EvidenceStore(Protocol):
 
     def get_index(self, evidence_id: str) -> dict[str, Any] | None: ...
 
+    def list_for_project(self, project_id: str) -> list[tuple[str, dict[str, Any]]]: ...
+
 
 class ObjectStore(Protocol):
     def upload(self, path: str, data: bytes, content_type: str) -> None: ...
@@ -61,7 +63,7 @@ class InMemoryProjectStore:
         return self.rows.get(project_id)
 
     def put(self, project_id: str, record: dict[str, Any]) -> None:
-        self.rows[project_id] = record
+        self.rows[project_id] = dict(record)
 
 
 class InMemoryDeviceStore:
@@ -86,6 +88,13 @@ class InMemoryEvidenceStore:
 
     def get_index(self, evidence_id: str) -> dict[str, Any] | None:
         return self.index.get(evidence_id)
+
+    def list_for_project(self, project_id: str) -> list[tuple[str, dict[str, Any]]]:
+        return [
+            (evidence_id, record)
+            for (owner, evidence_id), record in self.rows.items()
+            if owner == project_id
+        ]
 
 
 class FirestoreProjectStore:
@@ -150,6 +159,15 @@ class FirestoreEvidenceStore:
         if not item.exists:
             return None
         return item.to_dict() or {}
+
+    def list_for_project(self, project_id: str) -> list[tuple[str, dict[str, Any]]]:
+        items = (
+            self._client.collection("projects")
+            .document(project_id)
+            .collection("evidence")
+            .stream()
+        )
+        return [(item.id, item.to_dict() or {}) for item in items]
 
 
 @dataclass(frozen=True)
