@@ -47,6 +47,56 @@ def _submission(**kwargs) -> Submission:
     return Submission(submission_id="item-1", photos=[photo], registry=registry, **kwargs)
 
 
+def test_ollama_generator_sends_schema_images_and_temperature_zero() -> None:
+    import base64
+
+    import httpx
+
+    from app.llm import OllamaGenerator, provider_settings
+    from app.schema import judgment_schema
+
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.update(json.loads(request.content))
+        reply = json.dumps({"score": 0.1, "decision": "pass", "findings": [], "confidence": 0.8})
+        return httpx.Response(200, json={"message": {"content": reply}, "prompt_eval_count": 7, "eval_count": 3})
+
+    generator = OllamaGenerator(client=httpx.Client(transport=httpx.MockTransport(handler)))
+    parts = [
+        {"text": "prompt"},
+        {"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(_jpeg()).decode()}},
+    ]
+    wrapper = ModelWrapper(generator, MemoryCache(), "ollama/qwen2.5vl:3b")
+    call = wrapper.complete(evidence_sha256="e" * 64, agent_id="c1", prompt_version="c1-v1", parts=parts)
+    assert call.output.decision == "pass"
+    assert call.tokens == 10
+    assert seen["model"] == "qwen2.5vl:3b"
+    assert seen["format"] == judgment_schema()
+    assert seen["options"]["temperature"] == 0
+    assert len(seen["messages"][0]["images"]) == 1
+    assert provider_settings({"LLM_PROVIDER": "ollama", "OLLAMA_MODEL": "qwen2.5vl:3b"}) == (
+        "ollama",
+        "ollama/qwen2.5vl:3b",
+    )
+    assert provider_settings({"GEMINI_MODEL": "gemini-3.8-flash"}) == ("gemini", "gemini-3.8-flash")
+
+
+def test_ollama_http_error_is_not_cached() -> None:
+    import httpx
+
+    from app.llm import OllamaGenerator
+
+    generator = OllamaGenerator(
+        client=httpx.Client(transport=httpx.MockTransport(lambda request: httpx.Response(404, text="model not found")))
+    )
+    cache = MemoryCache()
+    wrapper = ModelWrapper(generator, cache, "ollama/missing")
+    with pytest.raises(LlmError):
+        wrapper.complete(evidence_sha256="e" * 64, agent_id="c1", prompt_version="c1-v1", parts=[{"text": "p"}])
+    assert cache.rows == {}
+
+
 def test_prompt_says_content_is_data() -> None:
     version, text = load_prompt("c1_v1")
     assert version == "c1-v1"

@@ -123,10 +123,106 @@ class GeminiGenerator:
         raise LlmError(f"gemini status 429\n{last_body}", status_code=429)
 
 
+OLLAMA_PREFIX = "ollama/"
+# Long edge for photos sent to a local model. Full-size photos overflow a small model's context.
+OLLAMA_IMAGE_EDGE = 896
+OLLAMA_CONTEXT = 8192
+
+
+class OllamaGenerator:
+    """Local open-weight model through the Ollama chat API. Demo use only; not a paper configuration."""
+
+    def __init__(self, host: str = "http://127.0.0.1:11434", client: httpx.Client | None = None) -> None:
+        self._host = host.rstrip("/")
+        self._client = client or httpx.Client(timeout=600.0)
+        self._owns_client = client is None
+
+    def close(self) -> None:
+        if self._owns_client:
+            self._client.close()
+
+    def generate(
+        self,
+        *,
+        model: str,
+        parts: list[dict[str, Any]],
+        schema: dict[str, Any],
+        temperature: float,
+        max_output_tokens: int,
+    ) -> tuple[str, int]:
+        texts = [part["text"] for part in parts if "text" in part]
+        images = [
+            _shrink_image(part["inline_data"]["data"])
+            for part in parts
+            if "inline_data" in part
+        ]
+        payload = {
+            "model": model.removeprefix(OLLAMA_PREFIX),
+            "messages": [{"role": "user", "content": "\n\n".join(texts), "images": images}],
+            "format": schema,
+            "stream": False,
+            "options": {
+                "temperature": temperature,
+                "seed": 0,
+                "num_predict": max_output_tokens,
+                "num_ctx": OLLAMA_CONTEXT,
+            },
+        }
+        try:
+            response = self._client.post(f"{self._host}/api/chat", json=payload)
+        except httpx.HTTPError as exc:
+            raise LlmError(f"ollama transport {type(exc).__name__} at {self._host}") from None
+        if response.status_code >= 400:
+            print(f"ollama call failed status {response.status_code}\n{response.text}", flush=True)
+            raise LlmError(
+                f"ollama status {response.status_code}\n{response.text}",
+                status_code=response.status_code,
+            )
+        body = response.json()
+        text = (body.get("message") or {}).get("content") or ""
+        if not text:
+            raise LlmError("ollama returned no text")
+        tokens = int(body.get("prompt_eval_count") or 0) + int(body.get("eval_count") or 0)
+        return text, tokens
+
+
+def _shrink_image(data: str) -> str:
+    import base64
+    import io
+
+    from PIL import Image
+
+    with Image.open(io.BytesIO(base64.b64decode(data))) as image:
+        image = image.convert("RGB")
+        image.thumbnail((OLLAMA_IMAGE_EDGE, OLLAMA_IMAGE_EDGE))
+        out = io.BytesIO()
+        image.save(out, format="JPEG", quality=90)
+    return base64.b64encode(out.getvalue()).decode("ascii")
+
+
+def provider_settings(env: dict[str, str]) -> tuple[str, str]:
+    """Return (provider, model id used in the cache key) from configuration."""
+    provider = (env.get("LLM_PROVIDER") or "gemini").strip().lower()
+    if provider == "gemini":
+        return provider, env.get("GEMINI_MODEL", "")
+    if provider == "ollama":
+        model = env.get("OLLAMA_MODEL", "").strip()
+        if not model:
+            raise ValueError("OLLAMA_MODEL is not set")
+        return provider, OLLAMA_PREFIX + model
+    raise ValueError(f"unknown LLM_PROVIDER {provider}")
+
+
+def build_generator(provider: str, env: dict[str, str]) -> Generator:
+    if provider == "ollama":
+        return OllamaGenerator(env.get("OLLAMA_HOST") or "http://127.0.0.1:11434")
+    return GeminiGenerator(env.get("GEMINI_API_KEY", ""))
+
+
 class ModelWrapper:
     def __init__(self, generator: Generator, store: CacheStore, model_id: str) -> None:
         if not model_id:
-            raise ValueError("GEMINI_MODEL is not set")
+            raise ValueError("model id is not set (GEMINI_MODEL or OLLAMA_MODEL)")
         self.generator = generator
         self.store = store
         self.model_id = model_id

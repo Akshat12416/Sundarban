@@ -67,6 +67,7 @@ bench/data/derived/*
 
 # Analysis cache for bench runs. Result JSONL files stay tracked.
 bench/results/*.sqlite
+bench/results/**/*.sqlite
 
 # Editor & OS files
 .DS_Store

@@ -41,3 +41,9 @@ The pilot split is `dev`. The runner does not look at `test`. A missing photo is
 The cost gate reads `MAX_RUN_COST`, then `GEMINI_RUN_COST_CAP_USD`. The price table is `bench/prices.json`, copied from the Gemini pricing page on 2026-10-21. The default tier is the paid standard rate. `GEMINI_PRICE_TIER=free` selects the published free-tier rate of zero. The output token count in an estimate is the configured ceiling of 1024 per call, not a measured response. `--dry-run` counts input tokens and does not call `generateContent`. An estimate above the cap exits 2 unless `--force` is set.
 
 
+
+## 2026-10-21 — Local demo provider (not a paper configuration)
+
+Paid Gemini calls were not available before the presentation, so the one LLM wrapper gained a second generator. `LLM_PROVIDER=gemini` (the default) is unchanged and is the only provider for paper results. `LLM_PROVIDER=ollama` sends the same prompt version, the same JSON schema (Ollama `format`), temperature 0 and seed 0 to a local open-weight model (`OLLAMA_MODEL`, default `qwen2.5vl:3b`) at `OLLAMA_HOST`. Pydantic validation, logging and the cache are shared. The cache model id is `ollama/<model>`, so local and Gemini answers never share a cache entry. Photos sent to the local model are shrunk to an 896-pixel long edge because full-size photos overflow its context.
+
+With a local provider the runner skips the cost gate (the cost is zero), skips the 15-second Gemini pacing, writes to `bench/results/demo/<config>-<split>-<provider>.jsonl`, and adds `provider` and `model_id` to each line. Files under `bench/results/demo/` are demo output. They must not appear in a paper table. C1 and C2 paper runs still need `LLM_PROVIDER=gemini` and a billed key.

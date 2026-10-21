@@ -18,7 +18,7 @@ if str(_VERIFIER) not in sys.path:
     sys.path.insert(0, str(_VERIFIER))
 
 from app.cache import SqliteCache
-from app.llm import GeminiGenerator, LlmError, ModelWrapper
+from app.llm import GeminiGenerator, LlmError, ModelWrapper, build_generator, provider_settings
 from app.prompts import load_prompt
 from app.verifiers import build_verifier
 from app.verifiers.c1 import parts_for
@@ -72,10 +72,20 @@ def main(argv: list[str] | None = None) -> int:
             skipped.append((row, reason or "missing file"))
         else:
             ready.append((row, submission))
-    estimate, detail = _estimate(args.config, ready, args.runs)
+    provider, model_id = provider_settings(dict(os.environ))
+    print(f"provider {provider}")
+    if provider == "gemini":
+        estimate, detail = _estimate(args.config, ready, args.runs)
+    else:
+        estimate, detail = Decimal(0), {
+            "input_tokens": "not_counted",
+            "output_tokens": cold_output_tokens(args.config, len(ready), args.runs),
+            "tier": "local",
+            "model": model_id,
+        }
     cap, cap_name = cap_value()
     _print_estimate(args.config, estimate, detail, cap, cap_name)
-    blocked = refusal(estimate, cap, args.force)
+    blocked = refusal(estimate, cap, args.force) if provider == "gemini" else None
     if args.dry_run:
         if blocked:
             print(blocked)
@@ -84,9 +94,14 @@ def main(argv: list[str] | None = None) -> int:
     if blocked:
         print(blocked)
         return 2
-    output = args.output or root / "bench" / "results" / f"{args.config}-{args.split}.jsonl"
+    if args.output:
+        output = args.output
+    elif provider == "gemini":
+        output = root / "bench" / "results" / f"{args.config}-{args.split}.jsonl"
+    else:
+        output = root / "bench" / "results" / "demo" / f"{args.config}-{args.split}-{provider}.jsonl"
     output.parent.mkdir(parents=True, exist_ok=True)
-    _write(output, args, ready, skipped)
+    _write(output, args, ready, skipped, provider, model_id)
     print(f"wrote {output}")
     return 0
 
@@ -143,31 +158,39 @@ def _print_estimate(config: str, estimate: Decimal, detail: dict, cap: Decimal |
     print(f"cap_source {cap_name or 'unset'}")
 
 
-def _write(output: Path, args: argparse.Namespace, ready: list, skipped: list) -> None:
-    model = os.environ.get("GEMINI_MODEL", "")
+def _write(
+    output: Path,
+    args: argparse.Namespace,
+    ready: list,
+    skipped: list,
+    provider: str,
+    model_id: str,
+) -> None:
     wrapper = None
     if args.config != "C0":
         cache = SqliteCache(output.parent / "analysis-cache.sqlite")
-        wrapper = ModelWrapper(GeminiGenerator(os.environ.get("GEMINI_API_KEY", "")), cache, model)
+        wrapper = ModelWrapper(build_generator(provider, dict(os.environ)), cache, model_id)
     verifier = build_verifier(args.config, wrapper)
+    extra = {} if provider == "gemini" else {"provider": provider, "model_id": model_id}
     with output.open("w", encoding="utf-8") as handle:
         for run in range(1, args.runs + 1):
             for row, reason in skipped:
-                handle.write(json.dumps(_skipped_line(args, run, row, reason), sort_keys=True) + "\n")
+                line = _skipped_line(args, run, row, reason) | extra
+                handle.write(json.dumps(line, sort_keys=True) + "\n")
             for index, (row, submission) in enumerate(ready, start=1):
-                if args.config != "C0" and index > 1:
+                if args.config != "C0" and provider == "gemini" and index > 1:
                     time.sleep(15)
                 try:
                     report = verifier.verify(submission)
                 except LlmError as exc:
                     print(f"skip {row['id']} {exc}", flush=True)
-                    handle.write(
-                        json.dumps(_skipped_line(args, run, row, str(exc)), sort_keys=True) + "\n"
-                    )
+                    line = _skipped_line(args, run, row, str(exc)) | extra
+                    handle.write(json.dumps(line, sort_keys=True) + "\n")
                     handle.flush()
                     continue
                 print(f"done {row['id']} {report.recommendation}", flush=True)
-                handle.write(json.dumps(_line(args, run, row, report), sort_keys=True) + "\n")
+                line = _line(args, run, row, report) | extra
+                handle.write(json.dumps(line, sort_keys=True) + "\n")
                 handle.flush()
     if wrapper is not None:
         wrapper.generator.close()  # type: ignore[attr-defined]
