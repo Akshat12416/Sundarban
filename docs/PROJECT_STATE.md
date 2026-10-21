@@ -44,7 +44,7 @@ Do not start a second bench run. Do not pass `--split test`.
 | 5a Mobile shell | in progress | 197d4cc | Expo SDK 58 shell in `apps/mobile`. Web checked 2026-10-21 at localhost:8081. Phone Expo Go not confirmed. |
 | 5b Attestation and capture | in progress | c6a4892 | EAS development profile and `cv-keystore` are written. Cloud build not started. Phone checks of accept, replay, and modified image are not done. |
 | 5c Mobile status and polish | not started | | |
-| 6 Contracts | done | see session log | Sepolia `CarbonRegistry` at `0xFC1F37fB7449619917Dd78431bB827A18E11C480`. Issuer role checked on that address. Gas in `bench/results/gas.json` is from a separate test deployment. |
+| 6 Contracts | done | 448c2de | Sepolia `CarbonRegistry` at `0xFC1F37fB7449619917Dd78431bB827A18E11C480`. Issuer role checked on that address. Gas in `bench/results/gas.json` is from a separate test deployment. |
 | 7a Admin review | not started | | |
 | 7b Issue flow and verify page | not started | | |
 | 8 Experiments | not started | | |
@@ -137,7 +137,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | CarbonRegistry on Sepolia, Python compile and deploy, gas from test receipts, Slither 0 findings. | see following commit |
+| 2026-10-21 | Grok 4.7 | CarbonRegistry on Sepolia, Python compile and deploy, gas from test receipts, Slither 0 findings. | 448c2de |
 | 2026-10-21 | Grok 4.7 | Android keystore module, attested capture, EAS development profile. Cloud build not started. | c6a4892 |
 | 2026-10-21 | Grok 4.7 | C3, C4, +A switch, paper tables, Phase 5 guide. Three-item Ollama probe only. | 7e11467, 8aa346b, 5e24d95 |
 | 2026-10-21 | Claude Opus | Local Ollama provider in the LLM wrapper (demo only), C1 dev demo run, C0 dev re-run (68 completed), decision recorded. | 43b0324, 4326bb4, e1b8985 |
