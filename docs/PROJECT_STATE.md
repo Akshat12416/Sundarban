@@ -1,18 +1,12 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-21 02:53 | by: Grok 4.7 | commit: see session log
+Last updated (UTC): 2026-10-21 08:40 | by: Grok 4.7 | commit: see session log
 
 ## 1. Next step (read this first)
-The user said go on 2026-10-21. The full dev demo is running in the background: C3 first, then C4 only if C3 exits 0. Provider is `LLM_PROVIDER=ollama`, model `qwen2.5vl:3b`. Do not start a second bench run. Do not pass `--split test`.
+The contributor shell is in `apps/mobile` (Expo SDK 58, Expo Router). Web was opened at `http://127.0.0.1:8081`: sign-in, sample home, the new-project type step, and credit history rendered. Expo Go on the phone is the user's check. Same Wi-Fi, Expo Go, project URL `exp://192.168.0.188:8081`. The dev server was started with `cd apps/mobile && npx expo start --web --port 8081`.
 
-C3 log: `bench/results/C3-dev.log`. JSONL: `bench/results/demo/C3-dev-ollama.jsonl`. Check with `tail -f bench/results/C3-dev.log` and `grep -Ec '^(done|skip) ' bench/results/C3-dev.log` against 80. The first three rows were cache hits at 0.0 s. About 65 items still call the model, near 60 s each, so C3 has about an hour left. C4 then writes `bench/results/C4-dev.log` and `bench/results/demo/C4-dev-ollama.jsonl`, about 50 minutes. Both files are demo output, not paper results.
+Fill `apps/mobile/.env` from `.env.example` for email/password sign-in. Leave it gitignored. Sample data opens every screen without those keys. Google sign-in and the hardware signing key stay in Phase 5b. Do not run `npx expo run:android` or download an APK in this phase.
 
-When both logs have 80 `done` or `skip` lines, run `services/verifier/.venv/bin/python -m bench.metrics --input bench/results/demo/C3-dev-ollama.jsonl` and the same for C4. Paper tables stay on `bench/results/` unless `--include-demo` is passed. Do not tune prompts from this run. Prompts `c3_*_v1` and `c4_*_v1` stay frozen.
-
-Demo run, verified 2026-10-21 with `python -m bench.metrics --input bench/results/demo/C1-dev-ollama.jsonl`: 68 completed, 12 skipped, every item `pass`/`approve`, so ASR 1.000, FRR 0.000, recall 0.000, median latency 13.5 s per uncached call, $0. The 3B model does not detect any attack class. This file is demo output, not a paper result. A larger local model (`qwen2.5vl:7b`, about 6 GB) did not fit: 3.2 GiB disk free after the 3B pull.
-
-C0 dev re-run after the filename alias fix, verified with `python -m bench.metrics --input bench/results/C0-dev.jsonl`: completed 68, skipped 12, ASR 0.322, FRR 0.000, precision 1.000, recall 0.678, F1 0.808, agreement 1.000. Do not tune prompts from the test split.
-
-Ollama must be running for a local run: `OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q8_0 /opt/homebrew/opt/ollama/bin/ollama serve` (or `brew services start ollama`).
+Do not start a second bench run. A C3 dev demo may still be writing `bench/results/C3-dev.log`. Do not pass `--split test`.
 
 Do not copy `legacy/` into the new apps. The only admin files a later phase may copy, and then edit, are `legacy/admin-portal/src/components/Navbar.jsx`, `legacy/admin-portal/src/components/Footer.jsx`, and the card markup in `ApprovedProjects.jsx` and `RejectedProjects.jsx`.
 
@@ -48,7 +42,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | 3 Evidence service and cache | done | 0fea73e | Nonce, device, evidence, and admin file routes. Cache tested: a second analysis of the same evidence makes no model call. Live Supabase test is skipped unless `SUPABASE_LIVE_TEST=1`. |
 | 4a Verifiers C0-C2 and runner | in progress (demo done) | 4326bb4 | C0 dev re-run: 68 completed. C1 ran on dev with local `qwen2.5vl:3b` (demo, `bench/results/demo/`). Gemini C1 and C2 paper runs still need a billed key. No test split. |
 | 4b Verifiers C3-C4 and metrics | in progress | 8aa346b | C3, C4, and +A are tested. Full dev demo started 2026-10-21: C3 log `bench/results/C3-dev.log`, then C4. Output is under `bench/results/demo/`. No test split. |
-| 5a Mobile shell | not started | | Screen map is `docs/design/SCREENS.md`. |
+| 5a Mobile shell | in progress | pending | Expo SDK 58 shell in `apps/mobile`. Web checked 2026-10-21 at localhost:8081. Phone Expo Go not confirmed. |
 | 5b Attestation and capture | not started | | |
 | 5c Mobile status and polish | not started | | |
 | 6 Contracts | not started | | |
@@ -74,7 +68,8 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | Contracts | `contracts` | | `cd contracts && .venv/bin/pytest` | Verified 2026-10-20: Sepolia chain id 11155111 and OpenZeppelin v5 import check passed. |
 | Test vectors | `packages/test-vectors` | `cd packages/test-vectors && .venv/bin/python generate.py` | `cd packages/test-vectors && .venv/bin/pytest` | Python reference unchanged. Service and TypeScript libraries matched `vectors.json` on 2026-10-21. |
 | TypeScript crypto | `packages/cv-crypto-ts` | | `cd packages/cv-crypto-ts && node --experimental-strip-types --test src/index.test.ts` | Verified 2026-10-21: 5 passed, including Merkle proofs. Node v22.16.0. |
-| Benchmark manifest | `bench/data/manifest.jsonl` | `python -m bench.generate --seed 42` | `python -m bench.validate` | Verified 2026-10-20: validate pass; second generate byte-identical. |
+| Benchmark generator | `bench/data/manifest.jsonl` | `python -m bench.generate --seed 42` | `python -m bench.validate` | Verified 2026-10-20: validate pass. |
+| Contributor app | `apps/mobile` | `cd apps/mobile && npx expo start` | `cd apps/mobile && npx tsc --noEmit` | Web verified 2026-10-21: sign-in, sample home, wizard type step, credit history. Typecheck passed. Expo Go on the phone not confirmed. |
 | C0 pilot | `bench/results/C0-dev.jsonl` | `services/verifier/.venv/bin/python -m bench.run --config C0 --split dev --runs 3` | `services/verifier/.venv/bin/python -m bench.metrics --input bench/results/C0-dev.jsonl` | Verified 2026-10-21 after the alias fix: ASR 0.322, FRR 0.000, 68 completed, 12 skipped. |
 | C1 demo (local model) | `bench/results/demo/C1-dev-ollama.jsonl` | `ollama serve`, then `services/verifier/.venv/bin/python -m bench.run --config C1 --split dev --runs 1` with `LLM_PROVIDER=ollama` | `services/verifier/.venv/bin/python -m bench.metrics --input bench/results/demo/C1-dev-ollama.jsonl` | Verified 2026-10-21: 68 completed, all approve. Not a paper result. |
 | C3 and C4 | `services/verifier/app/verifiers/specialists.py` | `services/verifier/.venv/bin/python -m bench.run --config C3 --split dev --runs 1` | `cd services/verifier && .venv/bin/pytest` | Verified 2026-10-21: 34 passed, 1 skipped. Three-item probe wrote `bench/results/demo/C3-probe.jsonl` and `C4-probe.jsonl`. Full dev not started. |
@@ -141,7 +136,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | Started the full C3 dev demo in the background, with C4 chained after it. | this state commit |
+| 2026-10-21 | Grok 4.7 | Contributor Expo shell: email/password auth, sample data, wizard, projects, credits, profile. Web checked. | pending |
 | 2026-10-21 | Grok 4.7 | C3, C4, +A switch, paper tables, Phase 5 guide. Three-item Ollama probe only. | 7e11467, 8aa346b, 5e24d95 |
 | 2026-10-21 | Claude Opus | Local Ollama provider in the LLM wrapper (demo only), C1 dev demo run, C0 dev re-run (68 completed), decision recorded. | 43b0324, 4326bb4, e1b8985 |
 | 2026-10-21 | Grok 4.7 | Set the run cap to 5 and recorded that the loaded Gemini key is still on the free-tier daily quota. C1 pilot not started. | 972a03b |

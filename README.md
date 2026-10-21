@@ -18,7 +18,8 @@ Run each one from the repository root unless the line says otherwise.
 | Contracts tests | `cd contracts && .venv/bin/pytest` |
 | Test vectors | `cd packages/test-vectors && .venv/bin/pytest` |
 | Shared TypeScript crypto | `cd packages/cv-crypto-ts && npm test` |
-| Admin claim | `python3 scripts/set_admin_claim.py --email you@example.com` |
+| Contributor app | `cd apps/mobile && npx expo start` |
+| Contributor app in the browser | `cd apps/mobile && npx expo start --web` |
 | Verifier pilot | `services/verifier/.venv/bin/python -m bench.run --config C0 --split dev --runs 3` |
 | Cost estimate | `services/verifier/.venv/bin/python -m bench.estimate_cost --config C1 --split dev --runs 1` |
 | Metrics | `services/verifier/.venv/bin/python -m bench.metrics --input bench/results/C0-dev.jsonl` |
