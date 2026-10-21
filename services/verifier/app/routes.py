@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Uplo
 from pydantic import BaseModel, Field
 
 from app.auth import Principal, get_current_user, require_admin
-from app.evidence import AcceptedEvidence, EvidenceError, accept_evidence, enrol_device
+from app.evidence import AcceptedEvidence, EvidenceError, accept_evidence, enrol_device, register_project
 from app.wiring import Services
 
 router = APIRouter()
@@ -26,6 +26,24 @@ def get_services(request: Request) -> Services:
     if services is None:
         raise HTTPException(status_code=503, detail="services not ready")
     return services
+
+
+class ProjectBody(BaseModel):
+    projectId: str = Field(min_length=1)
+
+
+@router.post("/v1/projects")
+def create_project(
+    body: ProjectBody,
+    user: Principal = Depends(get_current_user),
+    services: Services = Depends(get_services),
+) -> dict[str, str]:
+    try:
+        register_project(services.projects, body.projectId, user.uid)
+    except EvidenceError as exc:
+        status = 404 if str(exc) == "project not found" else 400
+        raise HTTPException(status_code=status, detail=str(exc)) from exc
+    return {"projectId": body.projectId, "ownerUid": user.uid}
 
 
 @router.post("/v1/nonce")

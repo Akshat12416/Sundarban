@@ -3,11 +3,12 @@ import * as Crypto from "expo-crypto";
 import * as DocumentPicker from "expo-document-picker";
 import * as Location from "expo-location";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Field, PhoneColumn, PillButton } from "../src/components/ui";
+import { attestedUpload, enrolDevice, registerProject } from "../src/capture/attest";
 import { useData } from "../src/data/store";
 import type { AccountKind, Project } from "../src/data/types";
 import { colors } from "../src/theme/tokens";
@@ -34,6 +35,9 @@ export default function WizardScreen() {
   const [cameraOn, setCameraOn] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const [message, setMessage] = useState("");
+  const [projectId] = useState(() => Crypto.randomUUID());
+  const camera = useRef<CameraView>(null);
+  const enrolled = useRef(false);
 
   async function pickDocument() {
     const result = await DocumentPicker.getDocumentAsync({ copyToCacheDirectory: false });
@@ -56,7 +60,7 @@ export default function WizardScreen() {
     setMessage("");
   }
 
-  async function capture() {
+  async function capture(): Promise<boolean> {
     if (!permission?.granted) {
       const next = await requestPermission();
       if (!next.granted) {
@@ -65,8 +69,38 @@ export default function WizardScreen() {
       }
     }
     setCameraOn(true);
-    setMessage("");
-    return true;
+    const shot = await camera.current?.takePictureAsync({ quality: 1 });
+    if (!shot?.uri) {
+      setMessage("The camera did not return a photo. Use the Android development build, not Expo Go, for attested capture.");
+      return false;
+    }
+    const allowed = await Location.requestForegroundPermissionsAsync();
+    if (!allowed.granted) {
+      setMessage("Location permission is required for an attested photo.");
+      return false;
+    }
+    const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+    try {
+      if (!enrolled.current) {
+        await registerProject(projectId);
+        const level = await enrolDevice();
+        enrolled.current = true;
+        setMessage(`Phone key enrolled (${level}).`);
+      }
+      const result = await attestedUpload({
+        projectId,
+        photoUri: shot.uri,
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracyM: position.coords.accuracy ?? Number.NaN,
+        mockLocation: position.mocked === true,
+      });
+      setMessage(result.reason);
+      return result.accepted;
+    } catch (caught) {
+      setMessage(caught instanceof Error ? caught.message : "Attestation failed.");
+      return false;
+    }
   }
 
   async function finish() {
@@ -74,7 +108,7 @@ export default function WizardScreen() {
       setMessage("Capture at least 3 before photos.");
       return;
     }
-    const id = Crypto.randomUUID();
+    const id = projectId;
     const project: Project = {
       id,
       kind,
@@ -162,11 +196,11 @@ export default function WizardScreen() {
               <Text style={{ fontFamily: "Inter" }}>Before photos {photos} of 3</Text>
               {cameraOn ? (
                 <View style={{ height: 240, borderRadius: 16, overflow: "hidden" }}>
-                  <CameraView style={{ flex: 1 }} facing="back" />
+                  <CameraView ref={camera} style={{ flex: 1 }} facing="back" />
                 </View>
               ) : null}
               <PillButton
-                label="Capture photo"
+                label="Capture attested photo"
                 onPress={() => {
                   void capture().then((saved) => {
                     if (saved) {
@@ -176,7 +210,7 @@ export default function WizardScreen() {
                 }}
               />
               <Text style={{ fontFamily: "Inter", color: colors.muted }}>
-                The photo stays on this phone in this build. Upload to the verifier comes later.
+                The camera takes the photo. The image picker is not used. The verifier's accept or reject reason appears below.
               </Text>
             </>
           ) : null}

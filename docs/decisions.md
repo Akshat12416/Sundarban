@@ -40,6 +40,11 @@ The pilot split is `dev`. The runner does not look at `test`. A missing photo is
 
 The cost gate reads `MAX_RUN_COST`, then `GEMINI_RUN_COST_CAP_USD`. The price table is `bench/prices.json`, copied from the Gemini pricing page on 2026-10-21. The default tier is the paid standard rate. `GEMINI_PRICE_TIER=free` selects the published free-tier rate of zero. The output token count in an estimate is the configured ceiling of 1024 per call, not a measured response. `--dry-run` counts input tokens and does not call `generateContent`. An estimate above the cap exits 2 unless `--force` is set.
 
+## 2026-10-21 — Attestation stays on the Android Keystore
+
+The development build uses an Expo module, `cv-keystore`, that creates an EC P-256 key in the Android Keystore with purpose SIGN and SHA-256. The private key is not exportable. The module tries StrongBox and, if the device rejects that, creates the key without StrongBox. It does not generate a software key. iOS throws. Expo Go throws. A capture whose GPS accuracy is worse than 20 metres is rejected before it is signed. The mock-location flag is stored on the metadata as `mockLocation` and is not a rejection by itself. The phone signs `SHA-256(image bytes) || SHA-256(canonical metadata)` with ECDSA-SHA256, DER encoded, which is the form Python already verifies.
+
+
 ## 2026-10-21 — Contributor shell stays on Expo Go
 
 Phase 5a uses Expo SDK 58 and Expo Router. Sign-in is email and password because that works in Expo Go. Google sign-in and the hardware signing key wait for the development build. Screens read a fake data source, so the shell opens before Firestore or the verifier is reachable. The API client uses `EXPO_PUBLIC_API_URL`, and also accepts `EXPO_PUBLIC_VERIFIER_URL` when the first name is empty. Firestore is not opened against production. It connects only when `EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST` is set.

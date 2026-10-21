@@ -4,6 +4,7 @@ import { ScrollView, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useSession, readableAuthError } from "../src/auth/AuthProvider";
+import { GoogleSignIn } from "../src/auth/GoogleSignIn";
 import { Field, PhoneColumn, PillButton } from "../src/components/ui";
 import { colors } from "../src/theme/tokens";
 
@@ -43,7 +44,7 @@ export default function SignInScreen() {
             Sundarban
           </Text>
           <Text style={{ fontFamily: "Inter", fontSize: 16, lineHeight: 24, color: colors.muted }}>
-            Photos are captured in this app. Email and password sign-in works here. Google sign-in and the device signing key come in the next build.
+            Photos are captured in this app and signed on the Android development build. Email and password work here. Google sign-in needs that same build.
           </Text>
           <Field
             label="Email"
@@ -75,6 +76,10 @@ export default function SignInScreen() {
           {error ? <Text style={{ color: colors.danger, fontFamily: "Inter" }}>{error}</Text> : null}
           <PillButton label={busy ? "Please wait" : "Sign in"} onPress={() => void run("in")} disabled={busy} />
           <PillButton label="Create account" tone="green" onPress={() => void run("up")} disabled={busy} />
+          <GoogleSignIn
+            onDone={() => router.replace("/home")}
+            onError={setError}
+          />
           <PillButton
             label={configured ? "Browse sample projects" : "Continue with sample data"}
             tone="ghost"

@@ -30,6 +30,8 @@ class EvidenceError(ValueError):
 class ProjectStore(Protocol):
     def get(self, project_id: str) -> dict[str, Any] | None: ...
 
+    def put(self, project_id: str, record: dict[str, Any]) -> None: ...
+
 
 class DeviceStore(Protocol):
     def get(self, device_id: str) -> dict[str, Any] | None: ...
@@ -57,6 +59,9 @@ class InMemoryProjectStore:
 
     def get(self, project_id: str) -> dict[str, Any] | None:
         return self.rows.get(project_id)
+
+    def put(self, project_id: str, record: dict[str, Any]) -> None:
+        self.rows[project_id] = record
 
 
 class InMemoryDeviceStore:
@@ -92,6 +97,9 @@ class FirestoreProjectStore:
         if not snapshot.exists:
             return None
         return snapshot.to_dict() or {}
+
+    def put(self, project_id: str, record: dict[str, Any]) -> None:
+        self._client.collection("projects").document(project_id).set(record)
 
 
 class FirestoreDeviceStore:
@@ -151,6 +159,16 @@ class AcceptedEvidence:
     sha256: str
     phash: str | None
     leaf: str
+
+
+def register_project(projects: ProjectStore, project_id: str, uid: str) -> None:
+    if not project_id or "/" in project_id:
+        raise EvidenceError("project id is invalid")
+    existing = projects.get(project_id)
+    if existing is not None and existing.get("ownerUid") not in (None, uid):
+        raise EvidenceError("project not found")
+    if existing is None:
+        projects.put(project_id, {"ownerUid": uid, "status": "draft"})
 
 
 def enrol_device(

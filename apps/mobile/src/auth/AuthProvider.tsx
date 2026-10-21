@@ -7,7 +7,7 @@ import {
 } from "firebase/auth";
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { firebaseConfigured, getFirebaseAuth } from "../firebase";
+import { firebaseConfigured, getFirebaseAuth, ensureUserDocument } from "../firebase";
 
 type Session = {
   uid: string;
@@ -70,6 +70,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return onAuthStateChanged(auth, (user: User | null) => {
       setSession(user ? { uid: user.uid, email: user.email ?? "", sample: false } : null);
       setReady(true);
+      if (user?.email) {
+        void ensureUserDocument(user.uid, user.email).catch(() => undefined);
+      }
     });
   }, []);
 

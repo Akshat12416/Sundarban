@@ -1,12 +1,18 @@
 # Sundarban Project State
-Last updated (UTC): 2026-10-21 08:40 | by: Grok 4.7 | commit: see session log
+Last updated (UTC): 2026-10-21 09:40 | by: Grok 4.7 | commit: see session log
 
 ## 1. Next step (read this first)
-The contributor shell is in `apps/mobile` (Expo SDK 58, Expo Router). Web was opened at `http://127.0.0.1:8081`: sign-in, sample home, the new-project type step, and credit history rendered. Expo Go on the phone is the user's check. Same Wi-Fi, Expo Go, project URL `exp://192.168.0.188:8081`. The dev server was started with `cd apps/mobile && npx expo start --web --port 8081`.
+The Android keystore module and the EAS development profile are in `apps/mobile`. Do not run a local Android build. The user runs the cloud build from `apps/mobile` after `eas login`:
 
-Fill `apps/mobile/.env` from `.env.example` for email/password sign-in. Leave it gitignored. Sample data opens every screen without those keys. Google sign-in and the hardware signing key stay in Phase 5b. Do not run `npx expo run:android` or download an APK in this phase.
+`npx eas-cli@latest build --profile development --platform android`
 
-Do not start a second bench run. A C3 dev demo may still be writing `bench/results/C3-dev.log`. Do not pass `--split test`.
+That is the first time to run it. It asks to create or link an Expo project if this app has none. A small Android development build is typically 15 to 30 minutes, longer when the free queue is busy. The installable APK link appears on the Expo build page when the status is finished. Install that APK, then `cd apps/mobile && npx expo start --dev-client`. Expo Go cannot create the key.
+
+Before the build, create the Google OAuth clients described in the reply for this session, and put the web client id in `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`. The Android client needs the SHA-1 from `npx eas-cli credentials -p android` after the first build, so Google sign-in may need a second build.
+
+Device checks after install: one captured photo accepted, the same nonce rejected on replay, and a modified image rejected. Those three are not done yet.
+
+Do not start a second bench run. Do not pass `--split test`.
 
 Do not copy `legacy/` into the new apps. The only admin files a later phase may copy, and then edit, are `legacy/admin-portal/src/components/Navbar.jsx`, `legacy/admin-portal/src/components/Footer.jsx`, and the card markup in `ApprovedProjects.jsx` and `RejectedProjects.jsx`.
 
@@ -43,7 +49,7 @@ Do not copy `legacy/` into the new apps. The only admin files a later phase may 
 | 4a Verifiers C0-C2 and runner | in progress (demo done) | 4326bb4 | C0 dev re-run: 68 completed. C1 ran on dev with local `qwen2.5vl:3b` (demo, `bench/results/demo/`). Gemini C1 and C2 paper runs still need a billed key. No test split. |
 | 4b Verifiers C3-C4 and metrics | in progress | 8aa346b | C3, C4, and +A are tested. Full dev demo started 2026-10-21: C3 log `bench/results/C3-dev.log`, then C4. Output is under `bench/results/demo/`. No test split. |
 | 5a Mobile shell | in progress | 197d4cc | Expo SDK 58 shell in `apps/mobile`. Web checked 2026-10-21 at localhost:8081. Phone Expo Go not confirmed. |
-| 5b Attestation and capture | not started | | |
+| 5b Attestation and capture | in progress | pending | EAS development profile and `cv-keystore` are written. Cloud build not started. Phone checks of accept, replay, and modified image are not done. |
 | 5c Mobile status and polish | not started | | |
 | 6 Contracts | not started | | |
 | 7a Admin review | not started | | |
@@ -137,7 +143,7 @@ Model id in both env files: `gemini-3.8-flash`. The demo provider is `ollama/qwe
 ## 11. Session log (newest first)
 | Date | Agent | What changed | Commit |
 |---|---|---|---|
-| 2026-10-21 | Grok 4.7 | Contributor Expo shell: email/password auth, sample data, wizard, projects, credits, profile. Web checked. | 197d4cc |
+| 2026-10-21 | Grok 4.7 | Android keystore module, attested capture, EAS development profile. Cloud build not started. | pending |
 | 2026-10-21 | Grok 4.7 | C3, C4, +A switch, paper tables, Phase 5 guide. Three-item Ollama probe only. | 7e11467, 8aa346b, 5e24d95 |
 | 2026-10-21 | Claude Opus | Local Ollama provider in the LLM wrapper (demo only), C1 dev demo run, C0 dev re-run (68 completed), decision recorded. | 43b0324, 4326bb4, e1b8985 |
 | 2026-10-21 | Grok 4.7 | Set the run cap to 5 and recorded that the loaded Gemini key is still on the free-tier daily quota. C1 pilot not started. | 972a03b |

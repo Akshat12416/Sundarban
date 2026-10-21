@@ -42,8 +42,12 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if isSelf(uid) || isAdmin();
       allow create: if isSelf(uid)
-        && request.resource.data.role == request.auth.token.role
-        && request.resource.data.role in ['contributor', 'admin'];
+        && request.resource.data.role == 'contributor'
+        && request.resource.data.email == request.auth.token.email
+        && (
+          request.auth.token.get('role', '') == ''
+          || request.auth.token.get('role', '') == 'contributor'
+        );
       allow update: if isAdmin()
         || (isSelf(uid) && request.resource.data.role == resource.data.role);
       allow delete: if false;

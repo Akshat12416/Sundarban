@@ -1,0 +1,10 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["CvKeystoreModule"],
+    "podspecPath": "ios/CvKeystore.podspec"
+  },
+  "android": {
+    "modules": ["expo.modules.cvkeystore.CvKeystoreModule"]
+  }
+}

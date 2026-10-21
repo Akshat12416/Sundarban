@@ -1,0 +1,12 @@
+{
+  "name": "cv-keystore",
+  "version": "1.0.0",
+  "description": "Android Keystore signing for Sundarban capture attestation. iOS throws.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "peerDependencies": {
+    "expo": "*",
+    "react": "*",
+    "react-native": "*"
+  }
+}
