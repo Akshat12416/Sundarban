@@ -37,6 +37,9 @@ def validate(items: list[dict]) -> list[str]:
             errors.append(f"{item['id']}: legit item has an attack class")
         if label == "attack" and not item.get("attack_class"):
             errors.append(f"{item['id']}: attack item has no class")
+        expected = "unattested" if item.get("attack_class") in {"A1", "A2", "A3", "A4"} else "valid"
+        if item.get("attestation") != expected:
+            errors.append(f"{item['id']}: attestation should be {expected}")
         if item.get("attack_class") == "A4":
             if item.get("ai_role") not in {"before", "after"}:
                 errors.append(f"{item['id']}: A4 ai_role missing")

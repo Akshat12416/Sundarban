@@ -47,3 +47,15 @@ The cost gate reads `MAX_RUN_COST`, then `GEMINI_RUN_COST_CAP_USD`. The price ta
 Paid Gemini calls were not available before the presentation, so the one LLM wrapper gained a second generator. `LLM_PROVIDER=gemini` (the default) is unchanged and is the only provider for paper results. `LLM_PROVIDER=ollama` sends the same prompt version, the same JSON schema (Ollama `format`), temperature 0 and seed 0 to a local open-weight model (`OLLAMA_MODEL`, default `qwen2.5vl:3b`) at `OLLAMA_HOST`. Pydantic validation, logging and the cache are shared. The cache model id is `ollama/<model>`, so local and Gemini answers never share a cache entry. Photos sent to the local model are shrunk to an 896-pixel long edge because full-size photos overflow its context.
 
 With a local provider the runner skips the cost gate (the cost is zero), skips the 15-second Gemini pacing, writes to `bench/results/demo/<config>-<split>-<provider>.jsonl`, and adds `provider` and `model_id` to each line. Files under `bench/results/demo/` are demo output. They must not appear in a paper table. C1 and C2 paper runs still need `LLM_PROVIDER=gemini` and a billed key.
+
+## 2026-10-21 — C3, C4, and the +A switch
+
+C3 is five model calls: image forensics, vegetation change, geospatial, document, then an aggregator. The document agent receives no photos. The image agent receives no document text. `VERIFIER_PARALLEL` unset means sequential when `LLM_PROVIDER=ollama`, and parallel otherwise. `VERIFIER_PARALLEL=1` forces parallel on either provider.
+
+C4 uses the same roles with tool output in the prompt. Tools are the C0 checks, split so each agent sees only its own finding types. The geospatial tool is the curated species-region table plus coordinate checks. `sentinel2_lookup` returns `enabled: false` unless `SENTINEL2_ENABLED` is set, and the enabled branch returns no index and makes no network call.
+
+aggregate-v1, frozen before the dev probe: the report decision is the more severe of the aggregator, every specialist, and, for C4, the C0 tool decision. Severity is flag, then review, then pass. Prompt files are `c3_*_v1` and `c4_*_v1`. They were not edited after seeing model output.
+
++A is `--attest` on C1–C4. It is not a C0 mode. The manifest field `attestation` stands in for Phase 5. `unattested` and `invalid` (and any other value) become a flag with no model call. `valid` continues into the verifier. A1–A4 are `unattested`. Other generated rows are `valid`.
+
+`--limit` requires `--output`, so a three-item probe cannot replace a split file. Paper tables read `bench/results/{config}-{split}.jsonl` and `{config}A-{split}.jsonl` only. Demo files are excluded unless `--include-demo` is passed.

@@ -22,3 +22,11 @@ A8 (species unsuitable for the region) and A9 (altered ownership document) each 
 
 The metrics script defines the pilot scores. The positive class is attack. Detected means the report recommendation is `reject`. ASR is attacks not detected, divided by attacks. FRR is legitimate items detected, divided by legitimate items. Precision, recall, and F1 use that same detected label. Agreement is the fraction of completed submissions whose runs share one decision. Rows with a missing photo are skipped and are not in those rates. The pilot split is dev. Prompts are not changed from test-split results, and this entry does not record a test-split number.
 
+## 2026-10-21
+
+The +A condition is simulated until the phone signs evidence. Each manifest row has `attestation`: `unattested` for A1–A4 and `valid` for every other row, including A13 and A14, which the draft says pass the attested path. The value `invalid` exists for the switch and is not written by the generator. With +A, `unattested` and `invalid` are flagged before any model call. This is not a device signature. Phase 5 replaces the field.
+
+C3 runs four specialists (image, vegetation, geospatial, document) and then an aggregator. On local hardware they run one after another, so latency is the sum of the calls. `VERIFIER_PARALLEL=1` is the parallel schedule in Section IV-D. C4 adds the C0 checks as tools. The geospatial tool reads the curated region table and does not call a live geocoder. Sentinel-2 stays off unless `SENTINEL2_ENABLED` is set, and that flag still does not call a live service. The aggregate-v1 rule takes the more severe of the aggregator decision, the specialist decisions, and, for C4, the tool decision.
+
+Table 2 and Table 3 in the metrics script use the draft's ASR: attacks whose recommendation is `approve`, divided by attacks. The pilot summary above still uses "not reject". FRR in the tables is legitimate items rejected or marked high risk. A cell is printed only when a result file for that configuration exists.
+
